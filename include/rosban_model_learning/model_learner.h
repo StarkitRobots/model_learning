@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rosban_model_learning/model.h"
+
 namespace rosban_model_learning
 {
 

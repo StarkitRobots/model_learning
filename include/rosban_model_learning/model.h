@@ -24,13 +24,11 @@ public:
   /// a multivariate-gaussian on the resulting observations. Then the density is
   /// provided directly using the logLikelihood inside the given distribution
   virtual double computeLogLikelihood(const Sample & sample,
-                                      const Eigen::VectorXd & parameters,
                                       std::default_random_engine * engine) const;
 
   /// Compute the logLikelihood of the given parameters for the specified
   /// dataset
   double computeLogLikelihood(const SampleVector & data_set,
-                              const Eigen::VectorXd & parameters,
                               std::default_random_engine * engine) const;
 
 protected:

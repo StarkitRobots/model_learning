@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <name>rosban_model_learning</name>
+  <version>0.0.0</version>
+  <description>This package provide tools to optimize the parameters of models</description>
+
+  <maintainer email="medrimonia@gmail.com">medrimonia</maintainer>
+  <author email="medrimonia@gmail.com">medrimonia</author>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>NCY</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rosban_bbo</build_depend> <!-- rhoban/rosban_bbo.git -->
+
+  <run_depend>rosban_bbo</run_depend>
+
+</package>

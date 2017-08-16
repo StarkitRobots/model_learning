@@ -4,7 +4,6 @@ namespace rosban_model_learning
 {
 
 double Model::computeLogLikelihood(const Sample & sample,
-                                   const Eigen::VectorXd & parameters,
                                    std::default_random_engine * engine) const
 {
   std::vector<Eigen::VectorXd> observations;
@@ -15,12 +14,11 @@ double Model::computeLogLikelihood(const Sample & sample,
 }
 
 double Model::computeLogLikelihood(const SampleVector & data_set,
-                                   const Eigen::VectorXd & parameters,
                                    std::default_random_engine * engine) const
 {
   double log_likelihood = 0.0;
-  for (const Sample & sample : data_set) {
-    log_likelihood += computeLogLikelihood(sample, parameters, engine);
+  for (const std::unique_ptr<Sample> & sample : data_set) {
+    log_likelihood += computeLogLikelihood(*sample, engine);
   }
   return log_likelihood;
 }
