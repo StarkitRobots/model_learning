@@ -31,6 +31,8 @@ public:
   double computeLogLikelihood(const SampleVector & data_set,
                               std::default_random_engine * engine) const;
 
+  virtual std::unique_ptr<Model> clone() const = 0;
+
 protected:
   /// The number of samples used to fit a distribution if necessary
   int nb_samples;

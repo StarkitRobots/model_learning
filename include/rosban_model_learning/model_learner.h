@@ -2,6 +2,8 @@
 
 #include "rosban_model_learning/model.h"
 
+#include "rosban_bbo/optimizer.h"
+
 namespace rosban_model_learning
 {
 
@@ -9,9 +11,16 @@ namespace rosban_model_learning
 class ModelLearner
 {
 public:
-  Eigen::VectorXd learnParameters(const SampleVector & training_set,
-                                  const SampleVector & validation_set,
-                                  std::default_random_engine * engine);
+
+  struct Result {
+    double training_log_likelihood;
+    double validation_log_likelihood;
+    Eigen::VectorXd best_parameters;
+  };
+
+  Result learnParameters(const SampleVector & training_set,
+                         const SampleVector & validation_set,
+                         std::default_random_engine * engine);
 
 protected:
   /// The model which

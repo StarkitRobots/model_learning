@@ -1,4 +1,4 @@
-#include "sample.h"
+#include "rosban_model_learning/sample.h"
 
 namespace rosban_model_learning
 {
