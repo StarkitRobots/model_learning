@@ -10,6 +10,8 @@ double Model::computeLogLikelihood(const Sample & sample,
   for (int i = 0; i < nb_samples; i++) {
     observations.push_back(predictObservation(sample.getInput(), engine));
   }
+  rosban_random::MultivariateGaussian distrib;
+  distrib.fit(observations, getObservationsCircularity()); 
   // TODO: fit the distribution and add it
 }
 

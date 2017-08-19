@@ -9,8 +9,19 @@ class Model
 {
 public:
 
+  /// Return the values of the current parameters
+  virtual Eigen::VectorXd getParameters() const = 0;
+
   /// Update the internal structure of the model with the provided parameters
   virtual void setParameters(const Eigen::VectorXd & new_params) = 0;
+
+  /// Return a list of names for the parameters
+  virtual std::vector<std::string> getParametersNames() const = 0;
+
+  /// Return a vector indicating for each dimension of the observation if it is
+  /// a circular dimension in radians
+  Eigen::VectorXi getObservationsCircularity() = 0;
+  
 
   /// Return the predicted observation according to the provided input and
   /// parameters. If 'engine' is null, noise is not considered
