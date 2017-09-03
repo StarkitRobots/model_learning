@@ -1,5 +1,7 @@
 #include "rosban_model_learning/model.h"
 
+#include "rosban_random/multivariate_gaussian.h"
+
 namespace rosban_model_learning
 {
 
@@ -13,6 +15,7 @@ double Model::computeLogLikelihood(const Sample & sample,
   rosban_random::MultivariateGaussian distrib;
   distrib.fit(observations, getObservationsCircularity()); 
   // TODO: fit the distribution and add it
+  return distrib.getLogLikelihood(sample.getObservation());
 }
 
 double Model::computeLogLikelihood(const SampleVector & data_set,

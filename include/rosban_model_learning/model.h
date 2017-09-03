@@ -20,7 +20,7 @@ public:
 
   /// Return a vector indicating for each dimension of the observation if it is
   /// a circular dimension in radians
-  Eigen::VectorXi getObservationsCircularity() = 0;
+  virtual Eigen::VectorXi getObservationsCircularity() const = 0;
   
 
   /// Return the predicted observation according to the provided input and
