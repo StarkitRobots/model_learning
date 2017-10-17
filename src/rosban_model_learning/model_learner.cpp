@@ -3,6 +3,16 @@
 namespace rosban_model_learning
 {
 
+
+ModelLearner::ModelLearner(std::unique_ptr<Model> model_,
+                           std::unique_ptr<rosban_bbo::Optimizer> optimizer_,
+                           const Eigen::MatrixXd & space_,
+                           const Eigen::VectorXd & initial_guess_) :
+  model(std::move(model_)), optimizer(std::move(optimizer_)),
+  space(space_), initial_guess(initial_guess_)
+{
+}
+
 ModelLearner::Result
 ModelLearner::learnParameters(const SampleVector & training_set,
                               const SampleVector & validation_set,

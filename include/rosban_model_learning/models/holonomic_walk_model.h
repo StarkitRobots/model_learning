@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rosban_model_learning/model.h"
+
 namespace rosban_model_learning
 {
 
@@ -19,7 +21,7 @@ namespace rosban_model_learning
 ///
 /// This model is composed two different parts:
 /// 1. Deterministic part:
-///    determinist_y = determinist_prop * X + determinist_bias
+///    deterministic_y = deterministic_prop * X + deterministic_bias
 /// 2. Stochastic part:
 ///    noise_y = N(noise_prop * X + noise_constant)
 
@@ -27,7 +29,7 @@ class HolonomicWalkModel : public Model {
 public:
 
   /// There are different variations of parametrization for the model
-  /// (both determinist and stochastic):
+  /// (both deterministic and stochastic):
   /// None        : No parameters can be changed (mainly related to stochastic parameters)
   /// Constant    : Only constant values can be changed
   /// Proportional: Only proportional parameters can be changed
@@ -43,17 +45,19 @@ public:
     All,
   };
 
-  /// Dummy constructor with no correction on determinist part and default values for noises (only 
+  /// Dummy constructor with no correction on deterministic part and default values for noises (only 
   HolonomicWalkModel();
 
   /// Constructor with specific parameters set
-  HolonomicWalkModel(ParameterSubset determinist_type,
+  HolonomicWalkModel(ParameterSubset deterministic_type,
                      ParameterSubset noise_type);
 
-  ParameterSubset getDeterministType() const;
+  ParameterSubset getDeterministicType() const;
   ParameterSubset getNoiseType() const;
 
-  /// Return the value of the parameters according to current determinist and
+  /// TODO: set coefficients
+
+  /// Return the value of the parameters according to current deterministic and
   /// noise types
   virtual Eigen::VectorXd getParameters() const override;
 
@@ -77,14 +81,14 @@ public:
                                   std::default_random_engine * engine) const;
 
 private:
-  /// First column is determinist_bias, following columns are determinist_prop
-  Eigen::MatrixXd determinist_coeffs;
+  /// First column is deterministic_bias, following columns are deterministic_prop
+  Eigen::MatrixXd deterministic_coeffs;
 
   /// First column is noise_constant, following columns are noise_prop
   Eigen::MatrixXd noise_coefficients;
 
-  /// What type of parametrization is used for the determinist part
-  ParameterSubset determinist_type;
+  /// What type of parametrization is used for the deterministic part
+  ParameterSubset deterministic_type;
 
   /// What type of parametrization is used for the noise part
   ParameterSubset noise_type;
