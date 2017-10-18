@@ -12,9 +12,17 @@ int main()
 {
   /// Parameters
   int nb_learnings = 5;
-  std::map<int,int> steps_map = { {10,10},{20,20}};
+  std::map<int,int> steps_map =
+    {
+      {2,10},
+      {10,10},
+      {20,10},
+      {50,10},
+      {100,10}
+    };
   double obs_stddev = 0.2;
   double step_stddev = 0.05;
+  double validation_ratio = 0.2;
 
   SimpleAngularModel training_model(obs_stddev, step_stddev);
   std::default_random_engine engine = rosban_random::getRandomEngine();
@@ -32,17 +40,27 @@ int main()
     }
   }
 
-  // Learning phase:
+  // Learning phase:m
 
   for (int learning = 0; learning < nb_learnings; learning++) {
+    // Reset of all entities
     std::unique_ptr<Model> training_model(new SimpleAngularModel());
     std::unique_ptr<rosban_bbo::Optimizer> optimizer(new rosban_bbo::CMAESOptimizer());
+    optimizer->setMaxCalls(250);
     Eigen::MatrixXd space(2,2);
     space << 0, 1, 0, 1;
     Eigen::Vector2d initial_guess(0.001, 0.001);
     ModelLearner learner(std::move(training_model), std::move(optimizer),
-                         initial_guess);
-    ModelLearner::Result r = learner->learnParameters(...,...,&engine);
+                         space, initial_guess);
+    // Separating samples in two sets
+    DataSet data = splitSamples(samples, validation_ratio, &engine);
+    // Computing learning
+    ModelLearner::Result r = learner.learnParameters(data.training_set,
+                                                     data.validation_set,
+                                                     &engine);
+    // Showing results
+    std::cout << "training score: " << r.training_log_likelihood << std::endl;
+    std::cout << "validation score: " << r.validation_log_likelihood << std::endl;
     std::cout << r.best_parameters.transpose() << std::endl;
   }
 }

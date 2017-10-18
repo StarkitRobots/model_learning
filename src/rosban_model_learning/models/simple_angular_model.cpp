@@ -1,6 +1,8 @@
 #include "rosban_model_learning/models/simple_angular_model.h"
 #include "rosban_model_learning/models/simple_angular_model_input.h"
 
+#include "rosban_random/multivariate_gaussian.h"
+
 namespace rosban_model_learning
 {
 
@@ -63,10 +65,29 @@ Eigen::VectorXd SimpleAngularModel::predictObservation(const Input & input,
   return result;
 }
 
+double SimpleAngularModel::computeLogLikelihood(const Sample & sample,
+                                                std::default_random_engine * engine) const
+{
+  bool use_analytic_model = false;
+  if (use_analytic_model) {
+    const SimpleAngularModelInput & casted_input =
+      dynamic_cast<const SimpleAngularModelInput &>(sample.getInput());
+    double obs_var = 2 * pow(observation_stddev,2);
+    double step_var = casted_input.nb_steps * pow(step_stddev,2);
+    Eigen::VectorXd mu(1);
+    Eigen::MatrixXd covar(1,1);
+    mu(0) = 0;
+    covar(0,0) = obs_var + step_var;
+    rosban_random::MultivariateGaussian distrib(mu, covar);
+    return distrib.getLogLikelihood(sample.getObservation());
+  } else {
+    return Model::computeLogLikelihood(sample,engine);
+  }
+}
+
 std::unique_ptr<Model> SimpleAngularModel::clone() const
 {
   return std::unique_ptr<Model>(new SimpleAngularModel(observation_stddev, step_stddev));
 }
-
 
 }

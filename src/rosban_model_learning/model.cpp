@@ -5,6 +5,15 @@
 namespace rosban_model_learning
 {
 
+Model::Model() : nb_samples(500)
+{
+}
+
+/// Number of samples to estimate logLikelihood
+Model::Model(int nb_samples_) : nb_samples(nb_samples_)
+{
+}
+
 double Model::computeLogLikelihood(const Sample & sample,
                                    std::default_random_engine * engine) const
 {
@@ -18,14 +27,14 @@ double Model::computeLogLikelihood(const Sample & sample,
   return distrib.getLogLikelihood(sample.getObservation());
 }
 
-double Model::computeLogLikelihood(const SampleVector & data_set,
+double Model::averageLogLikelihood(const SampleVector & data_set,
                                    std::default_random_engine * engine) const
 {
   double log_likelihood = 0.0;
   for (const std::unique_ptr<Sample> & sample : data_set) {
     log_likelihood += computeLogLikelihood(*sample, engine);
   }
-  return log_likelihood;
+  return log_likelihood / data_set.size();
 }
 
 

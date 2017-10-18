@@ -9,6 +9,10 @@ class Model
 {
 public:
 
+  Model();
+  /// Number of samples to estimate logLikelihood
+  Model(int nb_samples);
+
   /// Return the values of the current parameters
   virtual Eigen::VectorXd getParameters() const = 0;
 
@@ -37,9 +41,9 @@ public:
   virtual double computeLogLikelihood(const Sample & sample,
                                       std::default_random_engine * engine) const;
 
-  /// Compute the logLikelihood of the given parameters for the specified
-  /// dataset
-  double computeLogLikelihood(const SampleVector & data_set,
+  /// Compute the average logLikelihood of the data set given the current
+  /// parameters
+  double averageLogLikelihood(const SampleVector & data_set,
                               std::default_random_engine * engine) const;
 
   virtual std::unique_ptr<Model> clone() const = 0;

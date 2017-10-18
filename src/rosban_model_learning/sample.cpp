@@ -31,7 +31,7 @@ std::unique_ptr<Sample> Sample::clone() const
 DataSet splitSamples(const SampleVector & samples, double validation_ratio,
                      std::default_random_engine * engine)
 {
-  return splitSamples(samples, ceil(validation_ratio * samples.size()), engine);
+  return splitSamples(samples, (int)ceil(validation_ratio * samples.size()), engine);
 }
 
 DataSet splitSamples(const SampleVector & samples, int nb_validation_samples,

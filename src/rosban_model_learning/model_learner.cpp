@@ -26,8 +26,9 @@ ModelLearner::learnParameters(const SampleVector & training_set,
       // Copy the original model, update the parameters and compute logLikelihood
       std::unique_ptr<Model> model_copy = this->model->clone();
       model_copy->setParameters(parameters);
-      return model_copy->computeLogLikelihood(training_set, engine);
+      return model_copy->averageLogLikelihood(training_set, engine);
     };
+  optimizer->setLimits(space);
   result.best_parameters = optimizer->train(reward_function, initial_guess,
                                             engine);
   // Copy the model 
@@ -35,9 +36,9 @@ ModelLearner::learnParameters(const SampleVector & training_set,
   model_copy->setParameters(result.best_parameters);
   // Estimate log likelihood on both, training set and validation set
   result.training_log_likelihood =
-    model->computeLogLikelihood(training_set, engine);
+    model_copy->averageLogLikelihood(training_set, engine);
   result.validation_log_likelihood =
-    model->computeLogLikelihood(validation_set, engine);
+    model_copy->averageLogLikelihood(validation_set, engine);
   return result;
 }
 

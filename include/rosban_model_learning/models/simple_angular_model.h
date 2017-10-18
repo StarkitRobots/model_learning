@@ -29,6 +29,9 @@ public:
   predictObservation(const Input & input,
                      std::default_random_engine * engine) const override;
 
+  virtual double computeLogLikelihood(const Sample & sample,
+                                      std::default_random_engine * engine) const override;
+
   virtual std::unique_ptr<Model> clone() const override;
 
 private:
