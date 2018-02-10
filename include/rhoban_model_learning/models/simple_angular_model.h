@@ -1,9 +1,9 @@
 #pragma once
 
-#include "rosban_model_learning/model.h"
+#include "rhoban_model_learning/model.h"
 
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 /// This class is used as a preliminary test for working with angular spaces

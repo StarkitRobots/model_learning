@@ -1,11 +1,11 @@
-#include "rosban_model_learning/model_learner.h"
+#include "rhoban_model_learning/model_learner.h"
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 
 ModelLearner::ModelLearner(std::unique_ptr<Model> model_,
-                           std::unique_ptr<rosban_bbo::Optimizer> optimizer_,
+                           std::unique_ptr<rhoban_bbo::Optimizer> optimizer_,
                            const Eigen::MatrixXd & space_,
                            const Eigen::VectorXd & initial_guess_) :
   model(std::move(model_)), optimizer(std::move(optimizer_)),
@@ -19,7 +19,7 @@ ModelLearner::learnParameters(const SampleVector & training_set,
                               std::default_random_engine * engine)
 {
   Result result;
-  rosban_bbo::Optimizer::RewardFunc reward_function =
+  rhoban_bbo::Optimizer::RewardFunc reward_function =
     [this, &training_set, &validation_set]
     (const Eigen::VectorXd & parameters, std::default_random_engine * engine)
     {

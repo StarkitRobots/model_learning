@@ -1,12 +1,12 @@
 #pragma once
 
-#include "rosban_model_learning/input.h"
+#include "rhoban_model_learning/input.h"
 
 #include <Eigen/Core>
 
 #include <memory>
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 /// A pure interface which should be implemented by all the 'Sample' class

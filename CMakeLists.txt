@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rosban_model_learning)
+project(rhoban_model_learning)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rosban_bbo
+  rhoban_bbo
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++11")
@@ -21,8 +21,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++11")
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES rosban_model_learning
-  CATKIN_DEPENDS rosban_bbo
+  LIBRARIES rhoban_model_learning
+  CATKIN_DEPENDS rhoban_bbo
 #  DEPENDS system_lib
 )
 
@@ -37,8 +37,8 @@ include_directories(
 
 # Directories containing sources files
 set(DIRECTORIES
-  src/rosban_model_learning/
-  src/rosban_model_learning/models
+  src/rhoban_model_learning/
+  src/rhoban_model_learning/models
   )
 
 # Build ALL_SOURCES
@@ -57,15 +57,15 @@ foreach (DIRECTORY ${DIRECTORIES})
 endforeach (DIRECTORY)
 
 # Declare a C++ library
-add_library(rosban_model_learning
+add_library(rhoban_model_learning
   ${ALL_SOURCES}
   )
 
-target_link_libraries(rosban_model_learning
+target_link_libraries(rhoban_model_learning
   ${catkin_LIBRARIES}
   )
 
 # Binaries
 add_executable(test_simple_angular_model src/tests/test_simple_angular_model.cpp)
 
-target_link_libraries(test_simple_angular_model ${catkin_LIBRARIES} rosban_model_learning)
+target_link_libraries(test_simple_angular_model ${catkin_LIBRARIES} rhoban_model_learning)

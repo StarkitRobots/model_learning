@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 /// Simple interface for inputs (no content yet)

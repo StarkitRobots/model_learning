@@ -1,6 +1,6 @@
-#include "rosban_model_learning/input.h"
+#include "rhoban_model_learning/input.h"
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 class SimpleAngularModelInput : public Input

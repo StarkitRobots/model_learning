@@ -1,10 +1,10 @@
 #pragma once
 
-#include "rosban_model_learning/model.h"
+#include "rhoban_model_learning/model.h"
 
-#include "rosban_bbo/optimizer.h"
+#include "rhoban_bbo/optimizer.h"
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 /// A class allowing to optimize the parameters of a model using logLikelihood
@@ -18,7 +18,7 @@ public:
   };
 
   ModelLearner(std::unique_ptr<Model> model,
-               std::unique_ptr<rosban_bbo::Optimizer> optimizer,
+               std::unique_ptr<rhoban_bbo::Optimizer> optimizer,
                const Eigen::MatrixXd & space,
                const Eigen::VectorXd & initial_guess);
 
@@ -31,7 +31,7 @@ protected:
   std::unique_ptr<Model> model;
 
   /// The blackbox optimizer used for parameters calibration
-  std::unique_ptr<rosban_bbo::Optimizer> optimizer;
+  std::unique_ptr<rhoban_bbo::Optimizer> optimizer;
 
   /// The parameter space
   //TODO: move to model ? (could be overrided with learnParameters)

@@ -1,12 +1,14 @@
-#include "rosban_model_learning/model_learner.h"
-#include "rosban_model_learning/models/simple_angular_model.h"
-#include "rosban_model_learning/models/simple_angular_model_input.h"
+#include "rhoban_model_learning/model_learner.h"
+#include "rhoban_model_learning/models/simple_angular_model.h"
+#include "rhoban_model_learning/models/simple_angular_model_input.h"
 
-#include "rosban_random/tools.h"
+#include "rhoban_random/tools.h"
 
-#include "rosban_bbo/cmaes_optimizer.h"
+#include "rhoban_bbo/cmaes_optimizer.h"
 
-using namespace rosban_model_learning;
+#include <iostream>
+
+using namespace rhoban_model_learning;
 
 int main()
 {
@@ -25,7 +27,7 @@ int main()
   double validation_ratio = 0.2;
 
   SimpleAngularModel training_model(obs_stddev, step_stddev);
-  std::default_random_engine engine = rosban_random::getRandomEngine();
+  std::default_random_engine engine = rhoban_random::getRandomEngine();
   SampleVector samples;
 
   for (const auto & e : steps_map) {
@@ -40,12 +42,12 @@ int main()
     }
   }
 
-  // Learning phase:m
+  // Learning phase
 
   for (int learning = 0; learning < nb_learnings; learning++) {
     // Reset of all entities
     std::unique_ptr<Model> training_model(new SimpleAngularModel());
-    std::unique_ptr<rosban_bbo::Optimizer> optimizer(new rosban_bbo::CMAESOptimizer());
+    std::unique_ptr<rhoban_bbo::Optimizer> optimizer(new rhoban_bbo::CMAESOptimizer());
     optimizer->setMaxCalls(250);
     Eigen::MatrixXd space(2,2);
     space << 0, 1, 0, 1;

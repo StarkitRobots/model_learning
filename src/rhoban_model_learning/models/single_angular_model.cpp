@@ -1,6 +1,6 @@
-#include "rosban_model_learning/models/single_angular_model.h"
+#include "rhoban_model_learning/models/single_angular_model.h"
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 SimpleAngularModel::SimpleAngularModel() : SimpleAngularModel(0,0)

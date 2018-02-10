@@ -1,8 +1,8 @@
-#include "rosban_model_learning/model.h"
+#include "rhoban_model_learning/model.h"
 
-#include "rosban_random/multivariate_gaussian.h"
+#include "rhoban_random/multivariate_gaussian.h"
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 Model::Model() : nb_samples(500)
@@ -21,7 +21,7 @@ double Model::computeLogLikelihood(const Sample & sample,
   for (int i = 0; i < nb_samples; i++) {
     observations.push_back(predictObservation(sample.getInput(), engine));
   }
-  rosban_random::MultivariateGaussian distrib;
+  rhoban_random::MultivariateGaussian distrib;
   distrib.fit(observations, getObservationsCircularity()); 
   // TODO: fit the distribution and add it
   return distrib.getLogLikelihood(sample.getObservation());

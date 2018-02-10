@@ -1,9 +1,9 @@
-#include "rosban_model_learning/models/simple_angular_model.h"
-#include "rosban_model_learning/models/simple_angular_model_input.h"
+#include "rhoban_model_learning/models/simple_angular_model.h"
+#include "rhoban_model_learning/models/simple_angular_model_input.h"
 
-#include "rosban_random/multivariate_gaussian.h"
+#include "rhoban_random/multivariate_gaussian.h"
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 SimpleAngularModel::SimpleAngularModel() : SimpleAngularModel(0,0)
@@ -78,7 +78,7 @@ double SimpleAngularModel::computeLogLikelihood(const Sample & sample,
     Eigen::MatrixXd covar(1,1);
     mu(0) = 0;
     covar(0,0) = obs_var + step_var;
-    rosban_random::MultivariateGaussian distrib(mu, covar);
+    rhoban_random::MultivariateGaussian distrib(mu, covar);
     return distrib.getLogLikelihood(sample.getObservation());
   } else {
     return Model::computeLogLikelihood(sample,engine);

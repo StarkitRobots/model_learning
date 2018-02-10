@@ -1,8 +1,8 @@
 #pragma once
 
-#include "rosban_model_learning/sample.h"
+#include "rhoban_model_learning/sample.h"
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 class Model

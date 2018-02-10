@@ -1,8 +1,8 @@
-#include "rosban_model_learning/sample.h"
+#include "rhoban_model_learning/sample.h"
 
-#include "rosban_random/tools.h"
+#include "rhoban_random/tools.h"
 
-namespace rosban_model_learning
+namespace rhoban_model_learning
 {
 
 
@@ -39,7 +39,7 @@ DataSet splitSamples(const SampleVector & samples, int nb_validation_samples,
 {
   DataSet result;
   std::vector<size_t> validation_indices;
-  validation_indices = rosban_random::getKDistinctFromN(nb_validation_samples, samples.size(),
+  validation_indices = rhoban_random::getKDistinctFromN(nb_validation_samples, samples.size(),
                                                         engine);
   std::sort(validation_indices.begin(), validation_indices.end());
   int validation_idx = 0;
