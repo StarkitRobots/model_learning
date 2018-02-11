@@ -80,6 +80,10 @@ public:
                                   const Eigen::Vector3d & expected_move,
                                   std::default_random_engine * engine) const;
 
+  Json::Value toJson() const override;
+  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  std::string getClassName() const;
+
 private:
   /// First column is deterministic_bias, following columns are deterministic_prop
   Eigen::MatrixXd deterministic_coeffs;

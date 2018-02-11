@@ -2,10 +2,12 @@
 
 #include "rhoban_model_learning/sample.h"
 
+#include "rhoban_utils/serialization/json_serializable.h"
+
 namespace rhoban_model_learning
 {
 
-class Model
+class Model : public rhoban_utils::JsonSerializable
 {
 public:
 
@@ -42,7 +44,7 @@ public:
                                       std::default_random_engine * engine) const;
 
   /// Compute the average logLikelihood of the data set given the current
-  /// parameters
+  /// parameters (relies on computeLogLikelihood)
   double averageLogLikelihood(const SampleVector & data_set,
                               std::default_random_engine * engine) const;
 

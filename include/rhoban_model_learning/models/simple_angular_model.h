@@ -34,6 +34,11 @@ public:
 
   virtual std::unique_ptr<Model> clone() const override;
 
+
+  Json::Value toJson() const override;
+  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  std::string getClassName() const;
+
 private:
   double observation_stddev;
 

@@ -22,8 +22,8 @@ int main()
       {50,10},
       {100,10}
     };
-  double obs_stddev = 0.2;
-  double step_stddev = 0.05;
+  double obs_stddev = 0.002;
+  double step_stddev = 0.005;
   double validation_ratio = 0.2;
 
   SimpleAngularModel training_model(obs_stddev, step_stddev);

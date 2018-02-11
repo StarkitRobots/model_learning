@@ -85,6 +85,23 @@ double SimpleAngularModel::computeLogLikelihood(const Sample & sample,
   }
 }
 
+Json::Value SimpleAngularModel::toJson() const {
+  Json::Value v;
+  v["observation_stddev"] = observation_stddev;
+  v["step_stddev"] = step_stddev;
+  return v;
+}
+
+void SimpleAngularModel::fromJson(const Json::Value & v, const std::string & dir_name) {
+  (void)dir_name;
+  rhoban_utils::tryRead(v, "observation_stddev", &observation_stddev);
+  rhoban_utils::tryRead(v, "step_stddev", &step_stddev);
+}
+
+std::string SimpleAngularModel::getClassName() const {
+  return "SimpleAngularModel";
+}
+
 std::unique_ptr<Model> SimpleAngularModel::clone() const
 {
   return std::unique_ptr<Model>(new SimpleAngularModel(observation_stddev, step_stddev));
