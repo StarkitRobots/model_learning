@@ -1,6 +1,7 @@
 #include "rhoban_model_learning/humanoid_models/vision_correction_model.h"
 
 #include "rhoban_random/multivariate_gaussian.h"
+#include "rhoban_random/tools.h"
 
 #include "Model/HumanoidFixedModel.hpp"
 #include "Types/MatrixLabel.hpp"
@@ -23,7 +24,8 @@ std::unique_ptr<Input> VCM::VisionInput::clone() const {
   return std::unique_ptr<Input>(new VisionInput(*this));
 }
 
-VCM::VisionInputReader::VisionInputReader() : validation_ratio(0.2)
+VCM::VisionInputReader::VisionInputReader()
+  : max_coordinates(0.7), nb_validation_tags(3), max_samples_per_tag(30)
 {
 }
 
@@ -32,21 +34,52 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
   Leph::MatrixLabel logs;
   logs.load(file_path);
   // First: Read all entries
-  SampleVector samples;
+  std::map<int,SampleVector> samples_by_id;
   for (size_t i = 0; i < logs.size(); i++) {
     const Leph::VectorLabel & entry = logs[i];
+    int tag_id = entry("tag_id");
     Eigen::Vector2d observation(entry("pixel_x"), entry("pixel_y"));
     std::unique_ptr<Input> input(new VisionInput(entry));
     std::unique_ptr<Sample> sample(new Sample(std::move(input), observation));
 
-    double filter = 0.5;
-    if (std::fabs(observation(0)) < filter &&
-        std::fabs(observation(1)) < filter) {
-      samples.push_back(std::move(sample));
+    if (std::fabs(observation(0)) < max_coordinates &&
+        std::fabs(observation(1)) < max_coordinates) {
+      samples_by_id[tag_id].push_back(std::move(sample));
     }
   }
-  // Then separate
-  return splitSamples(samples, validation_ratio, engine);
+  // Get used indices
+  std::vector<int> tags_indices;
+  for (const auto & pair : samples_by_id) {
+    tags_indices.push_back(pair.first);
+  }
+  // Choose which tags will be used for training and validation
+  std::vector<size_t> set_sizes =
+    {(size_t)(tags_indices.size() - nb_validation_tags), (size_t)nb_validation_tags};
+  std::vector<std::vector<size_t>> separated_indices;
+  separated_indices = rhoban_random::splitIndices(tags_indices.size() - 1, set_sizes, engine);
+  // Fill data set
+  DataSet data;
+  for (size_t idx : separated_indices[0]) {
+    // Limited number of samples for training_set
+    int tag_id = tags_indices[idx];
+    const SampleVector & tag_samples = samples_by_id[tag_id];
+    int nb_samples = tag_samples.size();
+    std::vector<size_t> samples_indices =
+      rhoban_random::getUpToKDistinctFromN(max_samples_per_tag, nb_samples, engine);
+    for (size_t sample_idx : samples_indices) {
+      data.training_set.push_back(tag_samples[sample_idx]->clone());
+    }
+  }
+  for (size_t idx : separated_indices[1]) {
+    // Limited number of samples for training_set
+    int tag_id = tags_indices[idx];
+    const SampleVector & tag_samples = samples_by_id[tag_id];
+    for (const auto & sample : tag_samples) {
+      data.validation_set.push_back(sample->clone());
+    }
+  }
+
+  return data;
 }
 
 std::string VCM::VisionInputReader::getClassName() const {
@@ -55,17 +88,21 @@ std::string VCM::VisionInputReader::getClassName() const {
 
 Json::Value VCM::VisionInputReader::toJson() const {
   Json::Value  v;
-  v["validation_ratio"] = validation_ratio;
+  v["max_coordinates"    ] = max_coordinates    ;
+  v["nb_validation_tags" ] = nb_validation_tags ;
+  v["max_samples_per_tag"] = max_samples_per_tag;
   return v;
 }
 void VCM::VisionInputReader::fromJson(const Json::Value & v, 
                                       const std::string & dir_name) {
   (void) dir_name;
-  rhoban_utils::tryRead(v, "validation_ratio", &validation_ratio);
+  rhoban_utils::tryRead(v, "max_coordinates"    , &max_coordinates    );
+  rhoban_utils::tryRead(v, "nb_validation_tags" , &nb_validation_tags );
+  rhoban_utils::tryRead(v, "max_samples_per_tag", &max_samples_per_tag);
 }
 
 
-VCM::VisionCorrectionModel() {
+VCM::VisionCorrectionModel() : img_width(640), img_height(480) {
   // TODO read a value instead of having a constant value
   camera_parameters.widthAperture = 67 * M_PI / 180.0;
   camera_parameters.heightAperture = 52.47 * M_PI / 180.0;
@@ -124,9 +161,6 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
   // Modification of geometry data
   geometryData.block(geometryName.at("camera"),0,1,3) += cam_offset.transpose();
   geometryData.block(geometryName.at("head_yaw"),0,1,3) += neck_offset.transpose();
-//  std::cout << "geometryData.cols : " << geometryData.cols() << std::endl;
-//  std::cout << "cam_offset : " << cam_offset.transpose() << std::endl;
-//  std::cout << "neck_offset: " << neck_offset.transpose() << std::endl;
   // Initialize a fixed model 
   Leph::HumanoidFixedModel model(Leph::SigmabanModel, Eigen::MatrixXd(), {},
                                  geometryData, geometryName);
@@ -162,12 +196,6 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
   bool success = model.get().cameraWorldToPixel(camera_parameters,
                                                 seen_point, pixel);
 
-//  std::cout << "pos left foot: " << model.get().position("left_foot_tip","origin").transpose() << std::endl;
-//  std::cout << "pos trunk    : " << model.get().position("trunk","origin").transpose() << std::endl;
-//  std::cout << "pos camera   : " << model.get().position("camera","origin").transpose() << std::endl;
-
-
-
   if (!success) {
     std::ostringstream oss;
     Eigen::Vector2d pos(input.data("pixel_x"), input.data("pixel_y"));
@@ -187,8 +215,10 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
   // Add noise if required
   if (engine != nullptr) {
     std::normal_distribution<double> observation_noise(0, px_stddev);
+    pixel = leph2Img(pixel);
     pixel(0) += observation_noise(*engine);
     pixel(1) += observation_noise(*engine);
+    pixel = img2Leph(pixel);
   }
   return pixel;
 }
@@ -196,11 +226,14 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
 double VCM::computeLogLikelihood(const Sample & sample,
                                  std::default_random_engine * engine) const {
   (void) engine;
-  Eigen::VectorXd prediction = predictObservation(sample.getInput(), nullptr);
+  Eigen::Vector2d prediction_leph = predictObservation(sample.getInput(), nullptr);
+  Eigen::Vector2d prediction_img = leph2Img(prediction_leph);
+  Eigen::Vector2d observation_leph = sample.getObservation();
+  Eigen::Vector2d observation_img = leph2Img(observation_leph);
   Eigen::MatrixXd covar(2,2);
   covar << px_stddev, 0, 0, px_stddev;
-  rhoban_random::MultivariateGaussian expected_distribution(prediction, covar);
-  return expected_distribution.getLogLikelihood(sample.getObservation());
+  rhoban_random::MultivariateGaussian expected_distribution(prediction_img, covar);
+  return expected_distribution.getLogLikelihood(observation_img);
 }
 
 std::unique_ptr<Model> VCM::clone() const {
@@ -210,26 +243,50 @@ std::unique_ptr<Model> VCM::clone() const {
 Json::Value VCM::toJson() const  {
   Json::Value v;
   v["px_stddev"] = px_stddev;
-  v["cam_offset"] = rhoban_utils::vector2Json(cam_offset);
-  v["imu_offset"] = rhoban_utils::vector2Json(imu_offset);
-  v["neck_offset"] = rhoban_utils::vector2Json(neck_offset);
+  v["cam_offset" ] = rhoban_utils::vector2Json(cam_offset  * 180 / M_PI);
+  v["imu_offset" ] = rhoban_utils::vector2Json(imu_offset  * 180 / M_PI);
+  v["neck_offset"] = rhoban_utils::vector2Json(neck_offset * 180 / M_PI);
   v["cam_aperture_width"] = camera_parameters.widthAperture;
   v["cam_aperture_height"] = camera_parameters.heightAperture;
+  v["img_width"] = img_width;
+  v["img_height"] = img_height;
   return v;
 }
 
 void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
   (void) dir_name;
+  Eigen::Vector3d cam_offset_deg ( cam_offset * 180 / M_PI);
+  Eigen::Vector3d imu_offset_deg ( imu_offset * 180 / M_PI);
+  Eigen::Vector3d neck_offset_deg(neck_offset * 180 / M_PI);
   rhoban_utils::tryRead(v,"px_stddev", &px_stddev);
-  rhoban_utils::tryRead(v,"cam_offset", &cam_offset);
-  rhoban_utils::tryRead(v,"imu_offset", &imu_offset);
-  rhoban_utils::tryRead(v,"neck_offset", &neck_offset);
+  rhoban_utils::tryRead(v,"cam_offset", &cam_offset_deg);
+  rhoban_utils::tryRead(v,"imu_offset", &imu_offset_deg);
+  rhoban_utils::tryRead(v,"neck_offset", &neck_offset_deg);
   rhoban_utils::tryRead(v, "cam_aperture_width", &camera_parameters.widthAperture);
   rhoban_utils::tryRead(v, "cam_aperture_height", &camera_parameters.heightAperture);
+  rhoban_utils::tryRead(v, "img_width", &img_width);
+  rhoban_utils::tryRead(v, "img_height", &img_height);
+  cam_offset  = cam_offset_deg * M_PI / 180;
+  imu_offset  = imu_offset_deg * M_PI / 180;
+  neck_offset = neck_offset_deg * M_PI / 180;
 }
 
 std::string VCM::getClassName() const {
   return "VCM";
+}
+
+Eigen::Vector2d VCM::leph2Img(const Eigen::Vector2d & leph_px) const {
+  Eigen::Vector2d img_px;
+  img_px(0) = (leph_px(0) + 1 / 2) * img_width;
+  img_px(1) = (leph_px(1) + 1 / 2) * img_height;
+  return img_px;
+}
+
+Eigen::Vector2d VCM::img2Leph(const Eigen::Vector2d & img_px)  const{
+  Eigen::Vector2d leph_px;
+  leph_px(0) = 2 * (img_px(0) / img_width) - 1;
+  leph_px(1) = 2 * (img_px(1) / img_height) - 1;
+  return leph_px;
 }
 
 

@@ -43,8 +43,14 @@ public:
     Json::Value toJson() const override;
     void fromJson(const Json::Value & v, const std::string & dir_name) override;
   private:
-    /// Ratio of logs used for validation. Value in [0,1]
-    double validation_ratio;
+    /// The maximal distance to image center relative to image size in [0,1]
+    double max_coordinates;
+    /// Number of tags used for validation. By choosing to use separate training
+    /// set and validation set based on tagId, we ensure that the validation set
+    /// is really different from the training set
+    int nb_validation_tags;
+    /// The maximal number of samples per tag allowed in training_set
+    int max_samples_per_tag;
   };
 
 
@@ -70,6 +76,11 @@ public:
   std::string getClassName() const;
 
 private:
+  /// Convert from leph coordinates ([-1,1]^2) to img coordinates ([0,width]*[0,height])
+  Eigen::Vector2d leph2Img(const Eigen::Vector2d & leph_coordinates) const;
+  /// Convert from img coordinates ([0,width]*[0,height]) to leph coordinates ([-1 1]^2)
+  Eigen::Vector2d img2Leph(const Eigen::Vector2d & img_coordinates) const;
+
   /// The observation standard deviation in pixels
   double px_stddev;
 
@@ -82,6 +93,11 @@ private:
 
   // The width and height aperture of the camera
   Leph::CameraParameters camera_parameters;
+
+  /// Width of the image in pixels
+  int img_width;
+  /// Height of the image in pixels
+  int img_height;
 };
 
 }
