@@ -59,6 +59,7 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
   separated_indices = rhoban_random::splitIndices(tags_indices.size() - 1, set_sizes, engine);
   // Fill data set
   DataSet data;
+  std::cout << "Training indices" << std::endl;
   for (size_t idx : separated_indices[0]) {
     // Limited number of samples for training_set
     int tag_id = tags_indices[idx];
@@ -69,7 +70,9 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
     for (size_t sample_idx : samples_indices) {
       data.training_set.push_back(tag_samples[sample_idx]->clone());
     }
+    std::cout << "\t" << tag_id << ": " << samples_indices.size() << " samples" << std::endl;
   }
+  std::cout << "Validation indices" << std::endl;
   for (size_t idx : separated_indices[1]) {
     // Limited number of samples for training_set
     int tag_id = tags_indices[idx];
@@ -77,6 +80,7 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
     for (const auto & sample : tag_samples) {
       data.validation_set.push_back(sample->clone());
     }
+    std::cout << "\t" << tag_id << ": " << tag_samples.size() << " samples" << std::endl;
   }
 
   std::cout << "Training Set size: " << data.training_set.size() << std::endl;
