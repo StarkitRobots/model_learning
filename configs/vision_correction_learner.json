@@ -7,27 +7,25 @@
         "class name" : "CMAESOptimizer",
         "content" : {
             "quiet" : false,
-            "nb_evaluations" : 1000,
-            "population_size" : 15
+            "nb_evaluations" : 500,
+            "population_size" : 10
         }
     },
     "space" : {
         "rows" : 10,
         "cols" : 2,
         "values" : [
-            [0.01, 100],
+            [0.01, 100],/// px_stddev
             /// cam_offset
-            [-0.1,0.1],
-            [-0.1,0.1],
-            [-0.1,0.1],
-            /// imu_offset
-            [-0.1,0.1],
-            [-0.1,0.1],
-            [-0.1,0.1],
-            /// neck_offset
-            [-0.1,0.1],
-            [-0.1,0.1],
-            [-0.1,0.1]
+            [-0.2,0.2],
+            [-0.2,0.2],
+            [-0.2,0.2],
+            [-0.2,0.2],
+            [-0.2,0.2],
+            [-0.2,0.2],
+            [-0.2,0.2],
+            [-0.2,0.2],
+            [-0.2,0.2]
         ]
     }
 }
