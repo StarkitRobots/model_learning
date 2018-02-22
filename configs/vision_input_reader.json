@@ -1,0 +1,6 @@
+{
+    "class name" : "VisionInputReader",
+    "content" : {
+        "validation_ratio" : 0.2
+    }
+}

@@ -2,6 +2,8 @@
 
 #include "rhoban_random/tools.h"
 
+#include <iostream>
+
 namespace rhoban_model_learning
 {
 

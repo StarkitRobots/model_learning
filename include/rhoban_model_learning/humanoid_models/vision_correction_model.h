@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rhoban_model_learning/model.h"
+#include "rhoban_model_learning/input_reader.h"
 
 #include "Model/HumanoidModel.hpp"
 #include "Model/NamesModel.h"
@@ -16,7 +17,7 @@ namespace rhoban_model_learning
 /// - Expected position of the data in the left_foot referential
 ///
 /// Observations are positions of the object in the image (x,y)
-class VisionCorrectionModel : Model {
+class VisionCorrectionModel : public Model {
 public:
 
   class VisionInput : public Input {
@@ -29,6 +30,21 @@ public:
 
     /// Contains all DOF + IMU + pixel position
     Leph::VectorLabel data;
+  };
+
+  class VisionInputReader : public InputReader {
+  public:
+    VisionInputReader();
+
+    virtual DataSet extractSamples(const std::string & file_path,
+                                   std::default_random_engine * engine) const override;
+
+    virtual std::string getClassName() const override;
+    Json::Value toJson() const override;
+    void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  private:
+    /// Ratio of logs used for validation. Value in [0,1]
+    double validation_ratio;
   };
 
 
@@ -45,7 +61,7 @@ public:
 
   /// Density
   virtual double computeLogLikelihood(const Sample & sample,
-                                      std::default_random_engine * engine);
+                                      std::default_random_engine * engine) const override;
 
   virtual std::unique_ptr<Model> clone() const;
 

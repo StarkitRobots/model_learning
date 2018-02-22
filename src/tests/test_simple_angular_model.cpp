@@ -63,6 +63,6 @@ int main()
     // Showing results
     std::cout << "training score: " << r.training_log_likelihood << std::endl;
     std::cout << "validation score: " << r.validation_log_likelihood << std::endl;
-    std::cout << r.best_parameters.transpose() << std::endl;
+    std::cout << r.model->getParameters().transpose() << std::endl;
   }
 }

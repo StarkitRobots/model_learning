@@ -1,0 +1,33 @@
+{
+    "model" : {
+        "class name" : "VisionCorrectionModel",
+        "content" : {}
+    },
+    "optimizer" : {
+        "class name" : "CMAESOptimizer",
+        "content" : {
+            "quiet" : false,
+            "nb_evaluations" : 1000,
+            "population_size" : 15
+        }
+    },
+    "space" : {
+        "rows" : 10,
+        "cols" : 2,
+        "values" : [
+            [0.001, 0.1],
+            /// cam_offset
+            [-5,5],
+            [-5,5],
+            [-5,5],
+            /// imu_offset
+            [-5,5],
+            [-5,5],
+            [-5,5],
+            /// neck_offset
+            [-5,5],
+            [-5,5],
+            [-5,5]
+        ]
+    }
+}

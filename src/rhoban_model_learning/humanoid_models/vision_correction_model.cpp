@@ -3,31 +3,76 @@
 #include "rhoban_random/multivariate_gaussian.h"
 
 #include "Model/HumanoidFixedModel.hpp"
+#include "Types/MatrixLabel.hpp"
 
 namespace rhoban_model_learning
 {
 
-VisionCorrectionModel::VisionInput::VisionInput() {}
-VisionCorrectionModel::VisionInput::VisionInput(const Leph::VectorLabel & data_)
+typedef VisionCorrectionModel VCM;
+
+VCM::VisionInput::VisionInput() {}
+VCM::VisionInput::VisionInput(const Leph::VectorLabel & data_)
   : data(data_)
 {}
-VisionCorrectionModel::VisionInput::VisionInput(const VisionInput & other)
+VCM::VisionInput::VisionInput(const VisionInput & other)
   : data(other.data)
 {}
 
 
-std::unique_ptr<Input> VisionCorrectionModel::VisionInput::clone() const {
+std::unique_ptr<Input> VCM::VisionInput::clone() const {
   return std::unique_ptr<Input>(new VisionInput(*this));
 }
 
-VisionCorrectionModel::VisionCorrectionModel() {
+VCM::VisionInputReader::VisionInputReader() : validation_ratio(0.2)
+{
+}
+
+DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
+                                               std::default_random_engine * engine) const {
+  Leph::MatrixLabel logs;
+  logs.load(file_path);
+  // First: Read all entries
+  SampleVector samples;
+  for (size_t i = 0; i < logs.size(); i++) {
+    const Leph::VectorLabel & entry = logs[i];
+    Eigen::Vector2d observation(entry("pixel_x"), entry("pixel_y"));
+    std::unique_ptr<Input> input(new VisionInput(entry));
+    std::unique_ptr<Sample> sample(new Sample(std::move(input), observation));
+
+    double filter = 0.5;
+    if (std::fabs(observation(0)) < filter &&
+        std::fabs(observation(1)) < filter) {
+      samples.push_back(std::move(sample));
+    }
+  }
+  // Then separate
+  return splitSamples(samples, validation_ratio, engine);
+}
+
+std::string VCM::VisionInputReader::getClassName() const {
+  return "VisionInputReader";
+}
+
+Json::Value VCM::VisionInputReader::toJson() const {
+  Json::Value  v;
+  v["validation_ratio"] = validation_ratio;
+  return v;
+}
+void VCM::VisionInputReader::fromJson(const Json::Value & v, 
+                                      const std::string & dir_name) {
+  (void) dir_name;
+  rhoban_utils::tryRead(v, "validation_ratio", &validation_ratio);
+}
+
+
+VCM::VisionCorrectionModel() {
   // TODO read a value instead of having a constant value
   camera_parameters.widthAperture = 67 * M_PI / 180.0;
   camera_parameters.heightAperture = 52.47 * M_PI / 180.0;
 }
 
 
-Eigen::VectorXd VisionCorrectionModel::getParameters() const  {
+Eigen::VectorXd VCM::getParameters() const  {
   // TODO: implement several options
   Eigen::VectorXd params(10);
   params(0) = px_stddev;
@@ -37,18 +82,18 @@ Eigen::VectorXd VisionCorrectionModel::getParameters() const  {
   return params;
 }
 
-void VisionCorrectionModel::setParameters(const Eigen::VectorXd & new_params)  {
+void VCM::setParameters(const Eigen::VectorXd & new_params)  {
   if (new_params.rows() != 10) {
-    throw std::logic_error("VisionCorrectionModel::setParameters: unexpected size for new_params"
+    throw std::logic_error("VCM::setParameters: unexpected size for new_params"
                            + std::to_string(new_params.rows()));
   }
   px_stddev = new_params(0);
   cam_offset  = new_params.segment(1,3);
-  imu_offset  = new_params.segment(1,3);
-  neck_offset = new_params.segment(1,3);
+  imu_offset  = new_params.segment(4,3);
+  neck_offset = new_params.segment(7,3);
 }
 
-std::vector<std::string> VisionCorrectionModel::getParametersNames() const  {
+std::vector<std::string> VCM::getParametersNames() const  {
   std::vector<std::string> names(10);
   names[0] = "px_stddev";
   std::vector<std::string> transformations = {"roll", "pitch", "yaw"};
@@ -60,13 +105,12 @@ std::vector<std::string> VisionCorrectionModel::getParametersNames() const  {
   return names;
 }
 
-Eigen::VectorXi VisionCorrectionModel::getObservationsCircularity() const {
+Eigen::VectorXi VCM::getObservationsCircularity() const {
   return Eigen::VectorXi::Zero(10);
 }
 
-Eigen::VectorXd
-VisionCorrectionModel::predictObservation(const Input & raw_input,
-                                          std::default_random_engine * engine) const {
+Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
+                                        std::default_random_engine * engine) const {
   // Can generate bad_cast error
   const VisionInput & input = dynamic_cast<const VisionInput &>(raw_input);
   // TODO: improve/understand what is hidden here (content imported from
@@ -78,8 +122,11 @@ VisionCorrectionModel::predictObservation(const Input & raw_input,
   geometryData = tmpModel.getGeometryData();
   geometryName = tmpModel.getGeometryName();
   // Modification of geometry data
-  geometryData.row(geometryName.at("camera")) += cam_offset;
-  geometryData.row(geometryName.at("head_yaw")) += neck_offset;
+  geometryData.block(geometryName.at("camera"),0,1,3) += cam_offset.transpose();
+  geometryData.block(geometryName.at("head_yaw"),0,1,3) += neck_offset.transpose();
+//  std::cout << "geometryData.cols : " << geometryData.cols() << std::endl;
+//  std::cout << "cam_offset : " << cam_offset.transpose() << std::endl;
+//  std::cout << "neck_offset: " << neck_offset.transpose() << std::endl;
   // Initialize a fixed model 
   Leph::HumanoidFixedModel model(Leph::SigmabanModel, Eigen::MatrixXd(), {},
                                  geometryData, geometryName);
@@ -114,10 +161,27 @@ VisionCorrectionModel::predictObservation(const Input & raw_input,
   Eigen::Vector2d pixel;
   bool success = model.get().cameraWorldToPixel(camera_parameters,
                                                 seen_point, pixel);
+
+//  std::cout << "pos left foot: " << model.get().position("left_foot_tip","origin").transpose() << std::endl;
+//  std::cout << "pos trunk    : " << model.get().position("trunk","origin").transpose() << std::endl;
+//  std::cout << "pos camera   : " << model.get().position("camera","origin").transpose() << std::endl;
+
+
+
   if (!success) {
     std::ostringstream oss;
-    oss << "VisionCorrectionModel::predictObservation: failed cameraWorldToPixel: "
-        << seen_point.transpose();
+    Eigen::Vector2d pos(input.data("pixel_x"), input.data("pixel_y"));
+    Eigen::Vector3d viewVectorInWorld =
+      model.get().cameraPixelToViewVector(camera_parameters, Eigen::Vector2d(0,0));
+    Eigen::Vector3d groundAtCenter;
+    bool isSuccess = model.get().cameraViewVectorToWorld(
+      viewVectorInWorld, groundAtCenter, input.data("ground_z"));
+    oss << "VCM::predictObservation: failed cameraWorldToPixel:" << std::endl
+        << " point: " << seen_point.transpose() << std::endl
+        << " measured pos in image:" << pos.transpose() << std::endl
+        << " viewVecInWorld: " << viewVectorInWorld.transpose() << std::endl
+        << " groundAtCenter: " << groundAtCenter.transpose() << std::endl
+        << " camParams: " << camera_parameters.widthAperture << ", " << camera_parameters.heightAperture;
     throw std::logic_error(oss.str());
   }
   // Add noise if required
@@ -129,8 +193,8 @@ VisionCorrectionModel::predictObservation(const Input & raw_input,
   return pixel;
 }
 
-double VisionCorrectionModel::computeLogLikelihood(const Sample & sample,
-                                                   std::default_random_engine * engine) {
+double VCM::computeLogLikelihood(const Sample & sample,
+                                 std::default_random_engine * engine) const {
   (void) engine;
   Eigen::VectorXd prediction = predictObservation(sample.getInput(), nullptr);
   Eigen::MatrixXd covar(2,2);
@@ -139,11 +203,11 @@ double VisionCorrectionModel::computeLogLikelihood(const Sample & sample,
   return expected_distribution.getLogLikelihood(sample.getObservation());
 }
 
-std::unique_ptr<Model> VisionCorrectionModel::clone() const {
-  return std::unique_ptr<Model>(new VisionCorrectionModel(*this));
+std::unique_ptr<Model> VCM::clone() const {
+  return std::unique_ptr<Model>(new VCM(*this));
 }
 
-Json::Value VisionCorrectionModel::toJson() const  {
+Json::Value VCM::toJson() const  {
   Json::Value v;
   v["px_stddev"] = px_stddev;
   v["cam_offset"] = rhoban_utils::vector2Json(cam_offset);
@@ -154,8 +218,7 @@ Json::Value VisionCorrectionModel::toJson() const  {
   return v;
 }
 
-void VisionCorrectionModel::fromJson(const Json::Value & v,
-                                     const std::string & dir_name) {
+void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
   (void) dir_name;
   rhoban_utils::tryRead(v,"px_stddev", &px_stddev);
   rhoban_utils::tryRead(v,"cam_offset", &cam_offset);
@@ -165,8 +228,8 @@ void VisionCorrectionModel::fromJson(const Json::Value & v,
   rhoban_utils::tryRead(v, "cam_aperture_height", &camera_parameters.heightAperture);
 }
 
-std::string VisionCorrectionModel::getClassName() const {
-  return "VisionCorrectionModel";
+std::string VCM::getClassName() const {
+  return "VCM";
 }
 
 
