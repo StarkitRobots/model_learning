@@ -79,6 +79,9 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
     }
   }
 
+  std::cout << "Training Set size: " << data.training_set.size() << std::endl;
+  std::cout << "Validation Set size: " << data.validation_set.size() << std::endl;
+
   return data;
 }
 
@@ -205,6 +208,7 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
     bool isSuccess = model.get().cameraViewVectorToWorld(
       viewVectorInWorld, groundAtCenter, input.data("ground_z"));
     oss << "VCM::predictObservation: failed cameraWorldToPixel:" << std::endl
+        << " tag_id: " << input.data("tag_id") << std::endl
         << " point: " << seen_point.transpose() << std::endl
         << " measured pos in image:" << pos.transpose() << std::endl
         << " viewVecInWorld: " << viewVectorInWorld.transpose() << std::endl
@@ -230,6 +234,19 @@ double VCM::computeLogLikelihood(const Sample & sample,
   Eigen::Vector2d prediction_img = leph2Img(prediction_leph);
   Eigen::Vector2d observation_leph = sample.getObservation();
   Eigen::Vector2d observation_img = leph2Img(observation_leph);
+
+  
+
+  if ((prediction_img - observation_img).norm() > 100) {
+    const VisionInput & input = dynamic_cast<const VisionInput &>(sample.getInput());
+    std::cout << "tag_id: " << input.data("tag_id") << std::endl;
+    std::cout << "pred_leph: " << prediction_leph.transpose()  << std::endl
+              << "pred_img : " << prediction_img.transpose()   << std::endl
+              << "obs_leph : " << observation_leph.transpose() << std::endl
+              << "obs_img  : " << observation_img.transpose()  << std::endl;
+  }
+
+
   Eigen::MatrixXd covar(2,2);
   covar << px_stddev, 0, 0, px_stddev;
   rhoban_random::MultivariateGaussian expected_distribution(prediction_img, covar);
@@ -277,8 +294,8 @@ std::string VCM::getClassName() const {
 
 Eigen::Vector2d VCM::leph2Img(const Eigen::Vector2d & leph_px) const {
   Eigen::Vector2d img_px;
-  img_px(0) = (leph_px(0) + 1 / 2) * img_width;
-  img_px(1) = (leph_px(1) + 1 / 2) * img_height;
+  img_px(0) = ((leph_px(0) + 1) / 2) * img_width;
+  img_px(1) = ((leph_px(1) + 1) / 2) * img_height;
   return img_px;
 }
 

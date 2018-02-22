@@ -34,7 +34,7 @@ ModelLearner::learnParameters(const SampleVector & training_set,
 {
   Result result;
   rhoban_bbo::Optimizer::RewardFunc reward_function =
-    [this, &training_set, &validation_set]
+    [this, &training_set]
     (const Eigen::VectorXd & parameters, std::default_random_engine * engine)
     {
       // Copy the original model, update the parameters and compute logLikelihood
