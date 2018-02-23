@@ -75,12 +75,12 @@ public:
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
   std::string getClassName() const;
 
-private:
   /// Convert from leph coordinates ([-1,1]^2) to img coordinates ([0,width]*[0,height])
   Eigen::Vector2d leph2Img(const Eigen::Vector2d & leph_coordinates) const;
   /// Convert from img coordinates ([0,width]*[0,height]) to leph coordinates ([-1 1]^2)
   Eigen::Vector2d img2Leph(const Eigen::Vector2d & img_coordinates) const;
 
+private:
   /// The observation standard deviation in pixels
   double px_stddev;
 

@@ -239,20 +239,9 @@ double VCM::computeLogLikelihood(const Sample & sample,
   Eigen::Vector2d observation_leph = sample.getObservation();
   Eigen::Vector2d observation_img = leph2Img(observation_leph);
 
-  
-
-  if ((prediction_img - observation_img).norm() > 100) {
-    const VisionInput & input = dynamic_cast<const VisionInput &>(sample.getInput());
-    std::cout << "tag_id: " << input.data("tag_id") << std::endl;
-    std::cout << "pred_leph: " << prediction_leph.transpose()  << std::endl
-              << "pred_img : " << prediction_img.transpose()   << std::endl
-              << "obs_leph : " << observation_leph.transpose() << std::endl
-              << "obs_img  : " << observation_img.transpose()  << std::endl;
-  }
-
-
+  double px_var = px_stddev * px_stddev;
   Eigen::MatrixXd covar(2,2);
-  covar << px_stddev, 0, 0, px_stddev;
+  covar << px_var, 0, 0, px_var;
   rhoban_random::MultivariateGaussian expected_distribution(prediction_img, covar);
   return expected_distribution.getLogLikelihood(observation_img);
 }

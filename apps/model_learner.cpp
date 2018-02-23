@@ -3,6 +3,8 @@
 
 #include "rhoban_random/tools.h"
 
+#include <iostream>
+
 using namespace rhoban_model_learning;
 
 int main(int argc, char ** argv) {
