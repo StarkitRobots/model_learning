@@ -1,16 +1,23 @@
 #include "rhoban_model_learning/model.h"
 
 #include "rhoban_random/multivariate_gaussian.h"
+#include "rhoban_utils/threading/multi_core.h"
+
+using namespace rhoban_utils;
 
 namespace rhoban_model_learning
 {
 
-Model::Model() : nb_samples(500)
+Model::Model() : nb_samples(500), nb_threads(1)
 {
 }
 
-/// Number of samples to estimate logLikelihood
-Model::Model(int nb_samples_) : nb_samples(nb_samples_)
+Model::Model(int nb_samples_) : nb_samples(nb_samples_), nb_threads(1)
+{
+}
+
+Model::Model(const Model & other)
+  : nb_samples(other.nb_samples), nb_threads(other.nb_threads)
 {
 }
 
@@ -30,11 +37,36 @@ double Model::computeLogLikelihood(const Sample & sample,
 double Model::averageLogLikelihood(const SampleVector & data_set,
                                    std::default_random_engine * engine) const
 {
+  // Preparing task
+  std::vector<double> log_likelihoods(data_set.size());
+  MultiCore::StochasticTask log_likelihood_computer =
+    [&](int start_idx, int end_idx, std::default_random_engine * engine)
+    {
+      for (int idx = start_idx; idx < end_idx; idx++) {
+        log_likelihoods[idx] = this->computeLogLikelihood(*(data_set[idx]), engine);
+      }
+    };
+  // Computing evaluation
+  MultiCore::runParallelStochasticTask(log_likelihood_computer, data_set.size(),
+                                       nb_threads, engine);
+  // Gathering Results
   double log_likelihood = 0.0;
   for (const std::unique_ptr<Sample> & sample : data_set) {
     log_likelihood += computeLogLikelihood(*sample, engine);
   }
   return log_likelihood / data_set.size();
+}
+
+Json::Value Model::toJson() const {
+  Json::Value v;
+  v["nb_samples"] = nb_samples;
+  v["nb_threads"] = nb_threads;
+  return v;
+}
+
+void Model::fromJson(const Json::Value & v, const std::string & dir_name) {
+  rhoban_utils::tryRead(v, "nb_samples", &nb_samples);
+  rhoban_utils::tryRead(v, "nb_threads", &nb_threads);
 }
 
 

@@ -3,7 +3,9 @@
     "models" : {
         "full_model" : {
             "class name" : "VisionCorrectionModel",
-            "content" : {}
+            "content" : {
+                "nb_threads" : 4
+            }
         }
     },
     "optimizers" : {

@@ -14,6 +14,8 @@ public:
   Model();
   /// Number of samples to estimate logLikelihood
   Model(int nb_samples);
+  /// Copy constructor
+  Model(const Model & other);
 
   /// Return the values of the current parameters
   virtual Eigen::VectorXd getParameters() const = 0;
@@ -48,11 +50,18 @@ public:
   double averageLogLikelihood(const SampleVector & data_set,
                               std::default_random_engine * engine) const;
 
+  Json::Value toJson() const;
+  void fromJson(const Json::Value & v, const std::string & dir_name);
+
   virtual std::unique_ptr<Model> clone() const = 0;
 
 protected:
   /// The number of samples used to fit a distribution if necessary
   int nb_samples;
+
+  /// The maximal number of threads allowed for computing averageLogLikelihood
+  /// of a dataSet
+  int nb_threads;
 };
 
 }

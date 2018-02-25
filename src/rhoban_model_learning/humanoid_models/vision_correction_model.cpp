@@ -30,7 +30,8 @@ VCM::VisionInputReader::VisionInputReader()
 }
 
 DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
-                                               std::default_random_engine * engine) const {
+                                               std::default_random_engine * engine) const
+{
   Leph::MatrixLabel logs;
   logs.load(file_path);
   // First: Read all entries
@@ -113,6 +114,15 @@ VCM::VisionCorrectionModel() : img_width(640), img_height(480) {
   // TODO read a value instead of having a constant value
   camera_parameters.widthAperture = 67 * M_PI / 180.0;
   camera_parameters.heightAperture = 52.47 * M_PI / 180.0;
+}
+
+VCM::VisionCorrectionModel(const VisionCorrectionModel & other)
+  : Model(other), px_stddev(other.px_stddev), cam_offset(other.cam_offset),
+    imu_offset(other.imu_offset), neck_offset(other.neck_offset),
+    camera_parameters(other.camera_parameters),
+    img_width(other.img_width),
+    img_height(other.img_height)
+{
 }
 
 
@@ -211,6 +221,10 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
     Eigen::Vector3d groundAtCenter;
     bool isSuccess = model.get().cameraViewVectorToWorld(
       viewVectorInWorld, groundAtCenter, input.data("ground_z"));
+    if (!isSuccess) { 
+      oss << "VCM::predictObservation: failed cameraWorldToPixel AND "
+          << " failed cameraViewVectorToPixel"<< std::endl;
+    }
     oss << "VCM::predictObservation: failed cameraWorldToPixel:" << std::endl
         << " tag_id: " << input.data("tag_id") << std::endl
         << " point: " << seen_point.transpose() << std::endl
@@ -251,7 +265,7 @@ std::unique_ptr<Model> VCM::clone() const {
 }
 
 Json::Value VCM::toJson() const  {
-  Json::Value v;
+  Json::Value v = Model::toJson();
   v["px_stddev"] = px_stddev;
   v["cam_offset" ] = rhoban_utils::vector2Json(cam_offset  * 180 / M_PI);
   v["imu_offset" ] = rhoban_utils::vector2Json(imu_offset  * 180 / M_PI);
@@ -264,7 +278,7 @@ Json::Value VCM::toJson() const  {
 }
 
 void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
-  (void) dir_name;
+  Model::fromJson(v, dir_name);
   Eigen::Vector3d cam_offset_deg ( cam_offset * 180 / M_PI);
   Eigen::Vector3d imu_offset_deg ( imu_offset * 180 / M_PI);
   Eigen::Vector3d neck_offset_deg(neck_offset * 180 / M_PI);

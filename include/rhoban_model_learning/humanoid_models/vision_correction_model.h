@@ -55,6 +55,7 @@ public:
 
 
   VisionCorrectionModel();
+  VisionCorrectionModel(const VisionCorrectionModel & other);
 
   virtual Eigen::VectorXd getParameters() const override;
   virtual void setParameters(const Eigen::VectorXd & new_params) override;
