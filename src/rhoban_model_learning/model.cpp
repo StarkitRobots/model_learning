@@ -51,8 +51,8 @@ double Model::averageLogLikelihood(const SampleVector & data_set,
                                        nb_threads, engine);
   // Gathering Results
   double log_likelihood = 0.0;
-  for (const std::unique_ptr<Sample> & sample : data_set) {
-    log_likelihood += computeLogLikelihood(*sample, engine);
+  for (size_t idx = 0; idx < data_set.size(); idx++) {
+    log_likelihood += log_likelihoods[idx];
   }
   return log_likelihood / data_set.size();
 }
