@@ -65,6 +65,7 @@ Json::Value Model::toJson() const {
 }
 
 void Model::fromJson(const Json::Value & v, const std::string & dir_name) {
+  (void) dir_name;
   rhoban_utils::tryRead(v, "nb_samples", &nb_samples);
   rhoban_utils::tryRead(v, "nb_threads", &nb_threads);
 }

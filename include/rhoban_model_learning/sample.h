@@ -5,6 +5,8 @@
 #include <Eigen/Core>
 
 #include <memory>
+#include <random>
+#include <vector>
 
 namespace rhoban_model_learning
 {
