@@ -4,10 +4,13 @@
 
 #include "rhoban_bbo/optimizer_factory.h"
 
+#include "rhoban_utils/timing/time_stamp.h"
+
 #include "rhoban_random/tools.h"
 
 using namespace rhoban_bbo;
 using namespace rhoban_model_learning;
+using namespace rhoban_utils;
 
 class Config : public rhoban_utils::JsonSerializable {
 public:
@@ -65,55 +68,53 @@ int main(int argc, char ** argv) {
 
   // OPTIONAL: eventually, reduce number of columns if there is only 1 optimizer
   // or only 1 reader etc...
-  results_file << "optimizer,model,reader,trainingScore,validationScore" << std::endl;
+  results_file << "optimizer,model,reader,trainingScore,validationScore,learningTime" << std::endl;
 
-  // For each optimizer
-  for (const auto & optimizer_pair : conf.optimizers) {
-    std::string optimizer_name = optimizer_pair.first;
-    const Optimizer & optimizer = *(optimizer_pair.second);
-    // For each model
-    for (const auto & model_pair : conf.models) {
-      std::string model_name = model_pair.first;
-      const Model & model = *(model_pair.second);
+  // For each model
+  for (const auto & model_pair : conf.models) {
+    std::string model_name = model_pair.first;
+    const Model & model = *(model_pair.second);
+    // Parameters file
+    std::ostringstream name_oss;
+    name_oss <<  model_name << "_parameters.csv";
+    std::ofstream params_file(name_oss.str());
+    std::vector<std::string> parameter_names = model.getParametersNames();
+    params_file << "optimizer,reader";
+    for (size_t idx = 0; idx < parameter_names.size(); idx++) {
+      params_file << "," << parameter_names[idx];
+    };
+    params_file << std::endl;
+    // For each optimizer
+    for (const auto & optimizer_pair : conf.optimizers) {
+      std::string optimizer_name = optimizer_pair.first;
+      const Optimizer & optimizer = *(optimizer_pair.second);
       // Initialize the learning_model
       ModelLearner learner(model.clone(), optimizer.clone(), conf.space, initial_guess);
       // For each reader
       for (const auto & reader_pair : conf.readers) {
         std::string reader_name = reader_pair.first;
         const InputReader & reader = *(reader_pair.second);
-        // Parameters file
-        std::ostringstream name_oss;
-        name_oss << optimizer_name << "_" << model_name << "_"
-                 << reader_name << "_parameters.csv";
-        std::ofstream params_file(name_oss.str());
-        std::vector<std::string> parameter_names = model.getParametersNames();
-        for (size_t idx = 0; idx < parameter_names.size(); idx++) {
-          params_file << parameter_names[idx];
-          if (idx < parameter_names.size() - 1)
-            params_file << ",";
-          else
-            params_file << std::endl;
-        }
         // Perform multiple runs
         for (int run_id = 0; run_id < conf.nb_runs; run_id++) {
           // Extract data (splits between training and validation
           DataSet data = reader.extractSamples(data_path, &engine);
           // Learn model
+          TimeStamp start = TimeStamp::now();
           ModelLearner::Result r = learner.learnParameters(data, &engine);
+          TimeStamp end = TimeStamp::now();
+          double learning_time = diffSec(start, end);
           // Writing scores
           results_file << optimizer_name << "," << model_name << ","
                        << reader_name << "," << r.training_log_likelihood << ","
-                       << r.validation_log_likelihood << std::endl;
+                       << r.validation_log_likelihood << ","
+                       << learning_time<< std::endl;
           // Writing params
           Eigen::VectorXd params = r.model->getParameters();
+          params_file << optimizer_name << "," << reader_name;
           for (int i = 0; i < params.rows(); i++) {
-            params_file << params(i);
-            if ( i != params.rows() - 1) {
-              params_file << ",";
-            } else {
-              params_file << std::endl;
-            }
+            params_file << "," << params(i);
           }
+          params_file << std::endl;
         }
       }
     }
