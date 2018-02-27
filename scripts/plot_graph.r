@@ -36,15 +36,55 @@ analysisPlot <- function(data_path, output_file = "analysis.png")
     g <- g + geom_ribbon(size=0,alpha = 0.3)
     g <- g + geom_point(size=2)
     g <- g + geom_line(size=0.5)
-    g <- g + theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=12))
+    g <- g + theme_bw()
     g <- g + labs(x = "nb samples by tag")
-    g <- g + scale_x_log10()
+    g <- g + scale_x_log10(breaks=unique(data$reader))
+    g <- g + coord_cartesian(ylim=c(-15,-5))
     ggsave(output_file)
 }
 
-parametersPlot <- function(data_path, output_file = "analysis.png")
+parametersPlot <- function(data_path, output_file = "parameters_analysis.png")
 {
-    #TODO
+    data <- read.csv(data_path)
+    # Plot data is not equivalent to data
+    plotData <- data.frame(reader = integer(),
+                           optimizer = character(),
+                           param = character(),
+                           value = double(),
+                           ci = double(),
+                           stringsAsFactors=FALSE)
+    print(head(data))
+    # For each parameter (format is hard coded)
+    for (i in 3:length(names(data)))
+    {
+        colname <- names(data)[i]
+        print(paste0("treating ", colname))
+        tmpData <- do.call(data.frame,aggregate(formula(paste0(colname,"~reader+optimizer")),
+                                                data,
+                                                function(x) c(mean = mean(x),
+                                                              ci = ci(x))))
+        nrow <- nrow(tmpData)
+        tmpData$param <- rep(colname, nrow)
+        tmpData$value <- tmpData[,paste0(colname,".mean")]
+        tmpData$ci <- tmpData[,paste0(colname,".ci")]
+        tmpData <- tmpData[,c("param","value","ci","reader","optimizer")]
+        plotData <- rbind(plotData,tmpData)
+    }
+    print(plotData)
+    g <- ggplot(plotData, aes_string(x="reader",
+                                     y="value",
+                                     ymin="value - ci",
+                                     ymax="value + ci",
+                                     color="optimizer",
+                                     fill="optimizer",
+                                     group="interaction(param,optimizer)"))
+    g <- g + geom_ribbon(alpha=0.3)
+    g <- g + geom_point()
+    g <- g + geom_line()
+    g <- g + facet_wrap(~param, scales="free_y",ncol=3)
+    g <- g + scale_x_log10(breaks=unique(data$reader))
+    g <- g + theme_bw()
+    ggsave(output_file,width=16,height=9)
 }
 
 args <- commandArgs(TRUE)
@@ -55,3 +95,4 @@ if (length(args) < 1) {
 }
 
 analysisPlot(args[1])
+#parametersPlot(args[1])
