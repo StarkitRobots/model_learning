@@ -8,7 +8,8 @@ using namespace rhoban_model_learning;
 typedef VisionCorrectionModel::VisionInput VisionInput;
 
 void compare(const VisionCorrectionModel & m,
-             const SampleVector & samples) {
+             const SampleVector & samples,
+             std::ostream & out) {
   for (const auto & s : samples) {
     const VisionInput & input = dynamic_cast<const VisionInput &>(s->getInput());
     int tag_id = input.data("tag_id");
@@ -17,7 +18,7 @@ void compare(const VisionCorrectionModel & m,
     Eigen::Vector2d pred_leph = m.predictObservation(input, nullptr);
     Eigen::Vector2d pred_px = m.leph2Img(pred_leph);
     Eigen::Vector2d error = img_px - pred_px;
-    std::cout << tag_id << "," << error(0) << "," << error(1) << std::endl;
+    out << tag_id << "," << error(0) << "," << error(1) << std::endl;
   }
 }
 
@@ -38,10 +39,12 @@ int main(int argc, char ** argv) {
   std::default_random_engine engine = rhoban_random::getRandomEngine();
   DataSet data = input_reader->extractSamples(argv[3], &engine);
 
-  std::cout << "tagId,errX,errY" << std::endl;
+  std::ofstream csv_file("debug.csv");
+
+  csv_file << "tagId,errX,errY" << std::endl;
 
   //
-  compare(model, data.training_set);
-  compare(model, data.validation_set);
+  compare(model, data.training_set, csv_file);
+  compare(model, data.validation_set, csv_file);
 
 }
