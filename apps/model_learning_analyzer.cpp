@@ -95,7 +95,7 @@ int main(int argc, char ** argv) {
         std::string reader_name = reader_pair.first;
         const InputReader & reader = *(reader_pair.second);
         // Perform multiple runs
-        // TODO: Average parameters among runs to save a .json config
+        Eigen::VectorXd params_sum(parameter_names.size());
         for (int run_id = 0; run_id < conf.nb_runs; run_id++) {
           // Extract data (splits between training and validation
           DataSet data = reader.extractSamples(data_path, &engine);
@@ -115,8 +115,13 @@ int main(int argc, char ** argv) {
           for (int i = 0; i < params.rows(); i++) {
             params_file << "," << params(i);
           }
+          params_sum+=params;
           params_file << std::endl;
         }
+        Eigen::VectorXd params_average=params_sum/conf.nb_runs;
+        std::unique_ptr<Model> average_model = model.clone();
+        average_model->setParameters(params_average);
+        average_model->saveFile(model_name+"_"+optimizer_name+"_"+reader_name+"_average_trained_models.json");
       }
     }
   }
