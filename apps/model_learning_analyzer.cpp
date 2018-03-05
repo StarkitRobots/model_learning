@@ -95,7 +95,7 @@ int main(int argc, char ** argv) {
         std::string reader_name = reader_pair.first;
         const InputReader & reader = *(reader_pair.second);
         // Perform multiple runs
-        Eigen::VectorXd params_sum(parameter_names.size());
+        Eigen::VectorXd params_sum = Eigen::VectorXd::Zero(parameter_names.size());
         for (int run_id = 0; run_id < conf.nb_runs; run_id++) {
           // Extract data (splits between training and validation
           DataSet data = reader.extractSamples(data_path, &engine);
