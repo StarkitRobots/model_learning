@@ -267,9 +267,9 @@ std::unique_ptr<Model> VCM::clone() const {
 Json::Value VCM::toJson() const  {
   Json::Value v = Model::toJson();
   v["px_stddev"] = px_stddev;
-  v["cam_offset" ] = rhoban_utils::vector2Json(cam_offset  * 180 / M_PI);
-  v["imu_offset" ] = rhoban_utils::vector2Json(imu_offset  * 180 / M_PI);
-  v["neck_offset"] = rhoban_utils::vector2Json(neck_offset * 180 / M_PI);
+  v["cam_offset" ] = rhoban_utils::vector2Json<3>(cam_offset  * 180 / M_PI);
+  v["imu_offset" ] = rhoban_utils::vector2Json<3>(imu_offset  * 180 / M_PI);
+  v["neck_offset"] = rhoban_utils::vector2Json<3>(neck_offset * 180 / M_PI);
   v["cam_aperture_width"] = camera_parameters.widthAperture;
   v["cam_aperture_height"] = camera_parameters.heightAperture;
   v["img_width"] = img_width;
