@@ -20,6 +20,7 @@ public:
   SimpleAngularModel(double observation_stddev, double step_stddev);
 
   virtual Eigen::VectorXd getParameters() const override;
+  virtual Eigen::MatrixXd getParametersSpace() const override;
   virtual void setParameters(const Eigen::VectorXd & new_params) override;
   virtual std::vector<std::string> getParametersNames() const override;
 

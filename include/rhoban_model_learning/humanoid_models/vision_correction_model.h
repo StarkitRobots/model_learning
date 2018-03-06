@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rhoban_model_learning/model.h"
+#include "rhoban_model_learning/modular_model.h"
 #include "rhoban_model_learning/input_reader.h"
 
 #include "Model/HumanoidModel.hpp"
@@ -17,7 +17,7 @@ namespace rhoban_model_learning
 /// - Expected position of the data in the left_foot referential
 ///
 /// Observations are positions of the object in the image (x,y)
-class VisionCorrectionModel : public Model {
+class VisionCorrectionModel : public ModularModel {
 public:
 
   class VisionInput : public Input {
@@ -57,9 +57,10 @@ public:
   VisionCorrectionModel();
   VisionCorrectionModel(const VisionCorrectionModel & other);
 
-  virtual Eigen::VectorXd getParameters() const override;
-  virtual void setParameters(const Eigen::VectorXd & new_params) override;
-  virtual std::vector<std::string> getParametersNames() const override;
+  virtual Eigen::VectorXd getGlobalParameters() const override;
+  virtual Eigen::MatrixXd getGlobalParametersSpace() const override;
+  virtual void setGlobalParameters(const Eigen::VectorXd & new_params) override;
+  virtual std::vector<std::string> getGlobalParametersNames() const override;
   virtual Eigen::VectorXi getObservationsCircularity() const override;
 
   virtual Eigen::VectorXd
@@ -85,11 +86,11 @@ private:
   /// The observation standard deviation in pixels
   double px_stddev;
 
-  /// Offset at camera fixation (roll, pitch, yaw)
+  /// Offset at camera fixation (roll, pitch, yaw) [deg]
   Eigen::Vector3d cam_offset;
-  /// Offset between IMU orientation and trunk orientation (roll, pitch, yaw)
+  /// Offset between IMU orientation and trunk orientation (roll, pitch, yaw) [deg]
   Eigen::Vector3d imu_offset;
-  /// Offset in neck (roll, pitch, yaw)
+  /// Offset in neck (roll, pitch, yaw) [deg]
   Eigen::Vector3d neck_offset;
 
   // The width and height aperture of the camera
@@ -99,6 +100,12 @@ private:
   int img_width;
   /// Height of the image in pixels
   int img_height;
+
+  /// Space for tuning px_stddev [min,max]
+  Eigen::Vector2d px_stddev_space;
+
+  /// Maximal angle error [deg]
+  double max_angle_error;
 };
 
 }

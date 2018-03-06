@@ -22,6 +22,11 @@ Eigen::VectorXd SimpleAngularModel::getParameters() const
   return Eigen::Vector2d(observation_stddev, step_stddev);
 }
 
+Eigen::MatrixXd SimpleAngularModel::getParametersSpace() const
+{
+  throw std::logic_error("SimpleAngularModel::getParametersSpace is not implemented yet");
+}
+
 void SimpleAngularModel::setParameters(const Eigen::VectorXd & new_params)
 {
   if (new_params.rows() != 2) {
