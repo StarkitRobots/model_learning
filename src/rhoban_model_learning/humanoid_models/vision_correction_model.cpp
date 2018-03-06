@@ -112,6 +112,9 @@ void VCM::VisionInputReader::fromJson(const Json::Value & v,
 
 VCM::VisionCorrectionModel() :
   ModularModel(10),
+  cam_offset (Eigen::Vector3d::Zero()),
+  imu_offset (Eigen::Vector3d::Zero()),
+  neck_offset(Eigen::Vector3d::Zero()),
   img_width(640), img_height(480),
   px_stddev_space(0.01, 50),
   max_angle_error(5)
@@ -119,6 +122,7 @@ VCM::VisionCorrectionModel() :
   // TODO read a value instead of having a constant value
   camera_parameters.widthAperture = 67 * M_PI / 180.0;
   camera_parameters.heightAperture = 52.47 * M_PI / 180.0;
+  px_stddev = (px_stddev_space(0) + px_stddev_space(1)) / 2;
 }
 
 VCM::VisionCorrectionModel(const VisionCorrectionModel & other)

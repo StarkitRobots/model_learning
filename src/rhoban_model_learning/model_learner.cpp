@@ -45,8 +45,6 @@ ModelLearner::learnParameters(const SampleVector & training_set,
   if (space.rows() == 0) {
     throw std::logic_error("ModelLearner::learnParameters: model has no parameters");
   }
-  std::cout << space << std::endl;
-  std::cout << "initial_guess: " << initial_guess.transpose() << std::endl;
   optimizer->setLimits(space);
   Eigen::VectorXd best_parameters; 
   best_parameters = optimizer->train(reward_function, initial_guess, engine);
