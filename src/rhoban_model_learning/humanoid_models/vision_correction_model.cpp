@@ -311,7 +311,7 @@ void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
 }
 
 std::string VCM::getClassName() const {
-  return "VCM";
+  return "VisionCorrectionModel";
 }
 
 Eigen::Vector2d VCM::leph2Img(const Eigen::Vector2d & leph_px) const {
