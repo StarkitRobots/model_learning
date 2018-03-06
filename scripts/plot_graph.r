@@ -51,6 +51,7 @@ parametersPlot <- function(data_path, output_file = "parameters_analysis.png")
                            optimizer = character(),
                            param = character(),
                            value = double(),
+                           sd = double(),
                            ci = double(),
                            stringsAsFactors=FALSE)
     print(head(data))
@@ -62,12 +63,14 @@ parametersPlot <- function(data_path, output_file = "parameters_analysis.png")
         tmpData <- do.call(data.frame,aggregate(formula(paste0(colname,"~reader+optimizer")),
                                                 data,
                                                 function(x) c(mean = mean(x),
+                                                              sd = sd(x),
                                                               ci = ci(x))))
         nrow <- nrow(tmpData)
         tmpData$param <- rep(colname, nrow)
         tmpData$value <- tmpData[,paste0(colname,".mean")]
+        tmpData$sd <- tmpData[,paste0(colname,".sd")]
         tmpData$ci <- tmpData[,paste0(colname,".ci")]
-        tmpData <- tmpData[,c("param","value","ci","reader","optimizer")]
+        tmpData <- tmpData[,c("param","value","sd","ci","reader","optimizer")]
         plotData <- rbind(plotData,tmpData)
     }
     print(plotData)
@@ -78,7 +81,16 @@ parametersPlot <- function(data_path, output_file = "parameters_analysis.png")
                                      color="optimizer",
                                      fill="optimizer",
                                      group="interaction(param,optimizer)"))
-    g <- g + geom_ribbon(alpha=0.3)
+    g <- g + geom_ribbon(alpha=0.5)
+    g <- g + geom_ribbon(data=plotData,
+                         mapping=aes_string(x="reader",
+                                            y="value",
+                                            ymin="value - sd",
+                                            ymax="value + sd",
+                                            color="optimizer",
+                                            fill="optimizer",
+                                            group="interaction(param,optimizer)"),
+                         alpha=0.2)
     g <- g + geom_point()
     g <- g + geom_line()
     g <- g + facet_wrap(~param, scales="free_y",ncol=3)
@@ -94,5 +106,5 @@ if (length(args) < 1) {
     quit(status=1)
 }
 
-analysisPlot(args[1])
-#parametersPlot(args[1])
+#analysisPlot(args[1])
+parametersPlot(args[1])

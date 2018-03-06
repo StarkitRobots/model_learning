@@ -283,9 +283,9 @@ void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
   Eigen::Vector3d imu_offset_deg ( imu_offset * 180 / M_PI);
   Eigen::Vector3d neck_offset_deg(neck_offset * 180 / M_PI);
   rhoban_utils::tryRead(v,"px_stddev", &px_stddev);
-  rhoban_utils::tryRead(v,"cam_offset", &cam_offset_deg);
-  rhoban_utils::tryRead(v,"imu_offset", &imu_offset_deg);
-  rhoban_utils::tryRead(v,"neck_offset", &neck_offset_deg);
+  rhoban_utils::tryReadEigen(v,"cam_offset", &cam_offset_deg);
+  rhoban_utils::tryReadEigen(v,"imu_offset", &imu_offset_deg);
+  rhoban_utils::tryReadEigen(v,"neck_offset", &neck_offset_deg);
   rhoban_utils::tryRead(v, "cam_aperture_width", &camera_parameters.widthAperture);
   rhoban_utils::tryRead(v, "cam_aperture_height", &camera_parameters.heightAperture);
   rhoban_utils::tryRead(v, "img_width", &img_width);

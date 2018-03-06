@@ -78,8 +78,8 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
 {
   model = ModelFactory().read(v, "model", dir_name);
   optimizer = OptimizerFactory().read(v, "optimizer", dir_name);
-  space = rhoban_utils::read<Eigen::MatrixXd>(v, "space");
-  rhoban_utils::tryRead<Eigen::VectorXd>(v, "initial_guess", &initial_guess);
+  space = rhoban_utils::readEigen<-1,-1>(v, "space");
+  rhoban_utils::tryReadEigen(v, "initial_guess", &initial_guess);
   if (initial_guess.rows() == 0) {
     initial_guess = (space.col(0) + space.col(1)) / 2;
   }

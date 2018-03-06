@@ -29,7 +29,7 @@ public:
     readers = InputReaderFactory().readMap(v, "readers", dir_name);
     models = ModelFactory().readMap(v, "models", dir_name);
     optimizers = OptimizerFactory().readMap(v, "optimizers", dir_name);
-    space = rhoban_utils::read<Eigen::MatrixXd>(v, "space");
+    space = rhoban_utils::readEigen<-1,-1>(v, "space");
   }
 
   /// The number of runs for each configuration
