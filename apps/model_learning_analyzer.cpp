@@ -121,7 +121,7 @@ int main(int argc, char ** argv) {
         Eigen::VectorXd params_average=params_sum/conf.nb_runs;
         std::unique_ptr<Model> average_model = model.clone();
         average_model->setParameters(params_average);
-        average_model->saveFile(model_name+"_"+optimizer_name+"_"+reader_name+"_average_trained_models.json");
+        average_model->saveFile(model_name+"_"+optimizer_name+"_"+reader_name+"_average_trained_models.json",true);
       }
     }
   }
