@@ -20,6 +20,9 @@ public:
   /// Return the values of the current parameters
   virtual Eigen::VectorXd getParameters() const = 0;
 
+  /// Return the space allowed for parameters
+  virtual Eigen::MatrixXd getParametersSpace() const = 0;
+
   /// Update the internal structure of the model with the provided parameters
   virtual void setParameters(const Eigen::VectorXd & new_params) = 0;
 

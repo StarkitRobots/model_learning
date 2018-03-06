@@ -13,10 +13,9 @@ ModelLearner::ModelLearner() {}
 
 ModelLearner::ModelLearner(std::unique_ptr<Model> model_,
                            std::unique_ptr<rhoban_bbo::Optimizer> optimizer_,
-                           const Eigen::MatrixXd & space_,
                            const Eigen::VectorXd & initial_guess_) :
   model(std::move(model_)), optimizer(std::move(optimizer_)),
-  space(space_), initial_guess(initial_guess_)
+  initial_guess(initial_guess_)
 {
 }
 
@@ -42,6 +41,12 @@ ModelLearner::learnParameters(const SampleVector & training_set,
       model_copy->setParameters(parameters);
       return model_copy->averageLogLikelihood(training_set, engine);
     };
+  Eigen::MatrixXd space = model->getParametersSpace();
+  if (space.rows() == 0) {
+    throw std::logic_error("ModelLearner::learnParameters: model has no parameters");
+  }
+  std::cout << space << std::endl;
+  std::cout << "initial_guess: " << initial_guess.transpose() << std::endl;
   optimizer->setLimits(space);
   Eigen::VectorXd best_parameters; 
   best_parameters = optimizer->train(reward_function, initial_guess, engine);
@@ -69,7 +74,6 @@ Json::Value ModelLearner::toJson() const
   if (optimizer) {
     v["optimizer"] = optimizer->toFactoryJson();
   }
-  v["space"] = rhoban_utils::matrix2Json(space);
   v["initial_guess"] = rhoban_utils::vector2Json(initial_guess);
   return v;
 }
@@ -78,9 +82,9 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
 {
   model = ModelFactory().read(v, "model", dir_name);
   optimizer = OptimizerFactory().read(v, "optimizer", dir_name);
-  space = rhoban_utils::readEigen<-1,-1>(v, "space");
   rhoban_utils::tryReadEigen(v, "initial_guess", &initial_guess);
   if (initial_guess.rows() == 0) {
+    Eigen::MatrixXd space = model->getParametersSpace();
     initial_guess = (space.col(0) + space.col(1)) / 2;
   }
 }

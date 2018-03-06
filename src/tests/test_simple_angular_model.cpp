@@ -49,11 +49,8 @@ int main()
     std::unique_ptr<Model> training_model(new SimpleAngularModel());
     std::unique_ptr<rhoban_bbo::Optimizer> optimizer(new rhoban_bbo::CMAESOptimizer());
     optimizer->setMaxCalls(250);
-    Eigen::MatrixXd space(2,2);
-    space << 0, 1, 0, 1;
     Eigen::Vector2d initial_guess(0.001, 0.001);
-    ModelLearner learner(std::move(training_model), std::move(optimizer),
-                         space, initial_guess);
+    ModelLearner learner(std::move(training_model), std::move(optimizer), initial_guess);
     // Separating samples in two sets
     DataSet data = splitSamples(samples, validation_ratio, &engine);
     // Computing learning

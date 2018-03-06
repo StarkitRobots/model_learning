@@ -21,7 +21,6 @@ public:
 
   ModelLearner(std::unique_ptr<Model> model,
                std::unique_ptr<rhoban_bbo::Optimizer> optimizer,
-               const Eigen::MatrixXd & space,
                const Eigen::VectorXd & initial_guess);
 
   Result learnParameters(const DataSet & data_set,
@@ -44,10 +43,6 @@ protected:
 
   /// The blackbox optimizer used for parameters calibration
   std::unique_ptr<rhoban_bbo::Optimizer> optimizer;
-
-  /// The parameter space
-  //TODO: move to model ? (could be overrided with learnParameters)
-  Eigen::MatrixXd space;
 
   /// The initial guess for the parameters set
   //TODO: move to model ? (could be overrided with learnParameters)

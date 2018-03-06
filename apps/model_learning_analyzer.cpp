@@ -29,7 +29,6 @@ public:
     readers = InputReaderFactory().readMap(v, "readers", dir_name);
     models = ModelFactory().readMap(v, "models", dir_name);
     optimizers = OptimizerFactory().readMap(v, "optimizers", dir_name);
-    space = rhoban_utils::readEigen<-1,-1>(v, "space");
   }
 
   /// The number of runs for each configuration
@@ -43,9 +42,6 @@ public:
 
   /// All available optimizers
   std::map<std::string, std::unique_ptr<Optimizer>> optimizers;
-
-  /// Parameters space (to be moved to models)
-  Eigen::MatrixXd space;
 };
 
 int main(int argc, char ** argv) {
@@ -61,9 +57,6 @@ int main(int argc, char ** argv) {
 
   std::default_random_engine engine = rhoban_random::getRandomEngine();
 
-  // Start in the middle of the parameters
-  Eigen::VectorXd initial_guess = (conf.space.col(0) + conf.space.col(1)) / 2;
-
   std::ofstream results_file("results.csv");
 
   // OPTIONAL: eventually, reduce number of columns if there is only 1 optimizer
@@ -74,6 +67,9 @@ int main(int argc, char ** argv) {
   for (const auto & model_pair : conf.models) {
     std::string model_name = model_pair.first;
     const Model & model = *(model_pair.second);
+    // Start in the middle of the parameters
+    Eigen::MatrixXd param_space = model.getParametersSpace();
+    Eigen::VectorXd initial_guess = (param_space.col(0) + param_space.col(1)) / 2;
     // Parameters file
     std::ostringstream name_oss;
     name_oss <<  model_name << "_parameters.csv";
@@ -89,7 +85,7 @@ int main(int argc, char ** argv) {
       std::string optimizer_name = optimizer_pair.first;
       const Optimizer & optimizer = *(optimizer_pair.second);
       // Initialize the learning_model
-      ModelLearner learner(model.clone(), optimizer.clone(), conf.space, initial_guess);
+      ModelLearner learner(model.clone(), optimizer.clone(), initial_guess);
       // For each reader
       for (const auto & reader_pair : conf.readers) {
         std::string reader_name = reader_pair.first;

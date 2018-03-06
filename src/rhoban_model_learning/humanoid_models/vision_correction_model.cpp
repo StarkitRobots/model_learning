@@ -110,24 +110,30 @@ void VCM::VisionInputReader::fromJson(const Json::Value & v,
 }
 
 
-VCM::VisionCorrectionModel() : img_width(640), img_height(480) {
+VCM::VisionCorrectionModel() :
+  ModularModel(10),
+  img_width(640), img_height(480),
+  px_stddev_space(0.01, 50),
+  max_angle_error(5)
+{
   // TODO read a value instead of having a constant value
   camera_parameters.widthAperture = 67 * M_PI / 180.0;
   camera_parameters.heightAperture = 52.47 * M_PI / 180.0;
 }
 
 VCM::VisionCorrectionModel(const VisionCorrectionModel & other)
-  : Model(other), px_stddev(other.px_stddev), cam_offset(other.cam_offset),
+  : ModularModel(other), px_stddev(other.px_stddev), cam_offset(other.cam_offset),
     imu_offset(other.imu_offset), neck_offset(other.neck_offset),
     camera_parameters(other.camera_parameters),
     img_width(other.img_width),
-    img_height(other.img_height)
+    img_height(other.img_height),
+    px_stddev_space(other.px_stddev_space),
+    max_angle_error(other.max_angle_error)
 {
 }
 
 
-Eigen::VectorXd VCM::getParameters() const  {
-  // TODO: implement several options
+Eigen::VectorXd VCM::getGlobalParameters() const  {
   Eigen::VectorXd params(10);
   params(0) = px_stddev;
   params.segment(1,3) = cam_offset;
@@ -136,7 +142,17 @@ Eigen::VectorXd VCM::getParameters() const  {
   return params;
 }
 
-void VCM::setParameters(const Eigen::VectorXd & new_params)  {
+Eigen::MatrixXd VCM::getGlobalParametersSpace() const  {
+  Eigen::MatrixXd space(10,2);
+  space.row(0) = px_stddev_space.transpose();
+  for (int row = 1; row < 10; row++) {
+    space(row,0) = -max_angle_error;
+    space(row,1) = max_angle_error;
+  }
+  return space;
+}
+
+void VCM::setGlobalParameters(const Eigen::VectorXd & new_params)  {
   if (new_params.rows() != 10) {
     throw std::logic_error("VCM::setParameters: unexpected size for new_params"
                            + std::to_string(new_params.rows()));
@@ -147,7 +163,7 @@ void VCM::setParameters(const Eigen::VectorXd & new_params)  {
   neck_offset = new_params.segment(7,3);
 }
 
-std::vector<std::string> VCM::getParametersNames() const  {
+std::vector<std::string> VCM::getGlobalParametersNames() const  {
   std::vector<std::string> names(10);
   names[0] = "px_stddev";
   std::vector<std::string> transformations = {"roll", "pitch", "yaw"};
@@ -176,8 +192,8 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
   geometryData = tmpModel.getGeometryData();
   geometryName = tmpModel.getGeometryName();
   // Modification of geometry data
-  geometryData.block(geometryName.at("camera"),0,1,3) += cam_offset.transpose();
-  geometryData.block(geometryName.at("head_yaw"),0,1,3) += neck_offset.transpose();
+  geometryData.block(geometryName.at("camera"),0,1,3) += M_PI/ 180 * cam_offset.transpose();
+  geometryData.block(geometryName.at("head_yaw"),0,1,3) += M_PI/ 180 * neck_offset.transpose();
   // Initialize a fixed model 
   Leph::HumanoidFixedModel model(Leph::SigmabanModel, Eigen::MatrixXd(), {},
                                  geometryData, geometryName);
@@ -192,10 +208,11 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
   // Assign trunk orientation from IMU
   double imuPitch = input.data("imu_pitch");
   double imuRoll = input.data("imu_roll");
+  Eigen::Vector3d imu_offset_rad = M_PI/ 180 * imu_offset;
   Eigen::Matrix3d imuMatrix =
-    Eigen::AngleAxisd(imu_offset(2), Eigen::Vector3d::UnitZ()).toRotationMatrix()
-    * Eigen::AngleAxisd(imuPitch + imu_offset(1), Eigen::Vector3d::UnitY()).toRotationMatrix()
-    * Eigen::AngleAxisd(imuRoll + imu_offset(0), Eigen::Vector3d::UnitX()).toRotationMatrix();
+    Eigen::AngleAxisd(imu_offset_rad(2), Eigen::Vector3d::UnitZ()).toRotationMatrix()
+    * Eigen::AngleAxisd(imuPitch + imu_offset_rad(1), Eigen::Vector3d::UnitY()).toRotationMatrix()
+    * Eigen::AngleAxisd(imuRoll + imu_offset_rad(0), Eigen::Vector3d::UnitX()).toRotationMatrix();
   model.setOrientation(imuMatrix);
   // Assign the left foot to origin
   model.get().setDOF("base_x", 0.0);
@@ -265,11 +282,11 @@ std::unique_ptr<Model> VCM::clone() const {
 }
 
 Json::Value VCM::toJson() const  {
-  Json::Value v = Model::toJson();
+  Json::Value v = ModularModel::toJson();
   v["px_stddev"] = px_stddev;
-  v["cam_offset" ] = rhoban_utils::vector2Json<3>(cam_offset  * 180 / M_PI);
-  v["imu_offset" ] = rhoban_utils::vector2Json<3>(imu_offset  * 180 / M_PI);
-  v["neck_offset"] = rhoban_utils::vector2Json<3>(neck_offset * 180 / M_PI);
+  v["cam_offset" ] = rhoban_utils::vector2Json<3>(cam_offset );
+  v["imu_offset" ] = rhoban_utils::vector2Json<3>(imu_offset );
+  v["neck_offset"] = rhoban_utils::vector2Json<3>(neck_offset);
   v["cam_aperture_width"] = camera_parameters.widthAperture;
   v["cam_aperture_height"] = camera_parameters.heightAperture;
   v["img_width"] = img_width;
@@ -278,21 +295,15 @@ Json::Value VCM::toJson() const  {
 }
 
 void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
-  Model::fromJson(v, dir_name);
-  Eigen::Vector3d cam_offset_deg ( cam_offset * 180 / M_PI);
-  Eigen::Vector3d imu_offset_deg ( imu_offset * 180 / M_PI);
-  Eigen::Vector3d neck_offset_deg(neck_offset * 180 / M_PI);
+  ModularModel::fromJson(v, dir_name);
   rhoban_utils::tryRead(v,"px_stddev", &px_stddev);
-  rhoban_utils::tryReadEigen(v,"cam_offset", &cam_offset_deg);
-  rhoban_utils::tryReadEigen(v,"imu_offset", &imu_offset_deg);
-  rhoban_utils::tryReadEigen(v,"neck_offset", &neck_offset_deg);
+  rhoban_utils::tryReadEigen(v,"cam_offset", &cam_offset);
+  rhoban_utils::tryReadEigen(v,"imu_offset", &imu_offset);
+  rhoban_utils::tryReadEigen(v,"neck_offset", &neck_offset);
   rhoban_utils::tryRead(v, "cam_aperture_width", &camera_parameters.widthAperture);
   rhoban_utils::tryRead(v, "cam_aperture_height", &camera_parameters.heightAperture);
   rhoban_utils::tryRead(v, "img_width", &img_width);
   rhoban_utils::tryRead(v, "img_height", &img_height);
-  cam_offset  = cam_offset_deg * M_PI / 180;
-  imu_offset  = imu_offset_deg * M_PI / 180;
-  neck_offset = neck_offset_deg * M_PI / 180;
 }
 
 std::string VCM::getClassName() const {
