@@ -47,7 +47,7 @@ void compare(const std::string & model_name,
 }
 
 int main(int argc, char ** argv) {
-  if (argc < 4) {
+  if (argc != 4) {
     std::cerr << "Usage: " << argv[0] << " <vision_correction_debug.json> <input_reader.json> <data_file>"
               << std::endl;
     exit(EXIT_FAILURE);

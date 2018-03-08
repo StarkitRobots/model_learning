@@ -1,0 +1,6 @@
+{
+    "models" : {
+        "uncorrected" : { "rel path" : "default_vision_correction_model.json"},
+        "corrected" : { "rel path" : "trained_model.json"}
+    }
+}
