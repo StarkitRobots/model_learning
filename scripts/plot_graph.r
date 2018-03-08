@@ -1,5 +1,5 @@
 library(ggplot2)
-library(getopt)
+library(optparse)
 
 se <- function(x)
 {
@@ -102,12 +102,26 @@ parametersPlot <- function(data_path, output_file = "parameters_analysis.png")
     ggsave(output_file,width=16,height=9)
 }
 
+# Script OPTIONS
+option_list <- list(
+    make_option(c("-m","--mode"), type="character", default="validation",
+                help="Choose graph mode [parameters|validation]")
+)
+parser <- OptionParser(usage="%prog [options] <file>",
+                       option_list = option_list)
+
 args <- commandArgs(TRUE)
 
-if (length(args) < 1) {
-    print("Usage: ... <logFiles>");
-    quit(status=1)
-}
+# Read Options
+cmd <- parse_args(parser, args, positional_arguments=1)
 
-#analysisPlot(args[1])
-parametersPlot(args[1])
+mode <- cmd$options$mode
+input_file <- cmd$args[1]
+
+if (mode == "parameters") {
+    parametersPlot(input_file)
+} else if (mode == "validation") {
+    analysisPlot(input_file)
+} else {
+    print(paste("Unknown mode: '", mode , "'", sep=""))
+}
