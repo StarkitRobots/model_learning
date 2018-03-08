@@ -1,4 +1,5 @@
 library(ggplot2)
+library(getopt)
 
 se <- function(x)
 {
@@ -15,11 +16,13 @@ analysisPlot <- function(data_path, output_file = "analysis.png")
     data <- read.csv(data_path)
     print(names(data))
     values <- do.call(data.frame,
-                      aggregate(validationScore~reader+optimizer, data,
+                      aggregate(validationScore~reader+optimizer+model,
+                                data,
                                 function(x) c(mean = mean(x),
                                               sd = sd(x),
                                               se = se(x),
                                               ci = ci(x))))
+    values$group = paste(values$optimizer,values$model,sep='|')
     plotColumn <- "validationScore"
     meanStr <- sprintf("%s.mean", plotColumn)
     ciStr <- sprintf("%s.ci", plotColumn)
@@ -29,9 +32,9 @@ analysisPlot <- function(data_path, output_file = "analysis.png")
     g <- ggplot(values,
                 aes_string(x="reader", y=meanStr,
                            ymin = yMinStr, ymax = yMaxStr,
-                           group="optimizer",
-                           color="optimizer",
-                           fill="optimizer"))
+                           group="group",
+                           color="group",
+                           fill="group"))
     print("init OK")
     g <- g + geom_ribbon(size=0,alpha = 0.3)
     g <- g + geom_point(size=2)
@@ -39,7 +42,7 @@ analysisPlot <- function(data_path, output_file = "analysis.png")
     g <- g + theme_bw()
     g <- g + labs(x = "nb samples by tag")
     g <- g + scale_x_log10(breaks=unique(data$reader))
-    g <- g + coord_cartesian(ylim=c(-15,-5))
+#    g <- g + coord_cartesian(ylim=c(-15,-5))
     ggsave(output_file)
 }
 

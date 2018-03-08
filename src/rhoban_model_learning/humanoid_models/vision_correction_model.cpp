@@ -288,6 +288,7 @@ std::unique_ptr<Model> VCM::clone() const {
 Json::Value VCM::toJson() const  {
   Json::Value v = ModularModel::toJson();
   v["px_stddev"] = px_stddev;
+  v["px_stddev_space"] = rhoban_utils::vector2Json<2>(px_stddev_space);
   v["cam_offset" ] = rhoban_utils::vector2Json<3>(cam_offset );
   v["imu_offset" ] = rhoban_utils::vector2Json<3>(imu_offset );
   v["neck_offset"] = rhoban_utils::vector2Json<3>(neck_offset);
@@ -295,12 +296,14 @@ Json::Value VCM::toJson() const  {
   v["cam_aperture_height"] = camera_parameters.heightAperture;
   v["img_width"] = img_width;
   v["img_height"] = img_height;
+  v["max_angle_error"] = max_angle_error;
   return v;
 }
 
 void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
   ModularModel::fromJson(v, dir_name);
   rhoban_utils::tryRead(v,"px_stddev", &px_stddev);
+  rhoban_utils::tryReadEigen(v,"px_stddev_space", &px_stddev_space);
   rhoban_utils::tryReadEigen(v,"cam_offset", &cam_offset);
   rhoban_utils::tryReadEigen(v,"imu_offset", &imu_offset);
   rhoban_utils::tryReadEigen(v,"neck_offset", &neck_offset);
@@ -308,6 +311,7 @@ void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
   rhoban_utils::tryRead(v, "cam_aperture_height", &camera_parameters.heightAperture);
   rhoban_utils::tryRead(v, "img_width", &img_width);
   rhoban_utils::tryRead(v, "img_height", &img_height);
+  rhoban_utils::tryRead(v, "max_angle_error", &max_angle_error);
 }
 
 std::string VCM::getClassName() const {

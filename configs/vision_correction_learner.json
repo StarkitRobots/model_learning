@@ -1,31 +1,13 @@
 {
     "model" : {
-        "class name" : "VisionCorrectionModel",
-        "content" : {}
+        "rel path" : "cam_pitch_yaw_model.json"
     },
     "optimizer" : {
         "class name" : "CMAESOptimizer",
         "content" : {
             "quiet" : false,
-            "nb_evaluations" : 500,
+            "nb_evaluations" : 250,
             "population_size" : 10
         }
-    },
-    "space" : {
-        "rows" : 10,
-        "cols" : 2,
-        "values" : [
-            [0.01, 100],/// px_stddev
-            /// cam_offset
-            [-0.2,0.2],
-            [-0.2,0.2],
-            [-0.2,0.2],
-            [-0.2,0.2],
-            [-0.2,0.2],
-            [-0.2,0.2],
-            [-0.2,0.2],
-            [-0.2,0.2],
-            [-0.2,0.2]
-        ]
     }
 }
