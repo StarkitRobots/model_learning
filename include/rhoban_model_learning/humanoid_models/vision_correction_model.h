@@ -57,6 +57,15 @@ public:
   VisionCorrectionModel();
   VisionCorrectionModel(const VisionCorrectionModel & other);
 
+  /// Return the [roll,yaw,pitch] offsets of camera using [rad]
+  Eigen::Vector3d getCameraOffsetsRad() const;
+  /// Return the [roll,yaw,pitch] offsets of the IMU using [rad]
+  Eigen::Vector3d getImuOffsetsRad() const;
+  /// Return the [roll,yaw,pitch] offsets of neck using [rad]
+  Eigen::Vector3d getNeckOffsetsRad() const;
+  /// Return the parameters of the camera using Leph format
+  Leph::CameraParameters getCameraParameters() const;
+
   virtual Eigen::VectorXd getGlobalParameters() const override;
   virtual Eigen::MatrixXd getGlobalParametersSpace() const override;
   virtual void setGlobalParameters(const Eigen::VectorXd & new_params) override;
@@ -93,8 +102,11 @@ private:
   /// Offset in neck (roll, pitch, yaw) [deg]
   Eigen::Vector3d neck_offset;
 
-  // The width and height aperture of the camera
-  Leph::CameraParameters camera_parameters;
+  /// Width aperture angle for camera [deg]
+  double camera_pan;
+
+  /// Height aperture angle for camera [deg]
+  double camera_tilt;
 
   /// Width of the image in pixels
   int img_width;
@@ -106,6 +118,11 @@ private:
 
   /// Maximal angle error [deg]
   double max_angle_error;
+
+  /// Allowed space for tuning the camera pan [deg]
+  Eigen::Vector2d camera_pan_space;
+  /// Allowed space for tuning the camera tilt [deg]
+  Eigen::Vector2d camera_tilt_space;
 };
 
 }

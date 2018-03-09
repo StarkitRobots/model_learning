@@ -6,6 +6,8 @@
 #include "Model/HumanoidFixedModel.hpp"
 #include "Types/MatrixLabel.hpp"
 
+#include <rhoban_utils/angle.h>
+
 namespace rhoban_model_learning
 {
 
@@ -111,53 +113,79 @@ void VCM::VisionInputReader::fromJson(const Json::Value & v,
 
 
 VCM::VisionCorrectionModel() :
-  ModularModel(10),
+  ModularModel(12),
   cam_offset (Eigen::Vector3d::Zero()),
   imu_offset (Eigen::Vector3d::Zero()),
   neck_offset(Eigen::Vector3d::Zero()),
+  camera_pan(67),
+  camera_tilt(52.5),
   img_width(640), img_height(480),
   px_stddev_space(0.01, 50),
-  max_angle_error(5)
+  max_angle_error(5),
+  camera_pan_space(65,70),
+  camera_tilt_space(50,55)
 {
-  // TODO read a value instead of having a constant value
-  camera_parameters.widthAperture = 67 * M_PI / 180.0;
-  camera_parameters.heightAperture = 52.47 * M_PI / 180.0;
   px_stddev = (px_stddev_space(0) + px_stddev_space(1)) / 2;
 }
 
 VCM::VisionCorrectionModel(const VisionCorrectionModel & other)
   : ModularModel(other), px_stddev(other.px_stddev), cam_offset(other.cam_offset),
     imu_offset(other.imu_offset), neck_offset(other.neck_offset),
-    camera_parameters(other.camera_parameters),
+    camera_pan(other.camera_pan), camera_tilt(other.camera_tilt),
     img_width(other.img_width),
     img_height(other.img_height),
     px_stddev_space(other.px_stddev_space),
-    max_angle_error(other.max_angle_error)
+    max_angle_error(other.max_angle_error),
+    camera_pan_space(other.camera_pan_space),
+    camera_tilt_space(other.camera_tilt_space)
 {
+}
+
+Eigen::Vector3d VCM::getCameraOffsetsRad() const {
+  return M_PI/ 180 * cam_offset;
+}
+
+Eigen::Vector3d VCM::getImuOffsetsRad() const {
+  return M_PI/ 180 * imu_offset;
+}
+
+Eigen::Vector3d VCM::getNeckOffsetsRad() const {
+  return M_PI/ 180 * neck_offset;
+}
+
+Leph::CameraParameters VCM::getCameraParameters() const {
+  Leph::CameraParameters p;
+  p.widthAperture  = rhoban_utils::deg2rad(camera_pan);
+  p.heightAperture = rhoban_utils::deg2rad(camera_tilt);
+  return p;
 }
 
 
 Eigen::VectorXd VCM::getGlobalParameters() const  {
-  Eigen::VectorXd params(10);
+  Eigen::VectorXd params(12);
   params(0) = px_stddev;
   params.segment(1,3) = cam_offset;
   params.segment(4,3) = imu_offset;
   params.segment(7,3) = neck_offset;
+  params(10) = camera_pan;
+  params(11) = camera_tilt;
   return params;
 }
 
 Eigen::MatrixXd VCM::getGlobalParametersSpace() const  {
-  Eigen::MatrixXd space(10,2);
+  Eigen::MatrixXd space(12,2);
   space.row(0) = px_stddev_space.transpose();
   for (int row = 1; row < 10; row++) {
     space(row,0) = -max_angle_error;
     space(row,1) = max_angle_error;
   }
+  space.row(10) = camera_pan_space.transpose();
+  space.row(11) = camera_tilt_space.transpose();
   return space;
 }
 
 void VCM::setGlobalParameters(const Eigen::VectorXd & new_params)  {
-  if (new_params.rows() != 10) {
+  if (new_params.rows() != 12) {
     throw std::logic_error("VCM::setParameters: unexpected size for new_params"
                            + std::to_string(new_params.rows()));
   }
@@ -165,10 +193,12 @@ void VCM::setGlobalParameters(const Eigen::VectorXd & new_params)  {
   cam_offset  = new_params.segment(1,3);
   imu_offset  = new_params.segment(4,3);
   neck_offset = new_params.segment(7,3);
+  camera_pan = new_params(10);
+  camera_tilt = new_params(11);
 }
 
 std::vector<std::string> VCM::getGlobalParametersNames() const  {
-  std::vector<std::string> names(10);
+  std::vector<std::string> names(12);
   names[0] = "px_stddev";
   std::vector<std::string> transformations = {"roll", "pitch", "yaw"};
   for (int i = 0; i < 3; i++) {
@@ -176,11 +206,13 @@ std::vector<std::string> VCM::getGlobalParametersNames() const  {
     names[i+4] = "imu_offset_" + transformations[i];
     names[i+7] = "neck_offset_" + transformations[i];
   }
+  names[10] = camera_pan;
+  names[11] = camera_tilt;
   return names;
 }
 
 Eigen::VectorXi VCM::getObservationsCircularity() const {
-  return Eigen::VectorXi::Zero(10);
+  return Eigen::VectorXi::Zero(12);
 }
 
 Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
@@ -196,8 +228,8 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
   geometryData = tmpModel.getGeometryData();
   geometryName = tmpModel.getGeometryName();
   // Modification of geometry data
-  geometryData.block(geometryName.at("camera"),0,1,3) += M_PI/ 180 * cam_offset.transpose();
-  geometryData.block(geometryName.at("head_yaw"),0,1,3) += M_PI/ 180 * neck_offset.transpose();
+  geometryData.block(geometryName.at("camera"),0,1,3) += getCameraOffsetsRad().transpose();
+  geometryData.block(geometryName.at("head_yaw"),0,1,3) += getNeckOffsetsRad().transpose();
   // Initialize a fixed model 
   Leph::HumanoidFixedModel model(Leph::SigmabanModel, Eigen::MatrixXd(), {},
                                  geometryData, geometryName);
@@ -231,6 +263,9 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
                              input.data("ground_y"),
                              input.data("ground_z"));
   Eigen::Vector2d pixel;
+  Leph::CameraParameters camera_parameters;
+  camera_parameters.widthAperture = camera_pan * M_PI / 180;
+  camera_parameters.heightAperture = camera_tilt * M_PI / 180;
   bool success = model.get().cameraWorldToPixel(camera_parameters,
                                                 seen_point, pixel);
 
@@ -292,11 +327,13 @@ Json::Value VCM::toJson() const  {
   v["cam_offset" ] = rhoban_utils::vector2Json<3>(cam_offset );
   v["imu_offset" ] = rhoban_utils::vector2Json<3>(imu_offset );
   v["neck_offset"] = rhoban_utils::vector2Json<3>(neck_offset);
-  v["cam_aperture_width"] = camera_parameters.widthAperture;
-  v["cam_aperture_height"] = camera_parameters.heightAperture;
+  v["camera_pan"] = camera_pan;
+  v["camera_tilt"] = camera_tilt;
   v["img_width"] = img_width;
   v["img_height"] = img_height;
   v["max_angle_error"] = max_angle_error;
+  v["camera_pan_space"]  = rhoban_utils::vector2Json<2>(camera_pan_space );
+  v["camera_tilt_space"] = rhoban_utils::vector2Json<2>(camera_tilt_space);
   return v;
 }
 
@@ -307,11 +344,13 @@ void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
   rhoban_utils::tryReadEigen(v,"cam_offset", &cam_offset);
   rhoban_utils::tryReadEigen(v,"imu_offset", &imu_offset);
   rhoban_utils::tryReadEigen(v,"neck_offset", &neck_offset);
-  rhoban_utils::tryRead(v, "cam_aperture_width", &camera_parameters.widthAperture);
-  rhoban_utils::tryRead(v, "cam_aperture_height", &camera_parameters.heightAperture);
+  rhoban_utils::tryRead(v, "camera_pan", &camera_pan);
+  rhoban_utils::tryRead(v, "camera_tilt", &camera_tilt);
   rhoban_utils::tryRead(v, "img_width", &img_width);
   rhoban_utils::tryRead(v, "img_height", &img_height);
   rhoban_utils::tryRead(v, "max_angle_error", &max_angle_error);
+  rhoban_utils::tryReadEigen(v,"camera_pan_space", &camera_pan_space);
+  rhoban_utils::tryReadEigen(v,"camera_tilt_space", &camera_tilt_space);
 }
 
 std::string VCM::getClassName() const {
