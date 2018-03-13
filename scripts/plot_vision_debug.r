@@ -1,6 +1,7 @@
 library(ggplot2)
+library(optparse)
 
-plotTagsErrors <- function(dataPath, outputFile="vision_debug.png") {
+plotTagsErrors <- function(dataPath, outputFile) {
     data <- read.csv(dataPath)
     g <- ggplot(data, aes(x=errX, y=errY, group=tagId, color=model));
     xAbsMax <- max(-min(data$errX),max(data$errX))
@@ -14,12 +15,20 @@ plotTagsErrors <- function(dataPath, outputFile="vision_debug.png") {
 }
 
 
+# Script OPTIONS
+option_list <- list(
+    make_option(c("-o","--output"), type="character", default="vision_debug.png",
+                help="Output image path")
+)
+parser <- OptionParser(usage="%prog [options] <logFile>",
+                       option_list = option_list)
 
 args <- commandArgs(TRUE)
 
-if (length(args) < 1) {
-    print("Usage: ... <logFiles>");
-    quit(status=1)
-}
+# Read Options
+cmd <- parse_args(parser, args, positional_arguments=1)
 
-plotTagsErrors(args[1])
+input_file <- cmd$args[1]
+output_file <- cmd$option$output
+
+plotTagsErrors(input_file, output_file)

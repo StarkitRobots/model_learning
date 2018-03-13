@@ -7,6 +7,7 @@
 #include "Types/MatrixLabel.hpp"
 
 #include <rhoban_utils/angle.h>
+#include <rhoban_utils/util.h>
 
 namespace rhoban_model_learning
 {
@@ -27,7 +28,10 @@ std::unique_ptr<Input> VCM::VisionInput::clone() const {
 }
 
 VCM::VisionInputReader::VisionInputReader()
-  : max_coordinates(0.7), nb_validation_tags(3), max_samples_per_tag(30)
+  : max_coordinates(0.5),
+    nb_training_tags(0), nb_validation_tags(0),
+    max_samples_per_tag(1), min_samples_per_tag(1),
+    verbose(true)
 {
 }
 
@@ -36,7 +40,7 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
 {
   Leph::MatrixLabel logs;
   logs.load(file_path);
-  // First: Read all entries
+  // First: Read all entries and conserve only valid ones
   std::map<int,SampleVector> samples_by_id;
   for (size_t i = 0; i < logs.size(); i++) {
     const Leph::VectorLabel & entry = logs[i];
@@ -50,19 +54,47 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
       samples_by_id[tag_id].push_back(std::move(sample));
     }
   }
-  // Get used indices
+  // Get valid indices
+  if (verbose) {
+    std::cout << "Filtering tag indices" << std::endl;
+  }
   std::vector<int> tags_indices;
   for (const auto & pair : samples_by_id) {
-    tags_indices.push_back(pair.first);
+    int tag_id = pair.first;
+    int nb_samples = pair.second.size();
+    if (nb_samples >= min_samples_per_tag) {
+      tags_indices.push_back(pair.first);
+    } else if (verbose) {
+      std::cout << "\tIgnoring tag " << tag_id << " because it has only "
+                << nb_samples << " valid samples" << std::endl;
+    }
   }
   // Choose which tags will be used for training and validation
+  size_t training_size = nb_training_tags;
+  size_t validation_size = nb_validation_tags;
+  if (training_size == 0 && validation_size == 0) { 
+    throw std::runtime_error(DEBUG_INFO + "No size specified for either training or validation");
+  } else if (training_size + validation_size > tags_indices.size()) {
+    throw std::runtime_error(DEBUG_INFO + "Not enough tags available: ("
+                             + std::to_string(validation_size) + "+"
+                             + std::to_string(training_size) + ">"
+                             + std::to_string(tags_indices.size()) + ")");
+  }
+  if (validation_size == 0) {
+    validation_size = tags_indices.size() - training_size;
+  }
+  if (training_size == 0) {
+    training_size = tags_indices.size() - validation_size;
+  }
+    
+
   std::vector<size_t> set_sizes =
-    {(size_t)(tags_indices.size() - nb_validation_tags), (size_t)nb_validation_tags};
+    {training_size, validation_size, tags_indices.size() - (training_size+validation_size)};
   std::vector<std::vector<size_t>> separated_indices;
   separated_indices = rhoban_random::splitIndices(tags_indices.size() - 1, set_sizes, engine);
   // Fill data set
   DataSet data;
-  std::cout << "Training indices" << std::endl;
+  if (verbose) std::cout << "Training indices" << std::endl;
   for (size_t idx : separated_indices[0]) {
     // Limited number of samples for training_set
     int tag_id = tags_indices[idx];
@@ -73,9 +105,11 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
     for (size_t sample_idx : samples_indices) {
       data.training_set.push_back(tag_samples[sample_idx]->clone());
     }
-    std::cout << "\t" << tag_id << ": " << samples_indices.size() << " samples" << std::endl;
+    if (verbose) {
+      std::cout << "\t" << tag_id << ": " << samples_indices.size() << " samples" << std::endl;
+    }
   }
-  std::cout << "Validation indices" << std::endl;
+  if (verbose) std::cout << "Validation indices" << std::endl;
   for (size_t idx : separated_indices[1]) {
     // Limited number of samples for training_set
     int tag_id = tags_indices[idx];
@@ -83,12 +117,16 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
     for (const auto & sample : tag_samples) {
       data.validation_set.push_back(sample->clone());
     }
-    std::cout << "\t" << tag_id << ": " << tag_samples.size() << " samples" << std::endl;
+    if (verbose) {
+      std::cout << "\t" << tag_id << ": " << tag_samples.size() << " samples" << std::endl;
+    }
   }
 
-  std::cout << "Training Set size: " << data.training_set.size() << std::endl;
-  std::cout << "Validation Set size: " << data.validation_set.size() << std::endl;
-
+  if (verbose) {
+    std::cout << "Training Set size: " << data.training_set.size() << std::endl;
+    std::cout << "Validation Set size: " << data.validation_set.size() << std::endl;
+  }
+  
   return data;
 }
 
@@ -99,16 +137,22 @@ std::string VCM::VisionInputReader::getClassName() const {
 Json::Value VCM::VisionInputReader::toJson() const {
   Json::Value  v;
   v["max_coordinates"    ] = max_coordinates    ;
+  v["nb_training_tags"   ] = nb_training_tags   ;
   v["nb_validation_tags" ] = nb_validation_tags ;
   v["max_samples_per_tag"] = max_samples_per_tag;
+  v["min_samples_per_tag"] = min_samples_per_tag;
+  v["verbose"            ] = verbose            ;
   return v;
 }
 void VCM::VisionInputReader::fromJson(const Json::Value & v, 
                                       const std::string & dir_name) {
   (void) dir_name;
   rhoban_utils::tryRead(v, "max_coordinates"    , &max_coordinates    );
+  rhoban_utils::tryRead(v, "nb_training_tags"   , &nb_training_tags   );
   rhoban_utils::tryRead(v, "nb_validation_tags" , &nb_validation_tags );
   rhoban_utils::tryRead(v, "max_samples_per_tag", &max_samples_per_tag);
+  rhoban_utils::tryRead(v, "min_samples_per_tag", &min_samples_per_tag);
+  rhoban_utils::tryRead(v, "verbose"            , &verbose            );
 }
 
 
