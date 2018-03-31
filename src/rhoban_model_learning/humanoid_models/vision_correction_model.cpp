@@ -166,8 +166,8 @@ VCM::VisionCorrectionModel() :
   img_width(640), img_height(480),
   px_stddev_space(0.01, 50),
   max_angle_error(5),
-  camera_pan_space(65,70),
-  camera_tilt_space(50,55)
+  camera_pan_space(60,70),
+  camera_tilt_space(48,55)
 {
   px_stddev = (px_stddev_space(0) + px_stddev_space(1)) / 2;
 }
@@ -250,8 +250,8 @@ std::vector<std::string> VCM::getGlobalParametersNames() const  {
     names[i+4] = "imu_offset_" + transformations[i];
     names[i+7] = "neck_offset_" + transformations[i];
   }
-  names[10] = camera_pan;
-  names[11] = camera_tilt;
+  names[10] = "camera_pan";
+  names[11] = "camera_tilt";
   return names;
 }
 
