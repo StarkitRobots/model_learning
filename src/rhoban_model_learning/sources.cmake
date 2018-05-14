@@ -4,5 +4,7 @@ set(SOURCES
   model_factory.cpp
   model_learner.cpp
   modular_model.cpp
+  position_sequence_reader.cpp
   sample.cpp
+  speed_estimator_factory.cpp
 )
