@@ -12,13 +12,15 @@ namespace rhoban_model_learning
 /// - (vx, vy, t_pred)
 class SpeedEstimator : public ModularModel {
 public:
+  SpeedEstimator(int nb_dims);
 
   /// Input: a PositionSequence is required
   /// @return:  (vx [m/s], vy [m/s], t_pred [s])
   virtual Eigen::VectorXd
   predictObservation(const Input & input,
                      std::default_random_engine * engine) const = 0;
-
+  
+  virtual Eigen::VectorXi getObservationsCircularity() const override;
 };
 
 }

@@ -14,6 +14,10 @@ public:
   BallPhysicalModel();
   virtual ~BallPhysicalModel();
 
+  virtual Eigen::VectorXd
+  predictObservation(const Input & input,
+                     std::default_random_engine * engine) const override;
+
 
   virtual Eigen::VectorXd getGlobalParameters() const;
   virtual Eigen::MatrixXd getGlobalParametersSpace() const;

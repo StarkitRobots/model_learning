@@ -2,6 +2,10 @@
 
 #include "rhoban_model_learning/input.h"
 
+#include <Eigen/Core>
+
+#include <map>
+
 namespace rhoban_model_learning
 {
 
@@ -9,7 +13,10 @@ class PositionSequence : public Input {
 public:
   /// Creates an empty position sequence
   PositionSequence();
+  PositionSequence(const PositionSequence & other);
   virtual ~PositionSequence();
+
+  virtual std::unique_ptr<Input> clone() const override;
 
 
   /// The entries of the position sequence 

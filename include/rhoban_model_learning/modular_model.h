@@ -16,6 +16,8 @@ public:
   /// Use all dimensions as default
   ModularModel(int nb_dims);
 
+  /// Return the number of global parameters of the model
+  virtual int getGlobalParametersCount() const;
   virtual Eigen::VectorXd getGlobalParameters() const = 0;
   virtual Eigen::MatrixXd getGlobalParametersSpace() const = 0;
   virtual void setGlobalParameters(const Eigen::VectorXd & new_params) = 0;
@@ -29,6 +31,10 @@ public:
   Json::Value toJson() const override;
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
 
+  /// Default method for cloning modular model is to build a Model of the same
+  /// class and set his globalParameters
+  virtual std::unique_ptr<Model> clone() const override;
+  
 private:
   /// The list of indices used for training
   std::vector<int> used_indices;

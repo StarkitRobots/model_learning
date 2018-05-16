@@ -1,10 +1,14 @@
-#include "rhoban_model_learning/ball_models/ball_physical_model.h"
+#include "rhoban_model_learning/ball_models/linear_speed_estimator.h"
+
+#include "rhoban_model_learning/ball_models/position_sequence.h"
+
+#include "rhoban_utils/util.h"
 
 namespace rhoban_model_learning
 {
 
 LinearSpeedEstimator::LinearSpeedEstimator()
-  : ModularModel(1), window_duration(0.5)
+  : SpeedEstimator(1), window_duration(0.5)
 {
 }
 
@@ -12,7 +16,7 @@ LinearSpeedEstimator::~LinearSpeedEstimator() {}
 
 Eigen::VectorXd
 LinearSpeedEstimator::predictObservation(const Input & input,
-                                      std::default_random_engine * engine) const {
+                                         std::default_random_engine * engine) const {
   try {
     const PositionSequence & seq = dynamic_cast<const PositionSequence &>(input);
 
@@ -21,14 +25,14 @@ LinearSpeedEstimator::predictObservation(const Input & input,
     // 2. Choose estimation_point
     // 3. Separate data in two cluster
     // 4. Average position in each cluster
-    // 5. Use positions and dt to compute average position
+    // 5. Use positions and dt to compute average speed
     throw std::logic_error(DEBUG_INFO + " not implemented");
   } catch (const std::bad_cast & exc) {
     throw std::logic_error(DEBUG_INFO + " invalid type for input");    
   }
 }
 
-Eigen::VectorXd LinearSpeedEstimator::GetGlobalParameters() const {
+Eigen::VectorXd LinearSpeedEstimator::getGlobalParameters() const {
   Eigen::VectorXd params(1);
   params(0) = window_duration;
   return params;
@@ -44,7 +48,7 @@ Eigen::MatrixXd LinearSpeedEstimator::getGlobalParametersSpace() const {
 void LinearSpeedEstimator::setGlobalParameters(const Eigen::VectorXd & new_params) {
   if (new_params.rows() != 1) {
     throw std::logic_error(DEBUG_INFO + " invalid number of parameters, "
-                           + new_params.rows() + " received, 1 expected");
+                           + std::to_string(new_params.rows()) + " received, 1 expected");
   }
   window_duration = new_params(0);
 }
@@ -55,16 +59,13 @@ std::vector<std::string> LinearSpeedEstimator::getGlobalParametersNames() const 
 
 Json::Value LinearSpeedEstimator::toJson() const {
   Json::Value v;
-  v["blade_grass_direction"] = blade_grass_direction.getSignedValue();
-  v["max_integration_step" ] = max_integration_step;
+  v["window_duration"] = window_duration;
   return v;
 }
 
 void LinearSpeedEstimator::fromJson(const Json::Value & v, const std::string & dir_name) {
-  double bgd_deg = blade_grass_direction.getSignedValue();
-  rhoban_utils::tryRead(v, "blade_grass_direction",  &bdg_deg             );
-  rhoban_utils::tryRead(v, "max_integration_step" ,  &max_integration_step);
-  blade_grass_direction = Angle(bdg_deg);
+  (void)dir_name;
+  rhoban_utils::tryRead(v, "window_duration",  &window_duration);
 }
 
 std::string LinearSpeedEstimator::getClassName() const {

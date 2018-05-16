@@ -1,5 +1,9 @@
 #include "rhoban_model_learning/ball_models/position_sequence_reader.h"
 
+#include "rhoban_model_learning/ball_models/speed_estimator_factory.h"
+
+#include "rhoban_utils/util.h"
+
 namespace rhoban_model_learning
 {
 
@@ -23,13 +27,13 @@ std::string PositionSequenceReader::getClassName() const {
 }
 Json::Value PositionSequenceReader::toJson() const  {
   Json::Value v;
-  v["speed_estimator"] = speed_estimator.toJsonFactory();
+  v["speed_estimator"] = speed_estimator->toFactoryJson();
   v["low_threshold"] = low_threshold;
   v["high_threshold"] = high_threshold;
   return v;
 }
 void PositionSequenceReader::fromJson(const Json::Value & v, const std::string & dir_name) {
-  SpeedEstimatorFactory().tryRead(v,"speed_estimator",&speed_estimator);
+  speed_estimator = SpeedEstimatorFactory().read(v, "speed_estimator", dir_name);
   rhoban_utils::tryRead(v,"high_threshold", &high_threshold);
   rhoban_utils::tryRead(v,"low_threshold", &low_threshold);
 }

@@ -14,10 +14,10 @@ public:
   predictObservation(const Input & input,
                      std::default_random_engine * engine) const;
 
-  virtual Eigen::VectorXd getGlobalParameters() const;
-  virtual Eigen::MatrixXd getGlobalParametersSpace() const;
-  virtual void setGlobalParameters(const Eigen::VectorXd & new_params);
-  virtual std::vector<std::string> getGlobalParametersNames() const;
+  virtual Eigen::VectorXd getGlobalParameters() const override;
+  virtual Eigen::MatrixXd getGlobalParametersSpace() const override;
+  virtual void setGlobalParameters(const Eigen::VectorXd & new_params) override;
+  virtual std::vector<std::string> getGlobalParametersNames() const override;
 
   Json::Value toJson() const override;
   void fromJson(const Json::Value & v, const std::string & dir_name) override;

@@ -29,6 +29,7 @@ include_directories(
 # Directories containing sources files
 set(DIRECTORIES
   src/rhoban_model_learning/
+  src/rhoban_model_learning/ball_models
   src/rhoban_model_learning/models
   src/rhoban_model_learning/humanoid_models
   )
