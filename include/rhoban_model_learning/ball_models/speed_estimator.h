@@ -17,7 +17,7 @@ public:
   /// @return:  (vx [m/s], vy [m/s], t_pred [s])
   virtual Eigen::VectorXd
   predictObservation(const Input & input,
-                     std::default_random_engine * engine) const;
+                     std::default_random_engine * engine) const = 0;
 
 };
 

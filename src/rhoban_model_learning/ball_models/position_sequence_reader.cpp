@@ -15,6 +15,7 @@ PositionSequenceReader::readPositionSequences(const std::string & file_path) con
     throw std::logic_error(DEBUG_INFO + " speed estimator is null");
   }
   //TODO: implement
+  throw std::logic_error(DEBUG_INFO + "Not implemented");
 }
 
 std::string PositionSequenceReader::getClassName() const {
