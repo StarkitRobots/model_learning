@@ -4,38 +4,61 @@
 #include "rhoban_model_learning/ball_models/position_predictor.h"
 #include "rhoban_model_learning/ball_models/speed_estimator.h"
 
+#include "rhoban_model_learning/input_reader.h"
 #include "rhoban_model_learning/modular_model.h"
 
 namespace rhoban_model_learning
 {
 
-///class TrajectoryPredictorInputReader : public InputReader {
-///  /// Extracts training and validation set from 
-///  DataSet extractSamples(const std::string & file_path,
-///                         std::default_random_engine * engine) const;
-///};
-
-class TrajectoryPredictorInput : public Input {
+class TrajectoryPredictorInputReader : public InputReader {
 public:
-  TrajectoryPredictorInput();
-  virtual ~TrajectoryPredictorInput();
+  /// Extracts training and validation set from 
+  DataSet extractSamples(const std::string & file_path,
+                         std::default_random_engine * engine) const;
 
-  /// The entries available for prediction
-  PositionSequence ball_positions;
+private:
+  /// Used to extract Position Sequences
+//  PositionSequenceReader sequence_reader;
 
-  /// Timestamp for the prediction
-  double prediction_time;
+  /// Minimal time from trajectory start to sequence start [s]
+  double min_time_to_start;
+
+  /// Maximal time from trajectory start to sequence start [s]
+  double max_time_to_start;
+
+  /// What is the duration of the sequence available for prediction [s]
+  double memory_duration;
+
+  /// Min time from last sample to prediction [s]
+  double min_dt;
+
+  /// Max time from last sample to prediction [s]
+  double max_dt;
 };
 
 /// Predicts the position of the ball at a given TimeStamp
 class TrajectoryPredictor : public ModularModel {
 public:
+
+  class Input : public rhoban_model_learning::Input {
+  public:
+    Input();
+    virtual ~Input();
+    
+    /// The entries available for prediction
+    PositionSequence ball_positions;
+    
+    /// Timestamp for the prediction
+    double prediction_time;
+  };
+
+
   TrajectoryPredictor();
   virtual ~TrajectoryPredictor();
 
-  virtual Eigen::VectorXd
-  predictObservation(const Input & input,
-                     std::default_random_engine * engine) const override;
+//  virtual Eigen::VectorXd
+//  predictObservation(const Input & input,
+//                     std::default_random_engine * engine) const override;
   
   
   virtual Eigen::VectorXi getObservationsCircularity() const override;

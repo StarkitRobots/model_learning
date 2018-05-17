@@ -8,6 +8,10 @@
 namespace rhoban_model_learning
 {
 
+TrajectoryPredictor::Input::Input() {}
+
+TrajectoryPredictor::Input::~Input() {}
+
 TrajectoryPredictor::TrajectoryPredictor()
   : ModularModel(0), speed_estimator(), position_predictor()
 {
@@ -15,11 +19,15 @@ TrajectoryPredictor::TrajectoryPredictor()
 
 TrajectoryPredictor::~TrajectoryPredictor() {}
 
-Eigen::VectorXd
-TrajectoryPredictor::predictObservation(const Input & input,
-                                        std::default_random_engine * engine) const {
-  throw std::logic_error(DEBUG_INFO + " unimplemented");
-}
+//Eigen::VectorXd
+//TrajectoryPredictor::predictObservation(const Input & input,
+//                                        std::default_random_engine * engine) const {
+//  try {
+//    throw std::logic_error(DEBUG_INFO + " unimplemented");
+//  } catch (const std::bad_cast & exc) {
+//    throw std::logic_error(DEBUG_INFO + " invalid type for input");
+//  }
+//}
 
 
 Eigen::VectorXi TrajectoryPredictor::getObservationsCircularity() const {
