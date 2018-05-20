@@ -16,6 +16,10 @@ public:
   /// containing the separated position sequences
   std::vector<PositionSequence> readPositionSequences(const std::string & file_path) const;
 
+  /// Separate a PositionSequence in multiple PositionSequences based on
+  /// estimated ball speed
+  std::vector<PositionSequence> splitSequence(const PositionSequence & pos_seq) const;
+
   virtual std::string getClassName() const override;
   Json::Value toJson() const override;
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
@@ -30,6 +34,11 @@ private:
 
   /// Below this speed, authorize the creation of a new trajectory [m/s]
   double low_threshold;
+
+  /// Sequence starts 'anticipation' entries before the first entry with a speed
+  /// above the threshold. This option allows to have some data entries before
+  /// the ball start moving
+  int anticipation;
 };
 
 }

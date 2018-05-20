@@ -4,7 +4,7 @@
 
 #include <Eigen/Core>
 
-#include <map>
+#include <vector>
 
 namespace rhoban_model_learning
 {
@@ -16,13 +16,25 @@ public:
   PositionSequence(const PositionSequence & other);
   virtual ~PositionSequence();
 
+  /// throws an exception if timing of the entry is lower than timing of the
+  /// last entry
+  void addEntry(const Eigen::Vector3d & entry);
+
+  /// Extract a position sequence with only the entries in the given interval
+  PositionSequence extractSequence(double start, double end) const;
+
+  /// Return the timestamp of the first entry
+  double getStart() const;
+
+  /// Return the timestamp of the latest entry
+  double getEnd() const;
+
   virtual std::unique_ptr<Input> clone() const override;
 
 
-  /// The entries of the position sequence 
-  /// Key is timestamp in [s]
-  /// Value is position in [m] (referential is free)
-  std::map<double,Eigen::Vector2d> timed_positions;
+  /// The entries of the position sequence (ordered by time)
+  /// Entries are: (time[s], ball_x[m], ball_y[m])
+  std::vector<Eigen::Vector3d> timed_positions;
 };
 
 }

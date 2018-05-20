@@ -11,8 +11,8 @@ public:
   virtual ~LinearSpeedEstimator();
 
   virtual Eigen::VectorXd
-  predictObservation(const Input & input,
-                     std::default_random_engine * engine) const;
+  predictObservation(const rhoban_model_learning::Input & input,
+                     std::default_random_engine * engine) const override;
 
   virtual Eigen::VectorXd getGlobalParameters() const override;
   virtual Eigen::MatrixXd getGlobalParametersSpace() const override;

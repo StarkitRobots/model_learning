@@ -4,6 +4,8 @@
 
 #include "rhoban_utils/util.h"
 
+#include <iostream>
+
 namespace rhoban_model_learning
 {
 
@@ -15,18 +17,39 @@ LinearSpeedEstimator::LinearSpeedEstimator()
 LinearSpeedEstimator::~LinearSpeedEstimator() {}
 
 Eigen::VectorXd
-LinearSpeedEstimator::predictObservation(const Input & input,
+LinearSpeedEstimator::predictObservation(const rhoban_model_learning::Input & raw_input,
                                          std::default_random_engine * engine) const {
   try {
-    const PositionSequence & seq = dynamic_cast<const PositionSequence &>(input);
+    const SpeedEstimator::Input & input = dynamic_cast<const SpeedEstimator::Input &>(raw_input);
 
-    //TODO: treat sequence
+    double start = input.prediction_time - window_duration / 2;
+    double end = input.prediction_time + window_duration / 2;
+
     // 1. Remove data outside of time window
-    // 2. Choose estimation_point
-    // 3. Separate data in two cluster
-    // 4. Average position in each cluster
-    // 5. Use positions and dt to compute average speed
-    throw std::logic_error(DEBUG_INFO + " not implemented");
+    PositionSequence seq = input.seq.extractSequence(start,end);
+    // 2. Separate data in two cluster
+    size_t nb_entries = seq.timed_positions.size();
+    size_t entries_below = nb_entries / 2;
+    size_t entries_above = nb_entries - entries_below;
+    if (nb_entries < 2) {
+      std::cout << "Less than 2 entries in [" << start << "," << end << "]" << std::endl;
+      return Eigen::Vector2d(0,0);
+    }
+    // 3. Average position in each cluster
+    Eigen::Vector3d part1_avg = Eigen::Vector3d::Zero();
+    Eigen::Vector3d part2_avg = Eigen::Vector3d::Zero();
+    for (size_t idx = 0; idx < entries_below; idx++) {
+      part1_avg += seq.timed_positions[idx];
+    }
+    part1_avg /= entries_below;
+    for (size_t idx = entries_below; idx < nb_entries; idx++) {
+      part2_avg += seq.timed_positions[idx];
+    }
+    part2_avg /= entries_above;
+    // 4. Use positions and dt to compute average speed
+    Eigen::Vector2d distance = part2_avg.segment(1,2) - part1_avg.segment(1,2);
+    double dt = part2_avg(0) - part1_avg(0);
+    return distance / dt;
   } catch (const std::bad_cast & exc) {
     throw std::logic_error(DEBUG_INFO + " invalid type for input");    
   }

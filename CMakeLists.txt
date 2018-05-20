@@ -70,3 +70,6 @@ target_link_libraries(model_learning_analyzer ${catkin_LIBRARIES} rhoban_model_l
 
 add_executable(vision_correction_debug tools/vision_correction_debug.cpp)
 target_link_libraries(vision_correction_debug ${catkin_LIBRARIES} rhoban_model_learning)
+
+add_executable(ball_sequences_filter tools/ball_sequences_filter.cpp)
+target_link_libraries(ball_sequences_filter ${catkin_LIBRARIES} rhoban_model_learning)
