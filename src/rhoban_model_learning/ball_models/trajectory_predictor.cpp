@@ -19,15 +19,15 @@ TrajectoryPredictor::TrajectoryPredictor()
 
 TrajectoryPredictor::~TrajectoryPredictor() {}
 
-//Eigen::VectorXd
-//TrajectoryPredictor::predictObservation(const Input & input,
-//                                        std::default_random_engine * engine) const {
-//  try {
-//    throw std::logic_error(DEBUG_INFO + " unimplemented");
-//  } catch (const std::bad_cast & exc) {
-//    throw std::logic_error(DEBUG_INFO + " invalid type for input");
-//  }
-//}
+Eigen::VectorXd
+TrajectoryPredictor::predictObservation(const rhoban_model_learning::Input & input,
+                                        std::default_random_engine * engine) const {
+  try {
+    throw std::logic_error(DEBUG_INFO + " unimplemented");
+  } catch (const std::bad_cast & exc) {
+    throw std::logic_error(DEBUG_INFO + " invalid type for input");
+  }
+}
 
 
 Eigen::VectorXi TrajectoryPredictor::getObservationsCircularity() const {

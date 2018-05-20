@@ -79,6 +79,7 @@ std::unique_ptr<Model> ModularModel::clone() const {
   ModularModel * copy = (ModularModel*) ModelFactory().build(getClassName()).release();
   copy->used_indices = used_indices;
   copy->setGlobalParameters(getGlobalParameters());
+  return std::unique_ptr<Model>(copy);
 }
 
 }

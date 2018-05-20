@@ -6,6 +6,7 @@
 
 #include "rhoban_model_learning/input_reader.h"
 #include "rhoban_model_learning/modular_model.h"
+#include "rhoban_model_learning/ball_models/position_sequence_reader.h"
 
 namespace rhoban_model_learning
 {
@@ -18,7 +19,7 @@ public:
 
 private:
   /// Used to extract Position Sequences
-//  PositionSequenceReader sequence_reader;
+  PositionSequenceReader sequence_reader;
 
   /// Minimal time from trajectory start to sequence start [s]
   double min_time_to_start;
@@ -56,9 +57,9 @@ public:
   TrajectoryPredictor();
   virtual ~TrajectoryPredictor();
 
-//  virtual Eigen::VectorXd
-//  predictObservation(const Input & input,
-//                     std::default_random_engine * engine) const override;
+  Eigen::VectorXd
+  predictObservation(const rhoban_model_learning::Input & input,
+                     std::default_random_engine * engine) const override;
   
   
   virtual Eigen::VectorXi getObservationsCircularity() const override;
