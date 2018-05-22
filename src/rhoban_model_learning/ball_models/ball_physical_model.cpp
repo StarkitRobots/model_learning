@@ -34,10 +34,18 @@ BallPhysicalModel::predictObservation(const rhoban_model_learning::Input & raw_i
     
       double dt = std::min(time_to_prediction, max_integration_step);
       Eigen::Vector2d ball_acc(0.0, 0.0);
-      // TODO: update ball_acc
+      // Applying friction part independent of grass
+      ball_acc -= base_dry * ball_dir;
+      ball_acc -= base_visc * ball_speed.norm() * ball_dir;
+      // TODO: apply grass friction (opp+lat)
       // Updating status values
       ball_pos += ball_speed * dt;
-      ball_speed += ball_acc;
+      Eigen::Vector2d new_ball_speed = ball_speed + ball_acc;
+      if (ball_acc.norm() > ball_speed.norm()) {
+        new_ball_speed = Eigen::Vector2d(0.0, 0.0);
+      }
+      ball_pos += (ball_speed + new_ball_speed)/ 2 * dt;
+      ball_speed = new_ball_speed;
       time_to_prediction -= dt;
     }
     Eigen::Vector4d result;
