@@ -15,7 +15,7 @@ public:
   virtual ~BallPhysicalModel();
 
   virtual Eigen::VectorXd
-  predictObservation(const Input & input,
+  predictObservation(const rhoban_model_learning::Input & input,
                      std::default_random_engine * engine) const override;
 
 

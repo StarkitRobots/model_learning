@@ -21,27 +21,32 @@ BallPhysicalModel::BallPhysicalModel()
 BallPhysicalModel::~BallPhysicalModel() {}
 
 Eigen::VectorXd
-BallPhysicalModel::predictObservation(const Input & input,
+BallPhysicalModel::predictObservation(const rhoban_model_learning::Input & raw_input,
                                       std::default_random_engine * engine) const {
-  Eigen::Vector2d ball_pos = input.ball_pos;
-  Eigen::Vector2d ball_speed = input.ball_speed;
-  double time_to_prediction = input.prediction_duration;
-  double min_speed = 0.005;//TODO: add as parameter
-  while (time_to_prediction > 0 && ball_speed.norm() > min_speed) {
-    Eigen::Vector2d ball_dir = ball_speed.normalized();
+  try{
+    const Input & input = dynamic_cast<const Input &> (raw_input);
+    Eigen::Vector2d ball_pos = input.ball_pos;
+    Eigen::Vector2d ball_speed = input.ball_speed;
+    double time_to_prediction = input.prediction_duration;
+    double min_speed = 0.005;//TODO: add as parameter
+    while (time_to_prediction > 0 && ball_speed.norm() > min_speed) {
+      Eigen::Vector2d ball_dir = ball_speed.normalized();
     
-    double dt = std::min(time_to_prediction, max_integration_step);
-    Eigen::Vector2d ball_acc(0.0, 0.0);
-    // TODO: update ball_acc
-    // Updating status values
-    ball_pos += ball_speed * dt;
-    ball_speed = += ball_acc;
-    time_to_prediction -= dt;
+      double dt = std::min(time_to_prediction, max_integration_step);
+      Eigen::Vector2d ball_acc(0.0, 0.0);
+      // TODO: update ball_acc
+      // Updating status values
+      ball_pos += ball_speed * dt;
+      ball_speed += ball_acc;
+      time_to_prediction -= dt;
+    }
+    Eigen::Vector4d result;
+    result.segment(0,2) = ball_pos;
+    result.segment(2,2) = ball_speed;
+    return result;
+  } catch (const std::bad_cast & exc) {
+    throw std::logic_error(DEBUG_INFO + "Invalid type for input");
   }
-  Eigen::Vector4d result;
-  result.segment(0,2) = ball_pos;
-  result.segment(2,2) = ball_speed;
-  return result;
 }
 
 Eigen::VectorXd BallPhysicalModel::getGlobalParameters() const {
@@ -53,7 +58,7 @@ Eigen::VectorXd BallPhysicalModel::getGlobalParameters() const {
   params(dim++) = opp_visc;
   params(dim++) = lat_dry;
   params(dim++) = lat_visc;
-  params(dim++) = bdg.getSignedValue();
+  params(dim++) = blade_grass_direction.getSignedValue();
   params(dim++) = max_integration_step;
   return params;
 }
