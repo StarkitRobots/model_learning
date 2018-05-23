@@ -3,14 +3,87 @@
 #include "rhoban_model_learning/ball_models/position_predictor_factory.h"
 #include "rhoban_model_learning/ball_models/speed_estimator_factory.h"
 
+#include "rhoban_random/tools.h"
+
 #include "rhoban_utils/util.h"
 
 namespace rhoban_model_learning
 {
 
 TrajectoryPredictor::Input::Input() {}
+TrajectoryPredictor::Input::Input(const Input & other)
+  : ball_positions(other.ball_positions),
+    prediction_time(other.prediction_time)
+{
+}
+
+TrajectoryPredictor::Input::Input(const PositionSequence & seq, double t)
+  : ball_positions(seq), prediction_time(t)
+{
+}
 
 TrajectoryPredictor::Input::~Input() {}
+
+std::unique_ptr<rhoban_model_learning::Input> TrajectoryPredictor::Input::clone() const {
+  return std::unique_ptr<rhoban_model_learning::Input>(new Input(*this));
+}
+
+DataSet TrajectoryPredictor::Reader::extractSamples(const std::string & file_path,
+                                                    std::default_random_engine * engine) const
+{
+  DataSet data;
+  std::vector<PositionSequence> sequences = sequence_reader.readPositionSequences(file_path);
+
+  // Selecting sequences used for training
+  size_t training_size = nb_training_sequences;
+  if (sequences.size() > training_size) {
+    throw std::runtime_error(DEBUG_INFO + " Not enough sequences: " + std::to_string(sequences.size())
+                             + " while expecting at least " + std::to_string(training_size));
+  }
+  size_t validation_size = sequences.size() - training_size;
+  std::vector<size_t> set_sizes = {training_size, validation_size};
+  std::vector<std::vector<size_t>> separated_indices;
+  separated_indices = rhoban_random::splitIndices(sequences.size() - 1, set_sizes, engine);
+  // Generate TrajectoryPredictor inputs
+  std::uniform_real_distribution<double>
+    start_distribution(min_time_to_start, max_time_to_start),
+    dt_distribution(min_dt, max_dt);
+  for (size_t set_idx : {0,1}) {
+    bool training_set = set_idx == 0;
+    for (size_t seq_idx : separated_indices[set_idx]) {
+      const PositionSequence & seq = sequences[seq_idx];
+      if (seq.timed_positions.size() == 0) {
+        throw std::logic_error(DEBUG_INFO + " Empty sequence");
+      }
+      // 1. Get sequence start
+      double start = seq.getStart() + start_distribution(*engine);
+      double end = start + memory_duration;
+      // 2. Getting wished prediction time and finding closest sample (time)
+      double prediction_time = end + dt_distribution(*engine);
+      double best_diff = std::numeric_limits<double>::max();
+      Eigen::Vector3d best_entry;
+      for (const Eigen::Vector3d & entry : seq.timed_positions) {
+        double time_error = fabs(entry(0) - prediction_time);
+        if (time_error < best_diff) {
+          best_diff = time_error;
+          best_entry = entry;
+        }
+      }
+      prediction_time = best_entry(0);
+      Eigen::Vector2d ball_measured_pos = best_entry.segment(1,2);
+      // 3. Building sample and adding it to the appropriate set
+      std::unique_ptr<rhoban_model_learning::Input> input(
+        new TrajectoryPredictor::Input(seq.extractSequence(start, end), prediction_time));
+      std::unique_ptr<Sample> sample(new Sample(std::move(input), ball_measured_pos));
+      if (training_set) {
+        data.training_set.push_back(std::move(sample));
+      } else {
+        data.validation_set.push_back(std::move(sample));
+      }
+    }
+  }
+  
+}
 
 TrajectoryPredictor::TrajectoryPredictor()
   : ModularModel(0), speed_estimator(), position_predictor()
@@ -20,10 +93,27 @@ TrajectoryPredictor::TrajectoryPredictor()
 TrajectoryPredictor::~TrajectoryPredictor() {}
 
 Eigen::VectorXd
-TrajectoryPredictor::predictObservation(const rhoban_model_learning::Input & input,
+TrajectoryPredictor::predictObservation(const rhoban_model_learning::Input & raw_input,
                                         std::default_random_engine * engine) const {
   try {
-    throw std::logic_error(DEBUG_INFO + " unimplemented");
+    const Input & input = dynamic_cast<const Input &>(raw_input);
+
+    // 1. Ball status estimation
+    // - Estimating speed at last position seen
+    //   - An offset could be used (estimation of speed in the past is more accurate)
+    // - Pos is estimated using last entry (quite bad, should be changed)
+    //   - Very sensitive to noise + no smoothing at all
+    SpeedEstimator::Input se_input;
+    se_input.seq = input.ball_positions;
+    se_input.prediction_time = input.ball_positions.getEnd();
+    Eigen::Vector2d ball_pos = input.ball_positions.timed_positions.back().segment(1,2);
+    Eigen::Vector2d ball_speed = speed_estimator->predictObservation(se_input, engine);
+    // 2. Ball future estimation
+    PositionPredictor::Input pp_input;
+    pp_input.ball_pos = ball_pos;
+    pp_input.ball_speed = ball_speed;
+    pp_input.prediction_duration = input.prediction_time - se_input.prediction_time;
+    return position_predictor->predictObservation(pp_input, engine);
   } catch (const std::bad_cast & exc) {
     throw std::logic_error(DEBUG_INFO + " invalid type for input");
   }

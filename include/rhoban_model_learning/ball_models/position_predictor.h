@@ -14,6 +14,11 @@ class PositionPredictor : public ModularModel {
 public:
   class Input : public rhoban_model_learning::Input {
   public:
+    Input();
+    Input(const Input & other);
+
+    std::unique_ptr<rhoban_model_learning::Input> clone() const override;
+
     /// The current mesured position of the ball [m]
     Eigen::Vector2d ball_pos;
     /// The current measured speed of the ball [m/s]
