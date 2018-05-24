@@ -82,8 +82,36 @@ DataSet TrajectoryPredictor::Reader::extractSamples(const std::string & file_pat
       }
     }
   }
-  
+  return data;
 }
+
+
+Json::Value TrajectoryPredictor::Reader::toJson() const {
+  Json::Value v;
+  v["sequence_reader"] = sequence_reader.toJson();
+  v["nb_training_sequences"] = nb_training_sequences;
+  v["min_time_to_start"    ] = min_time_to_start    ;
+  v["max_time_to_start"    ] = max_time_to_start    ;
+  v["memory_duration"      ] = memory_duration      ;
+  v["min_dt"               ] = min_dt               ;
+  v["max_dt"               ] = max_dt               ;
+  return v;
+}
+
+void TrajectoryPredictor::Reader::fromJson(const Json::Value & v, const std::string & dir_name) {
+  sequence_reader.read(v, "sequence_reader", dir_name);
+  rhoban_utils::tryRead(v, "nb_training_sequences", &nb_training_sequences);
+  rhoban_utils::tryRead(v, "min_time_to_start"    , &min_time_to_start    );
+  rhoban_utils::tryRead(v, "max_time_to_start"    , &max_time_to_start    );
+  rhoban_utils::tryRead(v, "memory_duration"      , &memory_duration      );
+  rhoban_utils::tryRead(v, "min_dt"               , &min_dt               );
+  rhoban_utils::tryRead(v, "max_dt"               , &max_dt               );
+}
+
+std::string TrajectoryPredictor::Reader::getClassName() const {
+  return "TrajectoryPredictor";
+}
+
 
 TrajectoryPredictor::TrajectoryPredictor()
   : ModularModel(0), speed_estimator(), position_predictor()

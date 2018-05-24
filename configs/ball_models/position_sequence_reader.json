@@ -1,0 +1,11 @@
+{
+    "speed_estimator" : {
+        "class name" : "LinearSpeedEstimator",
+        "content" : {
+            "window_duration" : 0.4
+        }
+    },
+    "low_threshold" : 0.2,
+    "high_threshold" : 0.5,
+    "anticipation" : 5
+}

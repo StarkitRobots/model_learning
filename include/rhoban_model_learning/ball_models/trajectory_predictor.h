@@ -36,6 +36,10 @@ public:
     DataSet extractSamples(const std::string & file_path,
                            std::default_random_engine * engine) const;
 
+    Json::Value toJson() const override;
+    void fromJson(const Json::Value & v, const std::string & dir_name) override;
+    std::string getClassName() const;
+
   private:
     /// Used to extract Position Sequences
     PositionSequenceReader sequence_reader;

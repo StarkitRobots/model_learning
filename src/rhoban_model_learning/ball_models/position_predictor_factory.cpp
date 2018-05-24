@@ -5,7 +5,7 @@ namespace rhoban_model_learning
 {
 
 PositionPredictorFactory::PositionPredictorFactory() {
-  registerBuilder("LinearPositionPredictor",
+  registerBuilder("BallPhysicalModel",
                   [](){return std::unique_ptr<PositionPredictor>(new BallPhysicalModel);});  
 }
 
