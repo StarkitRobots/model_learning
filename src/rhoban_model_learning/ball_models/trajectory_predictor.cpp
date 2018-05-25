@@ -36,7 +36,7 @@ DataSet TrajectoryPredictor::Reader::extractSamples(const std::string & file_pat
 
   // Selecting sequences used for training
   size_t training_size = nb_training_sequences;
-  if (sequences.size() > training_size) {
+  if (sequences.size() < training_size) {
     throw std::runtime_error(DEBUG_INFO + " Not enough sequences: " + std::to_string(sequences.size())
                              + " while expecting at least " + std::to_string(training_size));
   }
@@ -118,6 +118,13 @@ TrajectoryPredictor::TrajectoryPredictor()
 {
 }
 
+TrajectoryPredictor::TrajectoryPredictor(const TrajectoryPredictor & other)
+  : ModularModel(other)
+{
+  speed_estimator = std::unique_ptr<SpeedEstimator>((SpeedEstimator*)other.speed_estimator->clone().release());
+  position_predictor = std::unique_ptr<PositionPredictor>((PositionPredictor*)other.position_predictor->clone().release());
+}
+
 TrajectoryPredictor::~TrajectoryPredictor() {}
 
 Eigen::VectorXd
@@ -141,7 +148,7 @@ TrajectoryPredictor::predictObservation(const rhoban_model_learning::Input & raw
     pp_input.ball_pos = ball_pos;
     pp_input.ball_speed = ball_speed;
     pp_input.prediction_duration = input.prediction_time - se_input.prediction_time;
-    return position_predictor->predictObservation(pp_input, engine);
+    return position_predictor->predictObservation(pp_input, engine).segment(0,2);
   } catch (const std::bad_cast & exc) {
     throw std::logic_error(DEBUG_INFO + " invalid type for input");
   }
@@ -161,8 +168,8 @@ Eigen::VectorXd TrajectoryPredictor::getGlobalParameters() const {
 }
 
 Eigen::MatrixXd TrajectoryPredictor::getGlobalParametersSpace() const {
-  Eigen::VectorXd se_limits = speed_estimator->getGlobalParametersSpace();
-  Eigen::VectorXd pp_limits = position_predictor->getGlobalParametersSpace();
+  Eigen::MatrixXd se_limits = speed_estimator->getGlobalParametersSpace();
+  Eigen::MatrixXd pp_limits = position_predictor->getGlobalParametersSpace();
   Eigen::MatrixXd limits(se_limits.rows() + pp_limits.rows(),2);
   limits << se_limits, pp_limits;
   return limits;
@@ -190,19 +197,27 @@ std::vector<std::string> TrajectoryPredictor::getGlobalParametersNames() const {
 }
 
 Json::Value TrajectoryPredictor::toJson() const {
-  Json::Value v;
+  Json::Value v = ModularModel::toJson();
   v["speed_estimator"] = speed_estimator->toFactoryJson();
   v["position_predictor"] = position_predictor->toFactoryJson();
   return v;
 }
 
 void TrajectoryPredictor::fromJson(const Json::Value & v, const std::string & dir_name) {
+  ModularModel::fromJson(v, dir_name);
   speed_estimator = SpeedEstimatorFactory().read(v, "speed_estimator", dir_name);
   position_predictor = PositionPredictorFactory().read(v, "position_predictor", dir_name);
+  if (used_indices.size() == 0) {
+    setDefaultIndices();
+  }
 }
 
 std::string TrajectoryPredictor::getClassName() const {
   return "TrajectoryPredictor";
+}
+
+std::unique_ptr<Model> TrajectoryPredictor::clone() const {
+  return std::unique_ptr<Model>(new TrajectoryPredictor(*this));
 }
 
 }

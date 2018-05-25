@@ -16,6 +16,12 @@ ModularModel::ModularModel(int nb_dims)
     used_indices.push_back(i);
   }
 }
+void ModularModel::setDefaultIndices() {
+  used_indices.clear();
+  for (int i=0; i < getGlobalParametersCount(); i++) {
+    used_indices.push_back(i);
+  }
+}
 
 int ModularModel::getGlobalParametersCount() const {
   return getGlobalParameters().rows();

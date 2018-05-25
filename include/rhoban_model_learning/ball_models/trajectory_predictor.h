@@ -66,6 +66,7 @@ public:
 
 
   TrajectoryPredictor();
+  TrajectoryPredictor(const TrajectoryPredictor & other);
   virtual ~TrajectoryPredictor();
 
   Eigen::VectorXd
@@ -84,6 +85,7 @@ public:
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
   std::string getClassName() const;
 
+  std::unique_ptr<Model> clone() const override;
 private:
   /// The model used to estimate the speed of the ball
   std::unique_ptr<SpeedEstimator> speed_estimator;

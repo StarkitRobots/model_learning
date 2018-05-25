@@ -16,6 +16,10 @@ public:
   /// Use all dimensions as default
   ModularModel(int nb_dims);
 
+
+  /// Use all available parameters
+  void setDefaultIndices();
+
   /// Return the number of global parameters of the model
   virtual int getGlobalParametersCount() const;
   virtual Eigen::VectorXd getGlobalParameters() const = 0;
@@ -35,7 +39,7 @@ public:
   /// class and set his globalParameters
   virtual std::unique_ptr<Model> clone() const override;
   
-private:
+protected:
   /// The list of indices used for training
   std::vector<int> used_indices;
 

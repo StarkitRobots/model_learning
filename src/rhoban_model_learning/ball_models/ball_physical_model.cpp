@@ -99,7 +99,7 @@ std::vector<std::string> BallPhysicalModel::getGlobalParametersNames() const {
 }
 
 Json::Value BallPhysicalModel::toJson() const {
-  Json::Value v;
+  Json::Value v = ModularModel::toJson();
   v["base_dry"  ] = base_dry ;
   v["base_visc" ] = base_visc;
   v["opp_dry"   ] = opp_dry  ;
@@ -112,6 +112,7 @@ Json::Value BallPhysicalModel::toJson() const {
 }
 
 void BallPhysicalModel::fromJson(const Json::Value & v, const std::string & dir_name) {
+  ModularModel::fromJson(v, dir_name);
   double bgd_deg = blade_grass_direction.getSignedValue();
   rhoban_utils::tryRead(v, "base_dry" , &base_dry );
   rhoban_utils::tryRead(v, "base_visc", &base_visc);

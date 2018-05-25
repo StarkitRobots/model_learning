@@ -81,13 +81,13 @@ std::vector<std::string> LinearSpeedEstimator::getGlobalParametersNames() const 
 }
 
 Json::Value LinearSpeedEstimator::toJson() const {
-  Json::Value v;
+  Json::Value v = ModularModel::toJson();
   v["window_duration"] = window_duration;
   return v;
 }
 
 void LinearSpeedEstimator::fromJson(const Json::Value & v, const std::string & dir_name) {
-  (void)dir_name;
+  ModularModel::fromJson(v, dir_name);
   rhoban_utils::tryRead(v, "window_duration",  &window_duration);
 }
 
