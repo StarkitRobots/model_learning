@@ -1,6 +1,23 @@
 library(ggplot2)
 library(optparse)
 
+# Plot all sequences on the same graph
+sequencePlot <- function(data_path, output_file = "sequences.png")
+{
+    data <- read.csv(data_path)
+    for (log in unique(data$log)) {
+        indices <- which(data$log == log)
+        timeEntries <- data[indices,"time"]
+        logStart <- min(timeEntries)
+        data[indices, "time"] <- timeEntries - logStart
+    }
+    g <- ggplot(data, aes(x=ball_x,y=ball_y, color=time, group=log))
+    g <- g + geom_point(size=0.2)
+    g <- g + facet_wrap(~log)
+    ggsave(output_file)
+}
+
+# Uses raw data from logs
 trajectoryPlot <- function(data_path, mode, output_file = "analysis.png")
 {
     xData <- "ySelf"
@@ -47,4 +64,5 @@ mode <- cmd$options$mode
 input_file <- cmd$args[1]
 output_file <-cmd$options$output
 
-trajectoryPlot(input_file, mode, output_file)
+sequencePlot(input_file, output_file)
+#trajectoryPlot(input_file, mode, output_file)

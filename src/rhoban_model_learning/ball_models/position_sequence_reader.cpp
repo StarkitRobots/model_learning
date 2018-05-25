@@ -11,7 +11,8 @@ namespace rhoban_model_learning
 PositionSequenceReader::PositionSequenceReader() :
   high_threshold(0.6),
   low_threshold(0.1),
-  anticipation(10)
+  anticipation(0.2),
+  allowed_time_gap(0.5)
 {
 }
 
@@ -81,20 +82,34 @@ PositionSequenceReader::splitSequence(const PositionSequence & seq ) const {
   // Populate vector
   bool new_seq_allowed = true;
   std::vector<PositionSequence> sequences;
-  for (size_t idx = 0; idx < estimated_speeds.size() - anticipation; idx++) {
+  for (size_t idx = 0; idx < estimated_speeds.size(); idx++) {
+    // Checking timing
+    double now = seq.timed_positions[idx](0);
+    double time_since_last = -1;
+    if (idx > 0) {
+      time_since_last = now -seq.timed_positions[idx-1](0);
+    }
+    // Looking speed for futur entries
+    double futur_speed = 0;
+    double time_limit = now + anticipation;
+    for (size_t futur_idx = idx; futur_idx < estimated_speeds.size(); futur_idx++) {
+      if (seq.timed_positions[futur_idx](0) > time_limit)
+        break;
+      futur_speed = std::max(futur_speed, estimated_speeds[futur_idx]);
+    }
     // Opening a new sequence
-    double anticipated_speed = estimated_speeds[idx+anticipation];
-    if (new_seq_allowed && anticipated_speed > high_threshold) {
+    if (time_since_last > allowed_time_gap ||
+        (new_seq_allowed && (futur_speed > high_threshold))) {
       sequences.push_back(PositionSequence());
       new_seq_allowed = false;
     }
     // Allowing start of a new sequence
-    if (anticipated_speed < low_threshold) {
+    if (futur_speed < low_threshold) {
       new_seq_allowed = true;
     }
     // Fill the current sequence
     if (sequences.size() > 0) {
-      sequences.back().timed_positions.push_back(seq.timed_positions[idx]);
+      sequences.back().addEntry(seq.timed_positions[idx]);
     }
   }
   return sequences;
@@ -110,6 +125,7 @@ Json::Value PositionSequenceReader::toJson() const  {
   v["low_threshold"] = low_threshold;
   v["high_threshold"] = high_threshold;
   v["anticipation"] = anticipation;
+  v["allowed_time_gap"] = allowed_time_gap;
   return v;
 }
 
@@ -118,6 +134,7 @@ void PositionSequenceReader::fromJson(const Json::Value & v, const std::string &
   rhoban_utils::tryRead(v,"high_threshold", &high_threshold);
   rhoban_utils::tryRead(v,"low_threshold", &low_threshold);
   rhoban_utils::tryRead(v,"anticipation", &anticipation);
+  rhoban_utils::tryRead(v,"allowed_time_gap", &allowed_time_gap);
 }
 
 }

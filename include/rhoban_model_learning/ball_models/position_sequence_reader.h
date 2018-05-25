@@ -35,10 +35,13 @@ private:
   /// Below this speed, authorize the creation of a new trajectory [m/s]
   double low_threshold;
 
-  /// Sequence starts 'anticipation' entries before the first entry with a speed
-  /// above the threshold. This option allows to have some data entries before
-  /// the ball start moving
-  int anticipation;
+  /// Sequence starts 'anticipation' before the first entry with a speed above
+  /// the threshold. This option allows to have some data entries before the
+  /// ball actually start moving
+  double anticipation;
+
+  /// If time gap between two entries is larger, automatically starts a new sequence [s]
+  double allowed_time_gap;
 };
 
 }
