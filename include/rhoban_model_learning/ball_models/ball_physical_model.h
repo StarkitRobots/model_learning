@@ -15,7 +15,7 @@ public:
   virtual ~BallPhysicalModel();
 
   virtual Eigen::VectorXd
-  predictObservation(const Input & input,
+  predictObservation(const rhoban_model_learning::Input & input,
                      std::default_random_engine * engine) const override;
 
 
@@ -32,8 +32,23 @@ private:
   /// The number of parameters of the full physical model
   static int nb_parameters;
 
-  /// Physical coefficients of the grass:
-  /// TODO: to be listed
+  /// Dry friction independent of grass [m/s^2]
+  double base_dry;
+
+  /// Viscous friction independent of grass
+  double base_visc;
+
+  /// Dry friction opposite to grass [m/s^2]
+  double opp_dry;
+
+  /// Viscous friction independent of grass
+  double opp_visc;
+
+  /// Dry friction lateral with grass [m/s^2]
+  double lat_dry;
+
+  /// Viscous friction independent of grass
+  double lat_visc;
 
   /// The direction toward which is pointing the blade of the grass [deg]
   ///

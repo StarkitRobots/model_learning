@@ -1,0 +1,22 @@
+{
+    "class name" : "TrajectoryInputReader",
+    "content" : {
+        "sequence_reader" : {
+            "speed_estimator" : {
+                "class name" : "LinearSpeedEstimator",
+                "content" : {
+                    "window_duration" : 0.4
+                }
+            },
+            "low_threshold" : 0.2,
+            "high_threshold" : 0.5,
+            "anticipation" : 5
+        },
+        "nb_training_sequences" : 10,
+        "min_time_to_start" : 0.0,
+        "max_time_to_start" : 0.5,
+        "memory_duration" : 0.4,
+        "min_dt" : 0.5,
+        "max_dt" : 2.0
+    }
+}

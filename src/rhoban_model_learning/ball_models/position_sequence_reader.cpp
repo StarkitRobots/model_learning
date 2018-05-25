@@ -26,19 +26,32 @@ PositionSequenceReader::readPositionSequences(const std::string & file_path) con
   if (lines.size() == 0) {
     throw std::runtime_error(DEBUG_INFO + " empty file " + file_path);
   }
-  // TODO: export should rather contain xField yField
-  if (lines[0] != "log,time,xWorld,yWorld,vxWorld,vyWorld,xSelf,ySelf,vxSelf,vySelf") {
+  // Choosing format
+  int log_name_column, traj_name_column, time_column, x_column, y_column;
+  size_t expected_columns;
+  if (lines[0] == "log,time,xWorld,yWorld,vxWorld,vyWorld,xSelf,ySelf,vxSelf,vySelf") {
+    log_name_column = 0;
+    traj_name_column = -1;
+    time_column = 1;
+    x_column = 2;
+    y_column = 3;
+    expected_columns = 10;
+    // TODO: export should rather contain xField yField
+  } else if (lines[0] == "log,traj,time,ball_x,ball_y")  {
+    log_name_column = 0;
+    traj_name_column = 1;
+    time_column = 2;
+    x_column = 3;
+    y_column = 4;
+    expected_columns = 5;
+  } else {
     throw std::runtime_error(DEBUG_INFO + " unexpected header '" + lines[0] + "'");
   }
   // Some properties for reading
-  int log_name_column = 0;
-  int time_column = 1;
-  int x_column = 2;
-  int y_column = 3;
-  size_t expected_columns = 10;
   // From lines to vector of PositionSequences
   std::vector<PositionSequence> unfiltered_sequences;
   std::string current_log_name;
+  std::string current_traj_name;
   for (size_t line_idx = 1; line_idx < lines.size(); line_idx++) {
     // Separating columns
     std::vector<std::string> elements;
@@ -47,13 +60,15 @@ PositionSequenceReader::readPositionSequences(const std::string & file_path) con
       throw std::runtime_error(DEBUG_INFO + " invalid line: '" + lines[line_idx] + "'");
     }
     // Parsing content
-    std::string log_name = elements[log_name_column];
+    std::string log_name = log_name_column >= 0 ? elements[log_name_column] : "default";
+    std::string traj_name = traj_name_column >= 0 ? elements[traj_name_column] : "default";
     double time = std::stod(elements[time_column]);
     double ball_x = std::stod(elements[x_column]);
     double ball_y = std::stod(elements[y_column]);
     // Add a new entry if log has changed
-    if (log_name != current_log_name) {
+    if (log_name != current_log_name || traj_name != current_traj_name) {
       current_log_name = log_name;
+      current_traj_name = traj_name;
       unfiltered_sequences.push_back(PositionSequence());
     }
     // Insert entry into last sequence

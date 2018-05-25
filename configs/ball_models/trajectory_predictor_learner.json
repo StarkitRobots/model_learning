@@ -1,0 +1,27 @@
+{
+    "model" : {
+        "class name" : "TrajectoryPredictor",
+        "content" : {
+            "speed_estimator" : {
+                "class name" : "LinearSpeedEstimator",
+                "content" : {
+                    "window_duration" : 0.4
+                }
+            },
+            "position_predictor"  :  {
+                "class name" : "BallPhysicalModel",
+                "content" : {
+                    "max_integration_step" : 0.1
+                }
+            }
+        }
+    },
+    "optimizer" : {
+        "class name" : "CMAESOptimizer",
+        "content" : {
+            "quiet" : false,
+            "nb_evaluations" : 250,
+            "population_size" : 10
+        }
+    }
+}

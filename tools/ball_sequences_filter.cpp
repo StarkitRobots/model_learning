@@ -8,24 +8,30 @@ int main(int argc, char ** argv) {
 
   if (argc < 3) {
     std::cerr << "Usage: " << argv[0]
-              << "<position_sequence_reader.json> <trajectory_file>" << std::endl;
+              << "<position_sequence_reader.json> <trajectory_files>" << std::endl;
     exit(EXIT_FAILURE);
   }
 
   std::string reader_path(argv[1]);
-  std::string traj_path(argv[2]);
+  std::vector<std::string> traj_paths;
+  for (int i = 2; i < argc; i++) {
+    traj_paths.push_back(argv[i]);
+  }
 
   PositionSequenceReader r;
   r.loadFile(reader_path);
 
-  std::vector<PositionSequence> sequences = r.readPositionSequences(traj_path);
+  std::cout << "log,traj,time,ball_x,ball_y" << std::endl;
 
-  std::cout << "log,time,ball_x,ball_y" << std::endl;
-
-  for (size_t idx = 0; idx < sequences.size(); idx++) {
-    const PositionSequence & seq = sequences[idx];
-    for (const Eigen::Vector3d & entry : seq.timed_positions) {
-      std::cout << idx << "," << entry[0] << "," << entry[1] << "," << entry[2] << std::endl;
+  int log_idx = 0;
+  for (const std::string & traj_path : traj_paths) {
+    std::vector<PositionSequence> sequences = r.readPositionSequences(traj_path);
+    for (size_t traj_idx = 0; traj_idx < sequences.size(); traj_idx++) {
+      const PositionSequence & seq = sequences[traj_idx];
+      for (const Eigen::Vector3d & entry : seq.timed_positions) {
+        std::cout << log_idx << "," << traj_idx << "," << entry[0] << "," << entry[1] << "," << entry[2] << std::endl;
+      }
     }
+    log_idx++;
   }
 }
