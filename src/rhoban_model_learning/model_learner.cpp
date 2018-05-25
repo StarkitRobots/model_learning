@@ -31,6 +31,13 @@ ModelLearner::learnParameters(const SampleVector & training_set,
                               const SampleVector & validation_set,
                               std::default_random_engine * engine)
 {
+  if (training_set.size() == 0) {
+    throw std::logic_error(DEBUG_INFO + " empty training set");
+  }
+  if (validation_set.size() == 0) {
+    throw std::logic_error(DEBUG_INFO + " empty validation set");
+  }
+
   Result result;
   rhoban_bbo::Optimizer::RewardFunc reward_function =
     [this, &training_set]

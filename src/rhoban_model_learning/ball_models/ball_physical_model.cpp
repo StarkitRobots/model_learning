@@ -91,6 +91,15 @@ void BallPhysicalModel::setGlobalParameters(const Eigen::VectorXd & new_params) 
                            + std::to_string(nb_parameters) + " expected");
   }
   // TODO: set parameters
+  int dim = 0;
+  base_dry = new_params(dim++);
+  base_visc = new_params(dim++);
+  opp_dry = new_params(dim++);
+  opp_visc = new_params(dim++);
+  lat_dry = new_params(dim++);
+  lat_visc = new_params(dim++);
+  blade_grass_direction = Angle(new_params(dim++));
+  max_integration_step = new_params(dim++);
 }
 
 std::vector<std::string> BallPhysicalModel::getGlobalParametersNames() const {

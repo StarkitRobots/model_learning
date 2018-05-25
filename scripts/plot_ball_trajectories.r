@@ -5,15 +5,16 @@ library(optparse)
 sequencePlot <- function(data_path, output_file = "sequences.png")
 {
     data <- read.csv(data_path)
-    for (log in unique(data$log)) {
-        indices <- which(data$log == log)
+    data$seq <- paste(data$log, data$traj,sep=':')
+    for (seq in unique(data$seq)) {
+        indices <- which(data$seq == seq)
         timeEntries <- data[indices,"time"]
-        logStart <- min(timeEntries)
-        data[indices, "time"] <- timeEntries - logStart
+        seqStart <- min(timeEntries)
+        data[indices, "time"] <- timeEntries - seqStart
     }
-    g <- ggplot(data, aes(x=ball_x,y=ball_y, color=time, group=log))
+    g <- ggplot(data, aes(x=ball_x,y=ball_y, color=time, group=seq))
     g <- g + geom_point(size=0.2)
-    g <- g + facet_wrap(~log)
+    g <- g + facet_wrap(~seq)
     ggsave(output_file)
 }
 

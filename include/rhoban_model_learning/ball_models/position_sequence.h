@@ -16,6 +16,8 @@ public:
   PositionSequence(const PositionSequence & other);
   virtual ~PositionSequence();
 
+  bool isEmpty() const;
+
   /// throws an exception if timing of the entry is lower than timing of the
   /// last entry
   void addEntry(const Eigen::Vector3d & entry);

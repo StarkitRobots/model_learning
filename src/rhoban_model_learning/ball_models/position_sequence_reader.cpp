@@ -85,6 +85,9 @@ PositionSequenceReader::readPositionSequences(const std::string & file_path) con
 
 std::vector<PositionSequence>
 PositionSequenceReader::splitSequence(const PositionSequence & seq ) const {
+  if (!speed_estimator) {
+    throw std::logic_error(DEBUG_INFO + " Speed estimator not initialized");
+  }
   // Estimating speed at each entry
   std::vector<double> estimated_speeds;
   for (const Eigen::Vector3d & entry : seq.timed_positions) {

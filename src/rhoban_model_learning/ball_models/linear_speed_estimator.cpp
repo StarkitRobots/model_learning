@@ -49,7 +49,15 @@ LinearSpeedEstimator::predictObservation(const rhoban_model_learning::Input & ra
     // 4. Use positions and dt to compute average speed
     Eigen::Vector2d distance = part2_avg.segment(1,2) - part1_avg.segment(1,2);
     double dt = part2_avg(0) - part1_avg(0);
-    return distance / dt;
+    Eigen::Vector2d ball_speed = distance / dt;
+    // 5. Adding simple noise
+    // TODO: replace by a parameter and take into account dispersion of data
+    if (engine != nullptr) {
+      std::uniform_real_distribution<double> noise_distrib(-0.1,0.1);
+      ball_speed(0) += noise_distrib(*engine);
+      ball_speed(1) += noise_distrib(*engine);
+    }
+    return ball_speed;
   } catch (const std::bad_cast & exc) {
     throw std::logic_error(DEBUG_INFO + " invalid type for input");    
   }

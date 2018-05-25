@@ -31,6 +31,10 @@ int main(int argc, char ** argv) {
   std::cout << "training score   : " << r.training_log_likelihood   << std::endl;
   std::cout << "validation score : " << r.validation_log_likelihood << std::endl;
 
+  Eigen::MatrixXd limits = r.model->getParametersSpace();
+  std::cout << "limits for learning" << std::endl
+            << limits.transpose() << std::endl;
+
   // Write parameters
   Eigen::VectorXd params = r.model->getParameters();
   std::vector<std::string> param_names = r.model->getParametersNames();

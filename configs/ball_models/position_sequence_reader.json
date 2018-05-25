@@ -5,7 +5,8 @@
             "window_duration" : 0.4
         }
     },
-    "low_threshold" : 0.2,
-    "high_threshold" : 0.5,
-    "anticipation" : 5
+    "low_threshold" : 0.5,
+    "high_threshold" : 1,
+    "anticipation" : 0.2,
+    "allowed_time_gap" : 0.5
 }
