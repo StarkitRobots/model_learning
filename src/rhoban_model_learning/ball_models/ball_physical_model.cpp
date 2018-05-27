@@ -2,6 +2,8 @@
 
 #include "rhoban_utils/util.h"
 
+#include <iostream>
+
 using namespace rhoban_utils;
 
 namespace rhoban_model_learning
@@ -11,7 +13,7 @@ int BallPhysicalModel::nb_parameters = 8;
 
 BallPhysicalModel::BallPhysicalModel()
   : PositionPredictor(nb_parameters),
-    base_dry(0.0), base_visc(0.0),
+    base_dry(0.0), base_visc(0.05),
     opp_dry(0.0), opp_visc(0.0),
     lat_dry(0.0), lat_visc(0.0),
     blade_grass_direction(0), max_integration_step(0.1)
@@ -23,14 +25,20 @@ BallPhysicalModel::~BallPhysicalModel() {}
 Eigen::VectorXd
 BallPhysicalModel::predictObservation(const rhoban_model_learning::Input & raw_input,
                                       std::default_random_engine * engine) const {
+  if (max_integration_step <= 0) {
+    throw std::logic_error(DEBUG_INFO + "Invalid value for max_integration_step: "
+                           + std::to_string(max_integration_step));
+  }
   try{
     const Input & input = dynamic_cast<const Input &> (raw_input);
     Eigen::Vector2d ball_pos = input.ball_pos;
     Eigen::Vector2d ball_speed = input.ball_speed;
+    Eigen::Vector2d grass_dir(cos(blade_grass_direction), sin(blade_grass_direction));
     double time_to_prediction = input.prediction_duration;
-    double min_speed = 0.005;//TODO: add as parameter
+    double min_speed = 0.02;//TODO: add as parameter
     while (time_to_prediction > 0 && ball_speed.norm() > min_speed) {
       Eigen::Vector2d ball_dir = ball_speed.normalized();
+      Eigen::Vector2d ball_dir_perp(ball_dir(1), - ball_dir(0));
     
       double dt = std::min(time_to_prediction, max_integration_step);
       Eigen::Vector2d ball_acc(0.0, 0.0);
@@ -38,6 +46,13 @@ BallPhysicalModel::predictObservation(const rhoban_model_learning::Input & raw_i
       ball_acc -= base_dry * ball_dir;
       ball_acc -= base_visc * ball_speed.norm() * ball_dir;
       // TODO: apply grass friction (opp+lat)
+      double dot_product = ball_dir.dot(grass_dir);
+      double cross_product = std::fabs(ball_dir(0) * grass_dir(1) - ball_dir(1) * grass_dir(0));
+      // Applying grass friction
+      ball_acc -= dot_product  * opp_dry * ball_dir;
+      ball_acc -= dot_product  * opp_visc * ball_speed.norm() * ball_dir;
+      ball_acc += cross_product  * lat_dry * grass_dir;
+      ball_acc += cross_product  * lat_visc * ball_speed.norm() * grass_dir;
       // Updating status values
       ball_pos += ball_speed * dt;
       Eigen::Vector2d new_ball_speed = ball_speed + ball_acc;
@@ -74,12 +89,12 @@ Eigen::VectorXd BallPhysicalModel::getGlobalParameters() const {
 Eigen::MatrixXd BallPhysicalModel::getGlobalParametersSpace() const {
   Eigen::MatrixXd limits(nb_parameters,2);
   int dim = 0;
-  limits(dim,0) = 0; limits(dim,1) = 10; dim++;//base_dry
-  limits(dim,0) = 0; limits(dim,1) = 1; dim++;//base_visc
-  limits(dim,0) = 0; limits(dim,1) = 10; dim++;//opp_dry
-  limits(dim,0) = 0; limits(dim,1) = 1; dim++;//opp_visc
-  limits(dim,0) = 0; limits(dim,1) = 10; dim++;//lat_dry
-  limits(dim,0) = 0; limits(dim,1) = 1; dim++;//lat_visc
+  limits(dim,0) = 0; limits(dim,1) = 1; dim++;//base_dry
+  limits(dim,0) = 0; limits(dim,1) = 0.5; dim++;//base_visc
+  limits(dim,0) = 0; limits(dim,1) = 1; dim++;//opp_dry
+  limits(dim,0) = 0; limits(dim,1) = 0.5; dim++;//opp_visc
+  limits(dim,0) = 0; limits(dim,1) = 1; dim++;//lat_dry
+  limits(dim,0) = 0; limits(dim,1) = 0.5; dim++;//lat_visc
   limits(dim,0) = -180; limits(dim,1) = 180; dim++;
   limits(dim,0) = 0.0001; limits(dim,1) = 1.0; dim++;
   return limits;

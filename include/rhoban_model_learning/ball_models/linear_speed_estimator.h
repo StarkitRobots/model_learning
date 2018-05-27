@@ -26,7 +26,9 @@ public:
 private:
   /// Duration of the window used to estimate ball speed
   double window_duration;
-  
+
+  /// Stddev on speed
+  double noise;
 };
 
 }

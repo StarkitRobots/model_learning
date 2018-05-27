@@ -51,9 +51,9 @@ LinearSpeedEstimator::predictObservation(const rhoban_model_learning::Input & ra
     double dt = part2_avg(0) - part1_avg(0);
     Eigen::Vector2d ball_speed = distance / dt;
     // 5. Adding simple noise
-    // TODO: replace by a parameter and take into account dispersion of data
+    // TODO: take into account dispersion of data
     if (engine != nullptr) {
-      std::uniform_real_distribution<double> noise_distrib(-0.1,0.1);
+      std::normal_distribution<double> noise_distrib(0,noise);
       ball_speed(0) += noise_distrib(*engine);
       ball_speed(1) += noise_distrib(*engine);
     }
@@ -64,38 +64,44 @@ LinearSpeedEstimator::predictObservation(const rhoban_model_learning::Input & ra
 }
 
 Eigen::VectorXd LinearSpeedEstimator::getGlobalParameters() const {
-  Eigen::VectorXd params(1);
-  params(0) = window_duration;
+  Eigen::VectorXd params(2);
+  params(0) = noise;
+  params(1) = window_duration;
   return params;
 }
 
 Eigen::MatrixXd LinearSpeedEstimator::getGlobalParametersSpace() const {
-  Eigen::MatrixXd limits(1,2);
+  Eigen::MatrixXd limits(2,2);
   limits(0,0) = 0.01;
   limits(0,1) = 1.0;
+  limits(1,0) = 0.01;
+  limits(1,1) = 1.0;
   return limits;
 }
 
 void LinearSpeedEstimator::setGlobalParameters(const Eigen::VectorXd & new_params) {
-  if (new_params.rows() != 1) {
+  if (new_params.rows() != 2) {
     throw std::logic_error(DEBUG_INFO + " invalid number of parameters, "
-                           + std::to_string(new_params.rows()) + " received, 1 expected");
+                           + std::to_string(new_params.rows()) + " received, 2 expected");
   }
-  window_duration = new_params(0);
+  noise = new_params(0);
+  window_duration = new_params(1);
 }
 
 std::vector<std::string> LinearSpeedEstimator::getGlobalParametersNames() const {
-  return { "window_duration"};
+  return {"noise", "window_duration"};
 }
 
 Json::Value LinearSpeedEstimator::toJson() const {
   Json::Value v = ModularModel::toJson();
+  v["noise"] = noise;
   v["window_duration"] = window_duration;
   return v;
 }
 
 void LinearSpeedEstimator::fromJson(const Json::Value & v, const std::string & dir_name) {
   ModularModel::fromJson(v, dir_name);
+  rhoban_utils::tryRead(v, "noise",  &noise);
   rhoban_utils::tryRead(v, "window_duration",  &window_duration);
 }
 

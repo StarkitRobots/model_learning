@@ -1,6 +1,20 @@
 library(ggplot2)
 library(optparse)
 
+# Plot sequences with different types of data (ignored, input, predicted, measured)
+debugPlot <- function(data_path, output_prefix = "seq_")
+{
+    data <- read.csv(data_path)
+    for (seq in unique(data$seq)) {
+        seqData <- data[which(data$seq == seq),]
+        seqData$time <- seqData$time - min(seqData$time)
+        g <- ggplot(seqData, aes(x=ball_x,y=ball_y, color=data_type, group=data_type))
+        g <- g + geom_point(size=0.2)
+        g <- g + coord_fixed()
+        ggsave(paste0(output_prefix,seq,".png"))
+    }
+}
+
 # Plot all sequences on the same graph
 sequencePlot <- function(data_path, output_file = "sequences.png")
 {
@@ -65,5 +79,6 @@ mode <- cmd$options$mode
 input_file <- cmd$args[1]
 output_file <-cmd$options$output
 
-sequencePlot(input_file, output_file)
+debugPlot(input_file)
+#sequencePlot(input_file, output_file)
 #trajectoryPlot(input_file, mode, output_file)
