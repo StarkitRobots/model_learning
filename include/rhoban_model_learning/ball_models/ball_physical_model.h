@@ -58,6 +58,9 @@ private:
 
   /// Maximal duration of an integration step [s]
   double max_integration_step;
+
+  /// Min speed from which we suppose that the ball doesn't move
+  double min_speed;
 };
 
 }
