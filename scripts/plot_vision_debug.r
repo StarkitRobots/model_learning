@@ -11,7 +11,7 @@ plotTagsErrors <- function(dataPath, outputFile) {
     g <- g + facet_wrap(~tagId,ncol=3)
     g <- g + coord_cartesian(xlim=c(-xAbsMax,xAbsMax), ylim=c(-yAbsMax,yAbsMax))
     g <- g + theme_bw()
-    ggsave(outputFile);
+    ggsave(outputFile,width=20,height=40);
 }
 
 
