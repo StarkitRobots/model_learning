@@ -66,12 +66,12 @@ int main(int argc, char ** argv) {
     // 1. Get sequence start
     std::uniform_real_distribution<double> start_distribution(config.min_time_to_start,
                                                               config.max_time_to_start);
-    double start = seq.getStart() + start_distribution(engine);
+    double start = seq.getStartTime() + start_distribution(engine);
     double end = start + config.memory_duration;
     // 2. Separating data
-    seq_by_type["ignored"  ] = seq.extractSequence(seq.getStart(), start);
+    seq_by_type["ignored"  ] = seq.extractSequence(seq.getStartTime(), start);
     seq_by_type["input"    ] = seq.extractSequence(start, end);
-    seq_by_type["measured" ] = seq.extractSequence(end, seq.getEnd());
+    seq_by_type["measured" ] = seq.extractSequence(end, seq.getEndTime());
     seq_by_type["predicted"] = PositionSequence();
     // 3. Predicting based on model
     for (const Eigen::Vector3d pos : seq_by_type["measured"].timed_positions) {

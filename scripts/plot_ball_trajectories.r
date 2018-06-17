@@ -16,6 +16,30 @@ debugPlot <- function(data_path, output_prefix = "seq_")
 }
 
 # Plot all sequences on the same graph
+sequencePlotWithSpeed <- function(data_path, output_prefix = "seq_")
+{
+    data <- read.csv(data_path)
+    data$seq <- paste(data$log, data$traj,sep=':')
+    for (seq in unique(data$seq)) {
+      indices <- which(data$seq == seq)
+      timeEntries <- data[indices,"time"]
+      seqStart <- min(timeEntries)
+      data[indices, "time"] <- timeEntries - seqStart
+      indicesStart <- indices[1:length(indices)-1]
+      indicesEnd <- indices[2:length(indices)]
+      seqData <- data[indicesStart,]
+      seqData$dt <- data[indicesEnd, "time"] - data[indicesStart, "time"]
+      seqData$endX <- seqData$ball_x + seqData$dt*seqData$vx
+      seqData$endY <- seqData$ball_y + seqData$dt*seqData$vy
+      g <- ggplot(seqData, aes(x=ball_x,y=ball_y, color=time, xend=endX, yend=endY))
+      g <- g + geom_point(size=0.2)
+      g <- g + geom_segment(size=0.2,arrow=arrow(length=unit(0.2, "cm")))
+
+      ggsave(paste0(output_prefix,seq,".png"))
+    }
+}
+
+# Plot all sequences on the same graph
 sequencePlot <- function(data_path, output_file = "sequences.png")
 {
     data <- read.csv(data_path)
@@ -79,6 +103,7 @@ mode <- cmd$options$mode
 input_file <- cmd$args[1]
 output_file <-cmd$options$output
 
-debugPlot(input_file)
+sequencePlotWithSpeed(input_file)
+#debugPlot(input_file)
 #sequencePlot(input_file, output_file)
 #trajectoryPlot(input_file, mode, output_file)

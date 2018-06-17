@@ -12,7 +12,9 @@ PositionSequenceReader::PositionSequenceReader() :
   high_threshold(0.6),
   low_threshold(0.1),
   anticipation(0.2),
-  allowed_time_gap(0.5)
+  allowed_time_gap(0.5),
+  min_amplitude(0.8),
+  min_point_count(20)
 {
 }
 
@@ -78,7 +80,14 @@ PositionSequenceReader::readPositionSequences(const std::string & file_path) con
   std::vector<PositionSequence> filtered_sequences;
   for (const PositionSequence & raw_seq : unfiltered_sequences) {
     std::vector<PositionSequence> sequences = splitSequence(raw_seq);
-    filtered_sequences.insert(filtered_sequences.end(), sequences.begin(), sequences.end());
+    for (const PositionSequence & sequence : sequences){
+      if (sequence.size() < min_point_count) continue;
+
+      double dist = (sequence.getStartPos() - sequence.getEndPos()).norm();
+      if (dist < min_amplitude) continue;
+
+      filtered_sequences.push_back(sequence);
+    }
   }
   return filtered_sequences;
 }

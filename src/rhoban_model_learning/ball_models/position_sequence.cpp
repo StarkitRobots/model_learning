@@ -36,22 +36,42 @@ PositionSequence PositionSequence::extractSequence(double start, double end) con
   return subsequence;
 }
 
-double PositionSequence::getStart() const {
+Eigen::Vector3d PositionSequence::getStart() const {
   if (isEmpty()) {
     throw std::logic_error(DEBUG_INFO + "empty sequence");
   }
-  return timed_positions.front()(0);
+  return timed_positions.front();
 }
 
-double PositionSequence::getEnd() const {
+Eigen::Vector3d PositionSequence::getEnd() const {
   if (isEmpty()) {
     throw std::logic_error(DEBUG_INFO + "empty sequence");
   }
-  return timed_positions.back()(0);
+  return timed_positions.back();
+}
+
+Eigen::Vector2d PositionSequence::getStartPos() const {
+  return getStart().segment(1,2);
+}
+
+Eigen::Vector2d PositionSequence::getEndPos() const {
+  return getEnd().segment(1,2);
+}
+
+double PositionSequence::getStartTime() const {
+  return getStart()(0);
+}
+
+double PositionSequence::getEndTime() const {
+  return getEnd()(0);
 }
 
 std::unique_ptr<Input> PositionSequence::clone() const {
   return std::unique_ptr<Input>(new PositionSequence(*this));
+}
+
+size_t PositionSequence::size() const{
+  return timed_positions.size();
 }
 
 }

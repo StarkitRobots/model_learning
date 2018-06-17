@@ -26,13 +26,26 @@ public:
   PositionSequence extractSequence(double start, double end) const;
 
   /// Return the timestamp of the first entry
-  double getStart() const;
+  double getStartTime() const;
 
   /// Return the timestamp of the latest entry
-  double getEnd() const;
+  double getEndTime() const;
+
+  /// Return the position of the first entry
+  Eigen::Vector2d getStartPos() const;
+
+  /// Return the position of the latest entry
+  Eigen::Vector2d getEndPos() const;
+
+  /// Return the first entry
+  Eigen::Vector3d getStart() const;
+
+  /// Return the latest entry
+  Eigen::Vector3d getEnd() const;
 
   virtual std::unique_ptr<Input> clone() const override;
 
+  size_t size() const;
 
   /// The entries of the position sequence (ordered by time)
   /// Entries are: (time[s], ball_x[m], ball_y[m])

@@ -56,7 +56,7 @@ DataSet TrajectoryPredictor::Reader::extractSamples(const std::string & file_pat
         throw std::logic_error(DEBUG_INFO + " Empty sequence");
       }
       // 1. Get sequence start
-      double start = seq.getStart() + start_distribution(*engine);
+      double start = seq.getStartTime() + start_distribution(*engine);
       double end = start + memory_duration;
       // 2. Getting wished prediction time and finding closest sample (time)
       double prediction_time = end + dt_distribution(*engine);
@@ -140,7 +140,7 @@ TrajectoryPredictor::predictObservation(const rhoban_model_learning::Input & raw
     //   - Very sensitive to noise + no smoothing at all
     SpeedEstimator::Input se_input;
     se_input.seq = input.ball_positions;
-    se_input.prediction_time = input.ball_positions.getEnd();
+    se_input.prediction_time = input.ball_positions.getEndTime();
     Eigen::Vector2d ball_pos = input.ball_positions.timed_positions.back().segment(1,2);
     Eigen::Vector2d ball_speed = speed_estimator->predictObservation(se_input, engine);
     // 2. Ball future estimation

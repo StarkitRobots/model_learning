@@ -42,6 +42,12 @@ private:
 
   /// If time gap between two entries is larger, automatically starts a new sequence [s]
   double allowed_time_gap;
+
+  /// If the sequences' first and last point are at a distance smaller than min_amplitude, ignore the sequence.
+  double min_amplitude;
+
+  /// If the sequence as less than min_point_count points, ignore the sequence.
+  double min_point_count;
 };
 
 }
