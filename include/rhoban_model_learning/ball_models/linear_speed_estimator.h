@@ -29,6 +29,8 @@ private:
 
   /// Stddev on speed
   double noise;
+  
+  double max_ball_speed;
 };
 
 }
