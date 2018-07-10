@@ -37,11 +37,9 @@ void compare(const std::string & model_name,
   for (const auto & s : samples) {
     const VisionInput & input = dynamic_cast<const VisionInput &>(s->getInput());
     int tag_id = input.data("tag_id");
-    Eigen::Vector2d img_px = m.leph2Img(Eigen::Vector2d(input.data("pixel_x"),
-                                                        input.data("pixel_y")));
-    Eigen::Vector2d pred_leph = m.predictObservation(input, nullptr);
-    Eigen::Vector2d pred_px = m.leph2Img(pred_leph);
-    Eigen::Vector2d error = img_px - pred_px;
+    Eigen::Vector2d obs(input.data("pixel_x"), input.data("pixel_y"));
+    Eigen::Vector2d pred = m.predictObservation(input, nullptr);
+    Eigen::Vector2d error = obs - pred;
     out << model_name << "," << tag_id << "," << error(0) << "," << error(1) << std::endl;
   }
 }
