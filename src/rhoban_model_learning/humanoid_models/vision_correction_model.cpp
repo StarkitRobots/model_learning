@@ -263,7 +263,10 @@ void VCM::setGlobalParameters(const Eigen::VectorXd & new_params)  {
   cam_offset  = new_params.segment(1,3);
   imu_offset  = new_params.segment(4,3);
   neck_offset = new_params.segment(7,3);
-  // TODO!!!
+  int i = 10;
+  camera_model.setCenter(new_params.segment(i,2)); i+= 2;
+  camera_model.setFocal(new_params.segment(i,2)); i+= 2;
+  camera_model.setDistortion(new_params.segment(i,5)); i+= 5;
 }
 
 std::vector<std::string> VCM::getGlobalParametersNames() const  {
