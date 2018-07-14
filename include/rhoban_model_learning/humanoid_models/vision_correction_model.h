@@ -63,6 +63,10 @@ public:
     int max_samples_per_tag;
     /// If a tag is represented less than min_samples_per_tag, it is ignored
     int min_samples_per_tag;
+    /// Unnormalize the information from data file to be able to read old format
+    double rescale_width;
+    /// Unnormalize the information from data file to be able to read old format
+    double rescale_height;
     /// Is the reading process printing summary of reading?
     bool verbose;
   };

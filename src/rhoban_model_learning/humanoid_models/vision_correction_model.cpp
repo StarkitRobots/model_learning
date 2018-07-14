@@ -41,6 +41,7 @@ VCM::VisionInputReader::VisionInputReader()
   : x_coord_range(0, 10000), y_coord_range(0, 10000),
     nb_training_tags(0), nb_validation_tags(0),
     max_samples_per_tag(1), min_samples_per_tag(1),
+    rescale_width(0), rescale_height(0),
     verbose(true)
 {
 }
@@ -53,9 +54,17 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
   // First: Read all entries and conserve only valid ones
   std::map<int,SampleVector> samples_by_id;
   for (size_t i = 0; i < logs.size(); i++) {
-    const Leph::VectorLabel & entry = logs[i];
+    Leph::VectorLabel & entry = logs[i];
     int tag_id = entry("tag_id");
-    Eigen::Vector2d observation(entry("pixel_x"), entry("pixel_y"));
+    Eigen::Vector2d observation(entry("pixel_x_uncorrected"), entry("pixel_y_uncorrected"));
+    if (rescale_width != 0) {
+      entry("pixel_x") = (entry("pixel_x") + 1 / 2.0) * rescale_width;
+      entry("pixel_x_uncorrected") = (entry("pixel_x_uncorrected") + 1) / 2.0 * rescale_width;
+    }
+    if (rescale_height != 0) {
+      entry("pixel_y") = (entry("pixel_y") + 1 / 2.0) * rescale_height;
+      entry("pixel_y_uncorrected") = (entry("pixel_y_uncorrected") + 1) / 2.0 * rescale_height;
+    }
     std::unique_ptr<Input> input(new VisionInput(entry));
     std::unique_ptr<Sample> sample(new Sample(std::move(input), observation));
 
@@ -155,6 +164,8 @@ Json::Value VCM::VisionInputReader::toJson() const {
   v["nb_validation_tags" ] = nb_validation_tags ;
   v["max_samples_per_tag"] = max_samples_per_tag;
   v["min_samples_per_tag"] = min_samples_per_tag;
+  v["rescale_width"      ] = rescale_width      ;
+  v["rescale_height"     ] = rescale_height     ;
   v["verbose"            ] = verbose            ;
   return v;
 }
@@ -167,6 +178,8 @@ void VCM::VisionInputReader::fromJson(const Json::Value & v,
   rhoban_utils::tryRead(v, "nb_validation_tags" , &nb_validation_tags );
   rhoban_utils::tryRead(v, "max_samples_per_tag", &max_samples_per_tag);
   rhoban_utils::tryRead(v, "min_samples_per_tag", &min_samples_per_tag);
+  rhoban_utils::tryRead(v, "rescale_width"      , &rescale_width      );
+  rhoban_utils::tryRead(v, "rescale_height"     , &rescale_height     );
   rhoban_utils::tryRead(v, "verbose"            , &verbose            );
 }
 
