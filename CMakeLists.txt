@@ -76,3 +76,20 @@ target_link_libraries(ball_sequences_filter ${catkin_LIBRARIES} rhoban_model_lea
 
 add_executable(ball_trajectory_predictor tools/ball_trajectory_predictor.cpp)
 target_link_libraries(ball_trajectory_predictor ${catkin_LIBRARIES} rhoban_model_learning)
+
+
+enable_testing()
+ 
+set(TESTS
+  humanoid_models/vision_correction_model
+)
+
+if (CATKIN_ENABLE_TESTING)
+  # create an executable for each test
+  foreach(test ${TESTS})
+    string(REPLACE "/" "_" id ${test})
+    catkin_add_gtest(${id} tests/${test}.cpp)
+    target_link_libraries(${id} rhoban_model_learning)
+  endforeach(test)
+endif()
+

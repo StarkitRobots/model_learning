@@ -1,0 +1,21 @@
+{
+    "cam_offset" : [ 1, -2, 3 ],
+    "imu_offset" : [ 3, 1, -2 ],
+    "max_angle_error" : 5,
+    "nb_samples" : 500,
+    "nb_threads" : 30,
+    "neck_offset" : [ 0, 0, 0 ],
+    "px_stddev" : 10,
+    "px_stddev_space" : [ 1, 20 ],
+    "used_indices" : [ 0, 1, 2, 3, 4, 5, 10, 11 ],
+    "camera_model" : {
+        "img_width" : 800,
+        "img_height" : 600,
+        "focal_x" : 600,
+        "focal_y" : 600,
+        "center_x" : 400,
+        "center_y" : 300,
+        "radial_coeffs" : [ 0, 0, 0],
+        "tangential_coeffs" : [0, 0]
+    }
+}

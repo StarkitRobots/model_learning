@@ -71,6 +71,8 @@ public:
   VisionCorrectionModel();
   VisionCorrectionModel(const VisionCorrectionModel & other);
 
+  double getPxStddev() const;
+
   /// Return the [roll,yaw,pitch] offsets of camera using [rad]
   Eigen::Vector3d getCameraOffsetsRad() const;
   /// Return the [roll,yaw,pitch] offsets of the IMU using [rad]

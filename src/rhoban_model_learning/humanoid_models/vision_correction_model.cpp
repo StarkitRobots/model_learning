@@ -198,6 +198,10 @@ VCM::VisionCorrectionModel(const VisionCorrectionModel & other)
 {
 }
 
+double VCM::getPxStddev() const {
+  return px_stddev;
+}
+
 Eigen::Vector3d VCM::getCameraOffsetsRad() const {
   return M_PI/ 180 * cam_offset;
 }
@@ -414,7 +418,7 @@ void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
   rhoban_utils::tryReadEigen(v,"cam_offset", &cam_offset);
   rhoban_utils::tryReadEigen(v,"imu_offset", &imu_offset);
   rhoban_utils::tryReadEigen(v,"neck_offset", &neck_offset);
-  camera_model.tryRead(v, "camera_model", dir_name);
+  camera_model.read(v, "camera_model", dir_name);
   rhoban_utils::tryRead(v, "max_angle_error", &max_angle_error);
   rhoban_utils::tryReadEigen(v,"focal_length_space", &focal_length_space);
   rhoban_utils::tryRead(v, "center_max_error", &center_max_error);
