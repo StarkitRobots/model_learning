@@ -11,9 +11,7 @@ public:
   Input(){};
   virtual ~Input(){};
 
-  virtual std::unique_ptr<Input> clone() const {
-    return std::unique_ptr<Input>(new Input());
-  }
+  virtual std::unique_ptr<Input> clone() const = 0;
 };
 
 }

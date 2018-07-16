@@ -31,6 +31,13 @@ ModelLearner::learnParameters(const SampleVector & training_set,
                               const SampleVector & validation_set,
                               std::default_random_engine * engine)
 {
+  if (training_set.size() == 0) {
+    throw std::logic_error(DEBUG_INFO + " empty training set");
+  }
+  if (validation_set.size() == 0) {
+    throw std::logic_error(DEBUG_INFO + " empty validation set");
+  }
+
   Result result;
   rhoban_bbo::Optimizer::RewardFunc reward_function =
     [this, &training_set]
@@ -85,6 +92,11 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
     Eigen::MatrixXd space = model->getParametersSpace();
     initial_guess = (space.col(0) + space.col(1)) / 2;
   }
+}
+
+const Model & ModelLearner::getModel()
+{
+  return *model;
 }
 
 }

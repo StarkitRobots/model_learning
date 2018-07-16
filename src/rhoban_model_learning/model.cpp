@@ -2,6 +2,7 @@
 
 #include "rhoban_random/multivariate_gaussian.h"
 #include "rhoban_utils/threading/multi_core.h"
+#include "rhoban_utils/util.h"
 
 using namespace rhoban_utils;
 
@@ -68,6 +69,20 @@ void Model::fromJson(const Json::Value & v, const std::string & dir_name) {
   (void) dir_name;
   rhoban_utils::tryRead(v, "nb_samples", &nb_samples);
   rhoban_utils::tryRead(v, "nb_threads", &nb_threads);
+}
+
+void Model::appendParametersSpace(std::ostream & out) const {
+  std::vector<std::string> parameters_names = getParametersNames();
+  Eigen::MatrixXd parameters_spaces = getParametersSpace();
+  if (parameters_names.size() != (size_t)parameters_spaces.rows()) {
+    throw std::logic_error(DEBUG_INFO +
+                           " inconsistent number of parameters between spaces and names");
+  }
+  for (int i = 0; i < parameters_spaces.rows(); i++) {
+    out << parameters_names[i] << ": ["
+        << parameters_spaces(i,0) << "," << parameters_spaces(i,1) << "]"
+        << std::endl;
+  }
 }
 
 

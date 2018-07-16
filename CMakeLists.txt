@@ -29,6 +29,7 @@ include_directories(
 # Directories containing sources files
 set(DIRECTORIES
   src/rhoban_model_learning/
+  src/rhoban_model_learning/ball_models
   src/rhoban_model_learning/models
   src/rhoban_model_learning/humanoid_models
   )
@@ -69,3 +70,26 @@ target_link_libraries(model_learning_analyzer ${catkin_LIBRARIES} rhoban_model_l
 
 add_executable(vision_correction_debug tools/vision_correction_debug.cpp)
 target_link_libraries(vision_correction_debug ${catkin_LIBRARIES} rhoban_model_learning)
+
+add_executable(ball_sequences_filter tools/ball_sequences_filter.cpp)
+target_link_libraries(ball_sequences_filter ${catkin_LIBRARIES} rhoban_model_learning)
+
+add_executable(ball_trajectory_predictor tools/ball_trajectory_predictor.cpp)
+target_link_libraries(ball_trajectory_predictor ${catkin_LIBRARIES} rhoban_model_learning)
+
+
+enable_testing()
+ 
+set(TESTS
+  humanoid_models/vision_correction_model
+)
+
+if (CATKIN_ENABLE_TESTING)
+  # create an executable for each test
+  foreach(test ${TESTS})
+    string(REPLACE "/" "_" id ${test})
+    catkin_add_gtest(${id} tests/${test}.cpp)
+    target_link_libraries(${id} rhoban_model_learning)
+  endforeach(test)
+endif()
+

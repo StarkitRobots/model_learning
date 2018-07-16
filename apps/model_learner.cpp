@@ -20,6 +20,8 @@ int main(int argc, char ** argv) {
   // Reading input reader from Json
   std::unique_ptr<InputReader> input_reader = InputReaderFactory().buildFromJsonFile(argv[2]);
 
+  learner.getModel().appendParametersSpace(std::cout);
+
   // Analyze data
   std::default_random_engine engine = rhoban_random::getRandomEngine();
   DataSet data = input_reader->extractSamples(argv[3], &engine);
@@ -30,6 +32,10 @@ int main(int argc, char ** argv) {
   // Output csv file with results
   std::cout << "training score   : " << r.training_log_likelihood   << std::endl;
   std::cout << "validation score : " << r.validation_log_likelihood << std::endl;
+
+  Eigen::MatrixXd limits = r.model->getParametersSpace();
+  std::cout << "limits for learning" << std::endl
+            << limits.transpose() << std::endl;
 
   // Write parameters
   Eigen::VectorXd params = r.model->getParameters();

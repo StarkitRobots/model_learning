@@ -1,5 +1,7 @@
 #include "rhoban_model_learning/modular_model.h"
 
+#include "rhoban_model_learning/model_factory.h"
+
 namespace rhoban_model_learning
 {
 
@@ -13,6 +15,16 @@ ModularModel::ModularModel(int nb_dims)
   for (int i=0; i < nb_dims; i++) {
     used_indices.push_back(i);
   }
+}
+void ModularModel::setDefaultIndices() {
+  used_indices.clear();
+  for (int i=0; i < getGlobalParametersCount(); i++) {
+    used_indices.push_back(i);
+  }
+}
+
+int ModularModel::getGlobalParametersCount() const {
+  return getGlobalParameters().rows();
 }
 
 Eigen::VectorXd ModularModel::getParameters() const {
@@ -67,6 +79,13 @@ Json::Value ModularModel::toJson() const {
 void ModularModel::fromJson(const Json::Value & v, const std::string & dir_name) {
   Model::fromJson(v, dir_name);
   rhoban_utils::tryReadVector<int>(v, "used_indices", &used_indices);
+}
+
+std::unique_ptr<Model> ModularModel::clone() const {
+  ModularModel * copy = (ModularModel*) ModelFactory().build(getClassName()).release();
+  copy->used_indices = used_indices;
+  copy->setGlobalParameters(getGlobalParameters());
+  return std::unique_ptr<Model>(copy);
 }
 
 }

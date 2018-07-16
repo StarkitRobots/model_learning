@@ -1,30 +1,17 @@
 {
-    "nb_runs" : 50,
+    "nb_runs" : 1,
     "models" : {
-        "cam_rpy_model" : {
+        "cam_imu_model" : {
             "class name" : "VisionCorrectionModel",
             "content" : {
                 "cam_aperture_height" : 0.91577425852142469,
                 "cam_aperture_width" : 1.1693705988362006,
                 "img_height" : 480,
                 "img_width" : 640,
-                "nb_threads" : 40,
+                "nb_threads" : 4,
                 "px_stddev_space" : [1,20],
                 "max_angle_error" : 5,
-                "used_indices" : [0,1,3]
-            }
-        },
-        "cam_py_model" : {
-            "class name" : "VisionCorrectionModel",
-            "content" : {
-                "cam_aperture_height" : 0.91577425852142469,
-                "cam_aperture_width" : 1.1693705988362006,
-                "img_height" : 480,
-                "img_width" : 640,
-                "nb_threads" : 40,
-                "px_stddev_space" : [1,20],
-                "max_angle_error" : 5,
-                "used_indices" : [0,1,2,3]
+                "used_indices" : [0,1,2,3,4,5,10,11]
             }
         }
     },
@@ -33,35 +20,14 @@
             "class name" : "CMAESOptimizer",
             "content" : {
                 "quiet" : false,
-                "nb_evaluations" : 250,
+                "nb_evaluations" : 1,
                 "population_size" : 10
             }
         }
     },
     "readers" : {
-        "02" : {
-            "class name" : "VisionInputReader",
-            "content" : {
-                "max_coordinates" : 0.4,
-                "nb_validation_tags" : 5,
-                "max_samples_per_tag" : 2
+        "108" : {
+              "rel path" : "vision_input_reader.json"
             }
-        },
-        "05" : {
-            "class name" : "VisionInputReader",
-            "content" : {
-                "max_coordinates" : 0.4,
-                "nb_validation_tags" : 5,
-                "max_samples_per_tag" : 5
-            }
-        },
-        "10" : {
-            "class name" : "VisionInputReader",
-            "content" : {
-                "max_coordinates" : 0.4,
-                "nb_validation_tags" : 5,
-                "max_samples_per_tag" : 10
-            }
-        }
     }
 }

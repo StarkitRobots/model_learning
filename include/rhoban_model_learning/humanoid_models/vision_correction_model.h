@@ -47,20 +47,26 @@ public:
     Json::Value toJson() const override;
     void fromJson(const Json::Value & v, const std::string & dir_name) override;
   private:
-    /// The maximal distance to image center relative to image size in [0,1]
-    double max_coordinates;
+    /// The acceptable range for x coordinates [px]
+    Eigen::Vector2d x_coord_range;
+    /// The acceptable range for y coordinates [px]
+    Eigen::Vector2d y_coord_range;
     /// Number of tags used for the training set
-    /// If value is 0, the number of tags is deduced from nb_validation_tags
+    /// If value is < 0, the number of tags is deduced from nb_validation_tags
     int nb_training_tags;
     /// Number of tags used for validation. By choosing to use separate training
     /// set and validation set based on tagId, we ensure that the validation set
     /// is really different from the training set
-    /// If value is 0, the number of tags is deduced from nb_training_tags
+    /// If value is < 0, the number of tags is deduced from nb_training_tags
     int nb_validation_tags;
     /// The maximal number of samples per tag allowed in training_set
     int max_samples_per_tag;
     /// If a tag is represented less than min_samples_per_tag, it is ignored
     int min_samples_per_tag;
+    /// Unnormalize the information from data file to be able to read old format
+    double rescale_width;
+    /// Unnormalize the information from data file to be able to read old format
+    double rescale_height;
     /// Is the reading process printing summary of reading?
     bool verbose;
   };
@@ -69,6 +75,8 @@ public:
   VisionCorrectionModel();
   VisionCorrectionModel(const VisionCorrectionModel & other);
 
+  double getPxStddev() const;
+
   /// Return the [roll,yaw,pitch] offsets of camera using [rad]
   Eigen::Vector3d getCameraOffsetsRad() const;
   /// Return the [roll,yaw,pitch] offsets of the IMU using [rad]
@@ -76,7 +84,7 @@ public:
   /// Return the [roll,yaw,pitch] offsets of neck using [rad]
   Eigen::Vector3d getNeckOffsetsRad() const;
   /// Return the parameters of the camera using Leph format
-  Leph::CameraParameters getCameraParameters() const;
+  const Leph::CameraModel & getCameraModel() const;
 
   virtual Eigen::VectorXd getGlobalParameters() const override;
   virtual Eigen::MatrixXd getGlobalParametersSpace() const override;
@@ -98,11 +106,6 @@ public:
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
   std::string getClassName() const;
 
-  /// Convert from leph coordinates ([-1,1]^2) to img coordinates ([0,width]*[0,height])
-  Eigen::Vector2d leph2Img(const Eigen::Vector2d & leph_coordinates) const;
-  /// Convert from img coordinates ([0,width]*[0,height]) to leph coordinates ([-1 1]^2)
-  Eigen::Vector2d img2Leph(const Eigen::Vector2d & img_coordinates) const;
-
 private:
   /// The observation standard deviation in pixels
   double px_stddev;
@@ -114,16 +117,8 @@ private:
   /// Offset in neck (roll, pitch, yaw) [deg]
   Eigen::Vector3d neck_offset;
 
-  /// Width aperture angle for camera [deg]
-  double camera_pan;
-
-  /// Height aperture angle for camera [deg]
-  double camera_tilt;
-
-  /// Width of the image in pixels
-  int img_width;
-  /// Height of the image in pixels
-  int img_height;
+  /// The model of the camera (focal length, focal center and distortion)
+  Leph::CameraModel camera_model;
 
   /// Space for tuning px_stddev [min,max]
   Eigen::Vector2d px_stddev_space;
@@ -131,10 +126,15 @@ private:
   /// Maximal angle error [deg]
   double max_angle_error;
 
-  /// Allowed space for tuning the camera pan [deg]
-  Eigen::Vector2d camera_pan_space;
-  /// Allowed space for tuning the camera tilt [deg]
-  Eigen::Vector2d camera_tilt_space;
+  /// Allowed space for tuning the length of the focals [px]
+  Eigen::Vector2d focal_length_space;
+
+  /// Allowed space for delta between image center and focal center [px]
+  double center_max_error;
+
+  /// Maximal distortion for each distortion coefficient [px]
+  /// The tuning space is approximated using this value
+  double max_distortion;
 };
 
 }
