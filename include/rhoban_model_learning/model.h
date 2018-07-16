@@ -58,6 +58,9 @@ public:
 
   virtual std::unique_ptr<Model> clone() const = 0;
 
+  /// Append a readable version of the parameters space to the given stream
+  void appendParametersSpace(std::ostream & out) const;
+
 protected:
   /// The number of samples used to fit a distribution if necessary
   int nb_samples;

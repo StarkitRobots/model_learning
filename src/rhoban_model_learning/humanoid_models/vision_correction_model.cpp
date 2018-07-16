@@ -39,7 +39,7 @@ std::unique_ptr<Input> VCM::VisionInput::clone() const {
 
 VCM::VisionInputReader::VisionInputReader()
   : x_coord_range(0, 10000), y_coord_range(0, 10000),
-    nb_training_tags(0), nb_validation_tags(0),
+    nb_training_tags(-1), nb_validation_tags(-1),
     max_samples_per_tag(1), min_samples_per_tag(1),
     rescale_width(0), rescale_height(0),
     verbose(true)
@@ -56,7 +56,6 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
   for (size_t i = 0; i < logs.size(); i++) {
     Leph::VectorLabel & entry = logs[i];
     int tag_id = entry("tag_id");
-    Eigen::Vector2d observation(entry("pixel_x_uncorrected"), entry("pixel_y_uncorrected"));
     if (rescale_width != 0) {
       entry("pixel_x") = (entry("pixel_x") + 1 / 2.0) * rescale_width;
       entry("pixel_x_uncorrected") = (entry("pixel_x_uncorrected") + 1) / 2.0 * rescale_width;
@@ -65,6 +64,7 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
       entry("pixel_y") = (entry("pixel_y") + 1 / 2.0) * rescale_height;
       entry("pixel_y_uncorrected") = (entry("pixel_y_uncorrected") + 1) / 2.0 * rescale_height;
     }
+    Eigen::Vector2d observation(entry("pixel_x_uncorrected"), entry("pixel_y_uncorrected"));
     std::unique_ptr<Input> input(new VisionInput(entry));
     std::unique_ptr<Sample> sample(new Sample(std::move(input), observation));
 
@@ -94,7 +94,7 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
   // Choose which tags will be used for training and validation
   size_t training_size = nb_training_tags;
   size_t validation_size = nb_validation_tags;
-  if (training_size == 0 && validation_size == 0) { 
+  if (training_size == -1 && validation_size == -1) { 
     throw std::runtime_error(DEBUG_INFO + "No size specified for either training or validation");
   } else if (training_size + validation_size > tags_indices.size()) {
     throw std::runtime_error(DEBUG_INFO + "Not enough tags available: ("
@@ -102,10 +102,10 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
                              + std::to_string(training_size) + ">"
                              + std::to_string(tags_indices.size()) + ")");
   }
-  if (validation_size == 0) {
+  if (validation_size == -1) {
     validation_size = tags_indices.size() - training_size;
   }
-  if (training_size == 0) {
+  if (training_size == -1) {
     training_size = tags_indices.size() - validation_size;
   }
     
@@ -192,7 +192,7 @@ VCM::VisionCorrectionModel() :
   camera_model(),
   px_stddev_space(0.01, 50),
   max_angle_error(5),
-  focal_length_space(0,500),
+  focal_length_space(0,2000),
   center_max_error(20),
   max_distortion(30)
 {
@@ -257,17 +257,17 @@ Eigen::MatrixXd VCM::getGlobalParametersSpace() const  {
   int i=10;
   space.row(i++) = focal_length_space;
   space.row(i++) = focal_length_space;
-  space.row(i++) = Eigen::Vector2d(camera_model.getCenterX() - center_max_error,
-                                   camera_model.getCenterX() + center_max_error);
-  space.row(i++) = Eigen::Vector2d(camera_model.getCenterY() - center_max_error,
-                                   camera_model.getCenterY() + center_max_error);
+  space.row(i++) = Eigen::Vector2d(camera_model.getImgWidth()/2.0 - center_max_error,
+                                   camera_model.getImgWidth()/2.0 + center_max_error);
+  space.row(i++) = Eigen::Vector2d(camera_model.getImgHeight()/2.0 - center_max_error,
+                                   camera_model.getImgHeight()/2.0 + center_max_error);
   Eigen::Vector2d distortion_basis(-max_distortion, max_distortion);
   double halfImgDiag = camera_model.getImgDiag() / 2;
-  space.row(i++) = distortion_basis / std::pow(halfImgDiag,2);//k_1 grows with r^2
-  space.row(i++) = distortion_basis / std::pow(halfImgDiag,4);//k_2 grows with r^4
-  space.row(i++) = distortion_basis / std::pow(halfImgDiag,2);//p_1 grows with r^2
-  space.row(i++) = distortion_basis / std::pow(halfImgDiag,2);//p_2 grows with r^4
-  space.row(i++) = distortion_basis / std::pow(halfImgDiag,6);//k_3 grows with r^6
+  space.row(i++) = distortion_basis;// / std::pow(halfImgDiag,2);//k_1 grows with r^2
+  space.row(i++) = distortion_basis;// / std::pow(halfImgDiag,4);//k_2 grows with r^4
+  space.row(i++) = distortion_basis;// / std::pow(halfImgDiag,2);//p_1 grows with r^2
+  space.row(i++) = distortion_basis;// / std::pow(halfImgDiag,2);//p_2 grows with r^4
+  space.row(i++) = distortion_basis;// / std::pow(halfImgDiag,6);//k_3 grows with r^6
   return space;
 }
 
@@ -281,8 +281,8 @@ void VCM::setGlobalParameters(const Eigen::VectorXd & new_params)  {
   imu_offset  = new_params.segment(4,3);
   neck_offset = new_params.segment(7,3);
   int i = 10;
-  camera_model.setCenter(new_params.segment(i,2)); i+= 2;
   camera_model.setFocal(new_params.segment(i,2)); i+= 2;
+  camera_model.setCenter(new_params.segment(i,2)); i+= 2;
   camera_model.setDistortion(new_params.segment(i,5)); i+= 5;
 }
 
@@ -363,7 +363,8 @@ Eigen::VectorXd VCM::predictObservation(const Input & raw_input,
   bool success = model.get().cameraWorldToPixel(camera_model,
                                                 seen_point, pixel);
 
-  if (!success) {
+  // Now we have some tolerance as long as the point is not behind the camera
+  if (!success && pixel(0) == 0 && pixel(1) == 0) {
     std::ostringstream oss;
     Eigen::Vector2d pos(input.data("pixel_x"), input.data("pixel_y"));
     Eigen::Vector3d viewVectorInWorld =
@@ -402,6 +403,7 @@ double VCM::computeLogLikelihood(const Sample & sample,
   Eigen::MatrixXd covar(2,2);
   covar << px_var, 0, 0, px_var;
   rhoban_random::MultivariateGaussian expected_distribution(prediction, covar);
+
   return expected_distribution.getLogLikelihood(observation);
 }
 

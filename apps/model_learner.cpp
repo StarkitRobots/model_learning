@@ -20,6 +20,8 @@ int main(int argc, char ** argv) {
   // Reading input reader from Json
   std::unique_ptr<InputReader> input_reader = InputReaderFactory().buildFromJsonFile(argv[2]);
 
+  learner.getModel().appendParametersSpace(std::cout);
+
   // Analyze data
   std::default_random_engine engine = rhoban_random::getRandomEngine();
   DataSet data = input_reader->extractSamples(argv[3], &engine);

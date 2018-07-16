@@ -52,12 +52,12 @@ public:
     /// The acceptable range for y coordinates [px]
     Eigen::Vector2d y_coord_range;
     /// Number of tags used for the training set
-    /// If value is 0, the number of tags is deduced from nb_validation_tags
+    /// If value is < 0, the number of tags is deduced from nb_validation_tags
     int nb_training_tags;
     /// Number of tags used for validation. By choosing to use separate training
     /// set and validation set based on tagId, we ensure that the validation set
     /// is really different from the training set
-    /// If value is 0, the number of tags is deduced from nb_training_tags
+    /// If value is < 0, the number of tags is deduced from nb_training_tags
     int nb_validation_tags;
     /// The maximal number of samples per tag allowed in training_set
     int max_samples_per_tag;

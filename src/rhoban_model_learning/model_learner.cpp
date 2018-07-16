@@ -94,4 +94,9 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
   }
 }
 
+const Model & ModelLearner::getModel()
+{
+  return *model;
+}
+
 }

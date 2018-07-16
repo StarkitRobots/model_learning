@@ -34,7 +34,6 @@ public:
   Json::Value toJson() const override;
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
 
-
   const Model & getModel();
 
 protected:
