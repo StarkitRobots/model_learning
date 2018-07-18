@@ -1,0 +1,9 @@
+{
+    "class name" : "VisionInputReader",
+    "content" : {
+        "nb_training_tags" : 30,
+        "nb_validation_tags" : 20,
+        "min_samples_per_tag" : 10,
+        "max_samples_per_tag" : 20
+    }
+}

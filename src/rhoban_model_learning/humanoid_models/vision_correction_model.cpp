@@ -92,11 +92,11 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
     }
   }
   // Choose which tags will be used for training and validation
-  size_t training_size = nb_training_tags;
-  size_t validation_size = nb_validation_tags;
+  int training_size = nb_training_tags;
+  int validation_size = nb_validation_tags;
   if (training_size == -1 && validation_size == -1) { 
     throw std::runtime_error(DEBUG_INFO + "No size specified for either training or validation");
-  } else if (training_size + validation_size > tags_indices.size()) {
+  } else if (training_size + validation_size > (int) tags_indices.size()) {
     throw std::runtime_error(DEBUG_INFO + "Not enough tags available: ("
                              + std::to_string(validation_size) + "+"
                              + std::to_string(training_size) + ">"
@@ -108,10 +108,11 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
   if (training_size == -1) {
     training_size = tags_indices.size() - validation_size;
   }
-    
+
+  int nb_unused_tags = tags_indices.size() - (training_size+validation_size);
 
   std::vector<size_t> set_sizes =
-    {training_size, validation_size, tags_indices.size() - (training_size+validation_size)};
+    {(size_t)training_size, (size_t)validation_size, (size_t)nb_unused_tags};
   std::vector<std::vector<size_t>> separated_indices;
   separated_indices = rhoban_random::splitIndices(tags_indices.size() - 1, set_sizes, engine);
   // Fill data set
@@ -262,7 +263,7 @@ Eigen::MatrixXd VCM::getGlobalParametersSpace() const  {
   space.row(i++) = Eigen::Vector2d(camera_model.getImgHeight()/2.0 - center_max_error,
                                    camera_model.getImgHeight()/2.0 + center_max_error);
   Eigen::Vector2d distortion_basis(-max_distortion, max_distortion);
-  double halfImgDiag = camera_model.getImgDiag() / 2;
+  //double halfImgDiag = camera_model.getImgDiag() / 2;
   space.row(i++) = distortion_basis;// / std::pow(halfImgDiag,2);//k_1 grows with r^2
   space.row(i++) = distortion_basis;// / std::pow(halfImgDiag,4);//k_2 grows with r^4
   space.row(i++) = distortion_basis;// / std::pow(halfImgDiag,2);//p_1 grows with r^2

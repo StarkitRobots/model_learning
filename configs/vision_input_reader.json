@@ -1,8 +1,0 @@
-{
-    "class name" : "VisionInputReader",
-    "content" : {
-        "max_coordinates" : 0.8,
-        "nb_validation_tags" : 2,
-        "max_samples_per_tag" : 20
-    }
-}

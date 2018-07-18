@@ -1,0 +1,15 @@
+{
+    "model" : {
+        "rel path" : "vcm_distortion.json",
+        "nb_threads" : 4
+    },
+    "optimizer" : {
+        "class name" : "CMAESOptimizer",
+        "content" : {
+            "quiet" : false,
+            "nb_evaluations" : 500,
+            "population_size" : 10,
+            "nb_threads" : 4
+        }
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "models" : {
+//        "TD" : { "rel path" : "trained_model_arya_distortion.json"}
+//        "Base" : { "rel path" : "vcm_no_distortion.json"}//,
+//        "TND" : { "rel path" : "trained_model_no_distortion.json"},
+        "TD" : { "rel path" : "rush/slow_log2/vcm_v2.json"}
+    }
+}
