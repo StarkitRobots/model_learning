@@ -1,6 +1,7 @@
 {
     "class name"  : "VisionCorrectionModel",
     "content" : {
+        "nb_threads" : 4,
         "cam_offset" : [ 0, 0, 0 ],
         "imu_offset" : [ 0, 0, 0 ],
         "neck_offset" : [ 0, 0, 0 ],
