@@ -14,7 +14,7 @@ std::unique_ptr<rhoban_model_learning::Input> SpeedEstimator::Input::clone() con
   return std::unique_ptr<rhoban_model_learning::Input>(new Input(*this));
 }
 
-SpeedEstimator::SpeedEstimator(int nb_dims) : ModularModel(nb_dims) {}
+SpeedEstimator::SpeedEstimator() : Model() {}
 
 Eigen::VectorXi SpeedEstimator::getObservationsCircularity() const {
   return Eigen::VectorXi::Zero(2);

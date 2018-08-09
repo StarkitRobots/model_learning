@@ -19,14 +19,14 @@ public:
 
   SimpleAngularModel(double observation_stddev, double step_stddev);
 
-  virtual Eigen::VectorXd getParameters() const override;
-  virtual Eigen::MatrixXd getParametersSpace() const override;
-  virtual void setParameters(const Eigen::VectorXd & new_params) override;
-  virtual std::vector<std::string> getParametersNames() const override;
+  Eigen::VectorXd getGlobalParameters() const override;
+  Eigen::MatrixXd getGlobalParametersSpace() const override;
+  void setGlobalParameters(const Eigen::VectorXd & new_params) override;
+  std::vector<std::string> getGlobalParametersNames() const override;
 
-  virtual Eigen::VectorXi getObservationsCircularity() const override;
+  Eigen::VectorXi getObservationsCircularity() const override;
 
-  virtual Eigen::VectorXd
+  Eigen::VectorXd
   predictObservation(const Input & input,
                      std::default_random_engine * engine) const override;
 

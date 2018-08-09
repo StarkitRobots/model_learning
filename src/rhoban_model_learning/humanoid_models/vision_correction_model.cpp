@@ -186,7 +186,7 @@ void VCM::VisionInputReader::fromJson(const Json::Value & v,
 
 
 VCM::VisionCorrectionModel() :
-  ModularModel(nb_parameters),
+  Model(nb_parameters),
   cam_offset (Eigen::Vector3d::Zero()),
   imu_offset (Eigen::Vector3d::Zero()),
   neck_offset(Eigen::Vector3d::Zero()),
@@ -201,7 +201,7 @@ VCM::VisionCorrectionModel() :
 }
 
 VCM::VisionCorrectionModel(const VisionCorrectionModel & other)
-  : ModularModel(other), px_stddev(other.px_stddev), cam_offset(other.cam_offset),
+  : Model(other), px_stddev(other.px_stddev), cam_offset(other.cam_offset),
     imu_offset(other.imu_offset), neck_offset(other.neck_offset),
     camera_model(other.camera_model),
     px_stddev_space(other.px_stddev_space),
@@ -413,7 +413,7 @@ std::unique_ptr<Model> VCM::clone() const {
 }
 
 Json::Value VCM::toJson() const  {
-  Json::Value v = ModularModel::toJson();
+  Json::Value v = Model::toJson();
   v["px_stddev"] = px_stddev;
   v["px_stddev_space"] = rhoban_utils::vector2Json<2>(px_stddev_space);
   v["cam_offset" ] = rhoban_utils::vector2Json<3>(cam_offset );
@@ -428,7 +428,7 @@ Json::Value VCM::toJson() const  {
 }
 
 void VCM::fromJson(const Json::Value & v, const std::string & dir_name) {
-  ModularModel::fromJson(v, dir_name);
+  Model::fromJson(v, dir_name);
   rhoban_utils::tryRead(v,"px_stddev", &px_stddev);
   rhoban_utils::tryReadEigen(v,"px_stddev_space", &px_stddev_space);
   rhoban_utils::tryReadEigen(v,"cam_offset", &cam_offset);

@@ -1,4 +1,5 @@
 #include "rhoban_model_learning/model.h"
+#include "rhoban_model_learning/model_factory.h"
 
 #include "rhoban_random/multivariate_gaussian.h"
 #include "rhoban_utils/threading/multi_core.h"
@@ -13,13 +14,56 @@ Model::Model() : nb_samples(500), nb_threads(1)
 {
 }
 
-Model::Model(int nb_samples_) : nb_samples(nb_samples_), nb_threads(1)
+Model::Model(const Model & other)
+  : nb_samples(other.nb_samples), nb_threads(other.nb_threads), used_indices(other.used_indices)
 {
 }
 
-Model::Model(const Model & other)
-  : nb_samples(other.nb_samples), nb_threads(other.nb_threads)
-{
+int Model::getGlobalParametersCount() const {
+  return getGlobalParameters().rows();
+}
+
+Eigen::VectorXd Model::getParameters() const {
+  Eigen::VectorXd global_parameters = getGlobalParameters();
+  Eigen::VectorXd used_parameters(used_indices.size());
+  int used_idx = 0;
+  for (int idx : used_indices) {
+    used_parameters(used_idx) = global_parameters[idx];
+    used_idx++;
+  }
+  return used_parameters;
+}
+
+Eigen::MatrixXd Model::getParametersSpace() const {
+  Eigen::MatrixXd global_space = getGlobalParametersSpace();
+  Eigen::MatrixXd used_space(used_indices.size(), 2);
+  int used_idx = 0;
+  for (int idx : used_indices) {
+    used_space.row(used_idx) = global_space.row(idx);
+    used_idx++;
+  }
+  return used_space;
+}
+
+void Model::setParameters(const Eigen::VectorXd & new_params) {
+  Eigen::VectorXd global_parameters = getGlobalParameters();
+  int used_idx = 0;
+  for (int idx : used_indices) {
+    global_parameters(idx) = new_params(used_idx);
+    used_idx++;
+  }
+  setGlobalParameters(global_parameters);
+}
+
+std::vector<std::string> Model::getParametersNames() const {
+  std::vector<std::string> global_names = getGlobalParametersNames();
+  std::vector<std::string> used_names(used_indices.size());
+  int used_idx = 0;
+  for (int idx : used_indices) {
+    used_names[used_idx] = global_names[idx];
+    used_idx++;
+  }
+  return used_names;
 }
 
 double Model::computeLogLikelihood(const Sample & sample,
@@ -62,6 +106,7 @@ Json::Value Model::toJson() const {
   Json::Value v;
   v["nb_samples"] = nb_samples;
   v["nb_threads"] = nb_threads;
+  v["used_indices"] = rhoban_utils::vector2Json(used_indices);
   return v;
 }
 
@@ -69,6 +114,7 @@ void Model::fromJson(const Json::Value & v, const std::string & dir_name) {
   (void) dir_name;
   rhoban_utils::tryRead(v, "nb_samples", &nb_samples);
   rhoban_utils::tryRead(v, "nb_threads", &nb_threads);
+  rhoban_utils::tryReadVector<int>(v, "used_indices", &used_indices);
 }
 
 void Model::appendParametersSpace(std::ostream & out) const {
@@ -83,6 +129,13 @@ void Model::appendParametersSpace(std::ostream & out) const {
         << parameters_spaces(i,0) << "," << parameters_spaces(i,1) << "]"
         << std::endl;
   }
+}
+
+std::unique_ptr<Model> Model::clone() const {
+  Json::Value v = toJson();
+  std::unique_ptr<Model> other = ModelFactory().build(getClassName());
+  other->fromJson(v,"./");
+  return other;
 }
 
 

@@ -12,26 +12,30 @@ class Model : public rhoban_utils::JsonSerializable
 public:
 
   Model();
-  /// Number of samples to estimate logLikelihood
-  Model(int nb_samples);
   /// Copy constructor
   Model(const Model & other);
 
   /// Return the values of the current parameters
-  virtual Eigen::VectorXd getParameters() const = 0;
+  Eigen::VectorXd getParameters() const;
 
   /// Return the space allowed for parameters
-  virtual Eigen::MatrixXd getParametersSpace() const = 0;
+  Eigen::MatrixXd getParametersSpace() const;
 
   /// Update the internal structure of the model with the provided parameters
-  virtual void setParameters(const Eigen::VectorXd & new_params) = 0;
+  void setParameters(const Eigen::VectorXd & new_params);
 
   /// Return a list of names for the parameters
-  virtual std::vector<std::string> getParametersNames() const = 0;
+  std::vector<std::string> getParametersNames() const;
 
   /// Return a vector indicating for each dimension of the observation if it is
   /// a circular dimension in radians
   virtual Eigen::VectorXi getObservationsCircularity() const = 0;
+
+  virtual int getGlobalParametersCount() const;
+  virtual Eigen::VectorXd getGlobalParameters() const = 0;
+  virtual Eigen::MatrixXd getGlobalParametersSpace() const = 0;
+  virtual void setGlobalParameters(const Eigen::VectorXd & new_params) = 0;
+  virtual std::vector<std::string> getGlobalParametersNames() const = 0;
   
 
   /// Return the predicted observation according to the provided input and
@@ -56,7 +60,9 @@ public:
   Json::Value toJson() const;
   void fromJson(const Json::Value & v, const std::string & dir_name);
 
-  virtual std::unique_ptr<Model> clone() const = 0;
+  /// Default method for cloning is to serialize the object to Json and deserialize
+  /// it which might be too time consuming for some classes
+  virtual std::unique_ptr<Model> clone() const;
 
   /// Append a readable version of the parameters space to the given stream
   void appendParametersSpace(std::ostream & out) const;
@@ -68,6 +74,9 @@ protected:
   /// The maximal number of threads allowed for computing averageLogLikelihood
   /// of a dataSet
   int nb_threads;
+
+  /// The list of indices used for training
+  std::vector<int> used_indices;
 };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rhoban_model_learning/modular_model.h"
+#include "rhoban_model_learning/model.h"
 #include "rhoban_model_learning/input_reader.h"
 
 #include "Model/HumanoidModel.hpp"
@@ -17,7 +17,7 @@ namespace rhoban_model_learning
 /// - Expected position of the data in the left_foot referential
 ///
 /// Observations are positions of the object in the image (x,y)
-class VisionCorrectionModel : public ModularModel {
+class VisionCorrectionModel : public Model {
 public:
 
   class VisionInput : public Input {

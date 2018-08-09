@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rhoban_model_learning/modular_model.h"
+#include "rhoban_model_learning/model.h"
 
 namespace rhoban_model_learning
 {
@@ -10,7 +10,7 @@ namespace rhoban_model_learning
 ///
 /// It takes as input the position and the speed of the ball as well as the time
 /// requested for prediction (dt)
-class PositionPredictor : public ModularModel {
+class PositionPredictor : public Model {
 public:
   class Input : public rhoban_model_learning::Input {
   public:

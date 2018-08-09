@@ -13,7 +13,7 @@ std::unique_ptr<rhoban_model_learning::Input> PositionPredictor::Input::clone() 
   return std::unique_ptr<rhoban_model_learning::Input>(new Input(*this));
 }
 
-PositionPredictor::PositionPredictor(int nb_dims) : ModularModel(nb_dims) {}
+PositionPredictor::PositionPredictor(int nb_dims) : Model() {}
 
 Eigen::VectorXi PositionPredictor::getObservationsCircularity() const {
   return Eigen::VectorXi::Zero(4);
