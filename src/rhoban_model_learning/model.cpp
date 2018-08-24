@@ -15,52 +15,42 @@ Model::Model() : nb_samples(500), nb_threads(1)
 }
 
 Model::Model(const Model & other)
-  : nb_samples(other.nb_samples), nb_threads(other.nb_threads), used_indices(other.used_indices)
+  : nb_samples(other.nb_samples), nb_threads(other.nb_threads)
 {
 }
 
-int Model::getGlobalParametersCount() const {
-  return getGlobalParameters().rows();
+int Model::getParametersSize() const {
+  return getParameters().rows();
 }
 
-Eigen::VectorXd Model::getParameters() const {
-  Eigen::VectorXd global_parameters = getGlobalParameters();
+Eigen::VectorXd Model::getParameters(const std::vector<int> & used_indices) const {
+  Eigen::VectorXd all_parameters = getParameters();
   Eigen::VectorXd used_parameters(used_indices.size());
   int used_idx = 0;
   for (int idx : used_indices) {
-    used_parameters(used_idx) = global_parameters[idx];
+    used_parameters(used_idx) = all_parameters[idx];
     used_idx++;
   }
   return used_parameters;
 }
 
-Eigen::MatrixXd Model::getParametersSpace() const {
-  Eigen::MatrixXd global_space = getGlobalParametersSpace();
-  Eigen::MatrixXd used_space(used_indices.size(), 2);
+void Model::setParameters(const Eigen::VectorXd & new_params,
+                          const std::vector<int> & used_indices) {
+  Eigen::VectorXd all_parameters = getParameters();
   int used_idx = 0;
   for (int idx : used_indices) {
-    used_space.row(used_idx) = global_space.row(idx);
+    all_parameters(idx) = new_params(used_idx);
     used_idx++;
   }
-  return used_space;
+  setParameters(all_parameters);
 }
 
-void Model::setParameters(const Eigen::VectorXd & new_params) {
-  Eigen::VectorXd global_parameters = getGlobalParameters();
-  int used_idx = 0;
-  for (int idx : used_indices) {
-    global_parameters(idx) = new_params(used_idx);
-    used_idx++;
-  }
-  setGlobalParameters(global_parameters);
-}
-
-std::vector<std::string> Model::getParametersNames() const {
-  std::vector<std::string> global_names = getGlobalParametersNames();
+std::vector<std::string> Model::getParametersNames(const std::vector<int> & used_indices) const {
+  std::vector<std::string> all_names = getParametersNames();
   std::vector<std::string> used_names(used_indices.size());
   int used_idx = 0;
   for (int idx : used_indices) {
-    used_names[used_idx] = global_names[idx];
+    used_names[used_idx] = all_names[idx];
     used_idx++;
   }
   return used_names;
@@ -106,7 +96,6 @@ Json::Value Model::toJson() const {
   Json::Value v;
   v["nb_samples"] = nb_samples;
   v["nb_threads"] = nb_threads;
-  v["used_indices"] = rhoban_utils::vector2Json(used_indices);
   return v;
 }
 
@@ -114,21 +103,6 @@ void Model::fromJson(const Json::Value & v, const std::string & dir_name) {
   (void) dir_name;
   rhoban_utils::tryRead(v, "nb_samples", &nb_samples);
   rhoban_utils::tryRead(v, "nb_threads", &nb_threads);
-  rhoban_utils::tryReadVector<int>(v, "used_indices", &used_indices);
-}
-
-void Model::appendParametersSpace(std::ostream & out) const {
-  std::vector<std::string> parameters_names = getParametersNames();
-  Eigen::MatrixXd parameters_spaces = getParametersSpace();
-  if (parameters_names.size() != (size_t)parameters_spaces.rows()) {
-    throw std::logic_error(DEBUG_INFO +
-                           " inconsistent number of parameters between spaces and names");
-  }
-  for (int i = 0; i < parameters_spaces.rows(); i++) {
-    out << parameters_names[i] << ": ["
-        << parameters_spaces(i,0) << "," << parameters_spaces(i,1) << "]"
-        << std::endl;
-  }
 }
 
 std::unique_ptr<Model> Model::clone() const {

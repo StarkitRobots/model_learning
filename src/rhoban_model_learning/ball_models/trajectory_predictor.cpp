@@ -114,7 +114,7 @@ std::string TrajectoryPredictor::Reader::getClassName() const {
 
 
 TrajectoryPredictor::TrajectoryPredictor()
-  : Model(0), speed_estimator(), position_predictor()
+  : Model(), speed_estimator(), position_predictor()
 {
 }
 

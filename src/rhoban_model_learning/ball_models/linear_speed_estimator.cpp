@@ -10,7 +10,7 @@ namespace rhoban_model_learning
 {
 
 LinearSpeedEstimator::LinearSpeedEstimator()
-  : SpeedEstimator(1), window_duration(0.5), max_ball_speed(4)
+  : SpeedEstimator(), window_duration(0.5), max_ball_speed(4)
 {
 }
 

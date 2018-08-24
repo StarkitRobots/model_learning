@@ -3,5 +3,10 @@ set(SOURCES
   model.cpp
   model_factory.cpp
   model_learner.cpp
+  model_space.cpp
+  model_space_factory.cpp
+  model_prior.cpp
+  model_prior_factory.cpp
   sample.cpp
+  tools.cpp
 )

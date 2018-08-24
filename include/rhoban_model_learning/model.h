@@ -14,28 +14,28 @@ public:
   Model();
   /// Copy constructor
   Model(const Model & other);
+  
+  /// Return the total number of parameters of the model
+  virtual int getParametersSize() const;
 
   /// Return the values of the current parameters
-  Eigen::VectorXd getParameters() const;
-
-  /// Return the space allowed for parameters
-  Eigen::MatrixXd getParametersSpace() const;
+  virtual Eigen::VectorXd getParameters() const = 0;
+  virtual Eigen::VectorXd getParameters(const std::vector<int> & used_indices) const;
 
   /// Update the internal structure of the model with the provided parameters
-  void setParameters(const Eigen::VectorXd & new_params);
+  virtual void setParameters(const Eigen::VectorXd & new_params) = 0;
+  /// Set parameters at provided indices
+  virtual void setParameters(const Eigen::VectorXd & new_params,
+                             const std::vector<int> & used_indices);
 
   /// Return a list of names for the parameters
-  std::vector<std::string> getParametersNames() const;
+  virtual std::vector<std::string> getParametersNames() const = 0;
+  /// List of names for parameters at the given indices
+  std::vector<std::string> getParametersNames(const std::vector<int> & used_indices) const;
 
   /// Return a vector indicating for each dimension of the observation if it is
   /// a circular dimension in radians
   virtual Eigen::VectorXi getObservationsCircularity() const = 0;
-
-  virtual int getGlobalParametersCount() const;
-  virtual Eigen::VectorXd getGlobalParameters() const = 0;
-  virtual Eigen::MatrixXd getGlobalParametersSpace() const = 0;
-  virtual void setGlobalParameters(const Eigen::VectorXd & new_params) = 0;
-  virtual std::vector<std::string> getGlobalParametersNames() const = 0;
   
 
   /// Return the predicted observation according to the provided input and
@@ -64,9 +64,6 @@ public:
   /// it which might be too time consuming for some classes
   virtual std::unique_ptr<Model> clone() const;
 
-  /// Append a readable version of the parameters space to the given stream
-  void appendParametersSpace(std::ostream & out) const;
-
 protected:
   /// The number of samples used to fit a distribution if necessary
   int nb_samples;
@@ -74,9 +71,6 @@ protected:
   /// The maximal number of threads allowed for computing averageLogLikelihood
   /// of a dataSet
   int nb_threads;
-
-  /// The list of indices used for training
-  std::vector<int> used_indices;
 };
 
 }

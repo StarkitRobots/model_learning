@@ -26,12 +26,14 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   )
 
+# TODO integrate back ball_models and humanoid_models
+
 # Directories containing sources files
 set(DIRECTORIES
   src/rhoban_model_learning/
-  src/rhoban_model_learning/ball_models
-  src/rhoban_model_learning/models
-  src/rhoban_model_learning/humanoid_models
+#  src/rhoban_model_learning/ball_models
+#  src/rhoban_model_learning/models
+#  src/rhoban_model_learning/humanoid_models
   )
 
 # Build ALL_SOURCES
@@ -59,23 +61,26 @@ target_link_libraries(rhoban_model_learning
   )
 
 # Binaries
-add_executable(test_simple_angular_model src/tests/test_simple_angular_model.cpp)
-target_link_libraries(test_simple_angular_model ${catkin_LIBRARIES} rhoban_model_learning)
+# TODO integrate back as a test
+#add_executable(test_simple_angular_model src/tests/test_simple_angular_model.cpp)
+#target_link_libraries(test_simple_angular_model ${catkin_LIBRARIES} rhoban_model_learning)
 
 add_executable(model_learner apps/model_learner.cpp)
 target_link_libraries(model_learner ${catkin_LIBRARIES} rhoban_model_learning)
 
-add_executable(model_learning_analyzer apps/model_learning_analyzer.cpp)
-target_link_libraries(model_learning_analyzer ${catkin_LIBRARIES} rhoban_model_learning)
+# TODO integrate back
+#add_executable(model_learning_analyzer apps/model_learning_analyzer.cpp)
+#target_link_libraries(model_learning_analyzer ${catkin_LIBRARIES} rhoban_model_learning)
 
-add_executable(vision_correction_debug tools/vision_correction_debug.cpp)
-target_link_libraries(vision_correction_debug ${catkin_LIBRARIES} rhoban_model_learning)
-
-add_executable(ball_sequences_filter tools/ball_sequences_filter.cpp)
-target_link_libraries(ball_sequences_filter ${catkin_LIBRARIES} rhoban_model_learning)
-
-add_executable(ball_trajectory_predictor tools/ball_trajectory_predictor.cpp)
-target_link_libraries(ball_trajectory_predictor ${catkin_LIBRARIES} rhoban_model_learning)
+# TODO integrate back tools
+#add_executable(vision_correction_debug tools/vision_correction_debug.cpp)
+#target_link_libraries(vision_correction_debug ${catkin_LIBRARIES} rhoban_model_learning)
+#
+#add_executable(ball_sequences_filter tools/ball_sequences_filter.cpp)
+#target_link_libraries(ball_sequences_filter ${catkin_LIBRARIES} rhoban_model_learning)
+#
+#add_executable(ball_trajectory_predictor tools/ball_trajectory_predictor.cpp)
+#target_link_libraries(ball_trajectory_predictor ${catkin_LIBRARIES} rhoban_model_learning)
 
 
 enable_testing()

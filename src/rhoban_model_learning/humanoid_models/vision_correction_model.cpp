@@ -186,7 +186,7 @@ void VCM::VisionInputReader::fromJson(const Json::Value & v,
 
 
 VCM::VisionCorrectionModel() :
-  Model(nb_parameters),
+  Model(),
   cam_offset (Eigen::Vector3d::Zero()),
   imu_offset (Eigen::Vector3d::Zero()),
   neck_offset(Eigen::Vector3d::Zero()),
