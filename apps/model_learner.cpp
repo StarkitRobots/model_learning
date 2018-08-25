@@ -1,5 +1,5 @@
 #include "rhoban_model_learning/model_learner.h"
-#include "rhoban_model_learning/input_reader_factory.h"
+#include "rhoban_model_learning/data_set_reader_factory.h"
 
 #include "rhoban_random/tools.h"
 
@@ -18,7 +18,7 @@ int main(int argc, char ** argv) {
   ModelLearner learner;
   learner.loadFile(argv[1]);
   // Reading input reader from Json
-  std::unique_ptr<InputReader> input_reader = InputReaderFactory().buildFromJsonFile(argv[2]);
+  std::unique_ptr<DataSetReader> input_reader = DataSetReaderFactory().buildFromJsonFile(argv[2]);
 
   learner.getSpace().append(learner.getModel(), learner.getTrainableIndices(), std::cout);
 

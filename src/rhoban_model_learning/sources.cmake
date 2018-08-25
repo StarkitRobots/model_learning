@@ -1,8 +1,8 @@
 set(SOURCES
+  data_set_reader_factory.cpp
   default_input.cpp
   default_prior.cpp
   default_space.cpp
-  input_reader_factory.cpp
   model.cpp
   model_factory.cpp
   model_learner.cpp
