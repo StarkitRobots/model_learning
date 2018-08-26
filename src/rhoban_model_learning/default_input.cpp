@@ -3,6 +3,9 @@
 namespace rhoban_model_learning {
 
 DefaultInput::DefaultInput() {}
+
+DefaultInput::DefaultInput(const Eigen::VectorXd & data_) : data(data_) {}
+
 DefaultInput::DefaultInput(const DefaultInput & other) : data(other.data) {}
 
 std::unique_ptr<Input> DefaultInput::clone() const {

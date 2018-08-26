@@ -1,5 +1,6 @@
 set(SOURCES
   data_set_reader_factory.cpp
+  default_data_set_reader.cpp
   default_input.cpp
   default_prior.cpp
   default_space.cpp

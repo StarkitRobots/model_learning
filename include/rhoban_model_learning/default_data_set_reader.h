@@ -1,10 +1,6 @@
 #pragma once
 
-#include "rhoban_model_learning/sample.h"
-
-#include <rhoban_utils/serialization/json_serializable.h>
-
-#include <random>
+#include "rhoban_model_learning/data_set_reader.h"
 
 namespace rhoban_model_learning
 {
@@ -21,7 +17,7 @@ public:
   DataSet extractSamples(const std::string & file_path,
                          std::default_random_engine * engine) const override;
 
-  virtual std::string getClassName() const override;
+  std::string getClassName() const override;
   Json::Value toJson() const override;
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
 
