@@ -31,6 +31,7 @@ include_directories(
 # Directories containing sources files
 set(DIRECTORIES
   src/rhoban_model_learning/
+  src/rhoban_model_learning/basic_models
 #  src/rhoban_model_learning/ball_models
 #  src/rhoban_model_learning/models
 #  src/rhoban_model_learning/humanoid_models
@@ -86,7 +87,9 @@ target_link_libraries(model_learner ${catkin_LIBRARIES} rhoban_model_learning)
 enable_testing()
  
 set(TESTS
-  humanoid_models/vision_correction_model
+  basic_models/linear_model
+# TODO: reintegrate
+#  humanoid_models/vision_correction_model
 )
 
 if (CATKIN_ENABLE_TESTING)

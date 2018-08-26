@@ -5,6 +5,10 @@
 
 #include "rhoban_random/gaussian_distribution.h"
 
+#include "rhoban_utils/util.h"
+
+#include <iostream>
+
 namespace rhoban_model_learning
 {
 
@@ -27,6 +31,9 @@ double ModelPrior::getLogLikelihood(const Model & m) const {
   double log_likelihood = 0.0;
   for (int i = 0; i < deviations.rows(); i++) {
     double stddev = deviations(i);
+    if (stddev <= 0.0) {
+      throw std::logic_error(DEBUG_INFO + "Negative or null stddev found");
+    }
     rhoban_random::GaussianDistribution distrib(means(i), stddev * stddev);
     log_likelihood += distrib.getLogLikelihood(parameters(i));
   }
@@ -41,6 +48,9 @@ double ModelPrior::getLogLikelihood(const Model & m,
   double log_likelihood = 0.0;
   for (int i : used_indices) {
     double stddev = deviations(i);
+    if (stddev <= 0.0) {
+      throw std::logic_error(DEBUG_INFO + "Negative or null stddev found");
+    }
     rhoban_random::GaussianDistribution distrib(means(i), stddev * stddev);
     log_likelihood += distrib.getLogLikelihood(parameters(i));
   }

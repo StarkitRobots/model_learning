@@ -29,13 +29,15 @@ public:
                              const std::vector<int> & used_indices);
 
   /// Return a list of names for the parameters
-  virtual std::vector<std::string> getParametersNames() const = 0;
+  /// Default implementation return a vector with {param1,param2,...}
+  virtual std::vector<std::string> getParametersNames() const;
   /// List of names for parameters at the given indices
   std::vector<std::string> getParametersNames(const std::vector<int> & used_indices) const;
 
   /// Return a vector indicating for each dimension of the observation if it is
   /// a circular dimension in radians
-  virtual Eigen::VectorXi getObservationsCircularity() const = 0;
+  /// Default implementation is none of the dimension is circular
+  virtual Eigen::VectorXi getObservationsCircularity() const;
   
 
   /// Return the predicted observation according to the provided input and

@@ -1,0 +1,8 @@
+{
+    "class name" : "DefaultDataSetReader",
+    "content" : {
+        "input_dim" : 2,
+        "obs_dim" : 1,
+        "validation_ratio" : 0.1
+    }
+}

@@ -1,0 +1,43 @@
+{
+    "model" : {
+        "class name" : "LinearModel",
+        "content" : {
+            "coeffs" : {
+                "rows" : 2,
+                "values" : [0,0]
+            }
+        }
+    },
+    "prior" : {
+        "class name" : "DefaultPrior",
+        "content" : {
+            "means" : {
+                "rows" : 4,
+                "values" : [0,0,0,1]
+            },
+            "deviations" : {
+                "rows" : 4,
+                "values" : [100,100,100,100]//Represents a low influence of prior
+            }
+        }
+    },
+    "space" : {
+        "class name" : "DefaultSpace",
+        "content" : {
+            "space" : {
+                "rows" : 4,
+                "cols" : 2,
+                "values" : [[-10,10],[-10,10],[-10,10],[0.000001,5]]
+            }
+        }
+    },
+    "optimizer" : {
+        "class name" : "CrossEntropy",
+        "content" : {
+            "nb_generations" : 50000,
+            "population_size" : 100,
+            "best_set_size" : 10
+        }
+    },
+    "trainable_indices" : [0,1,2,3]
+}

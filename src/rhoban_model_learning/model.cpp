@@ -45,6 +45,15 @@ void Model::setParameters(const Eigen::VectorXd & new_params,
   setParameters(all_parameters);
 }
 
+std::vector<std::string> Model::getParametersNames() const {
+  int nb_parameters = getParametersSize();
+  std::vector<std::string> result;
+  for (int idx = 0; idx < nb_parameters; idx++) {
+    result.push_back("param" + std::to_string(idx+1));
+  }
+  return result;
+}
+
 std::vector<std::string> Model::getParametersNames(const std::vector<int> & used_indices) const {
   std::vector<std::string> all_names = getParametersNames();
   std::vector<std::string> used_names(used_indices.size());
@@ -54,6 +63,10 @@ std::vector<std::string> Model::getParametersNames(const std::vector<int> & used
     used_idx++;
   }
   return used_names;
+}
+
+Eigen::VectorXi Model::getObservationsCircularity() const {
+  return Eigen::VectorXi(getParametersSize(), 0);
 }
 
 double Model::computeLogLikelihood(const Sample & sample,
