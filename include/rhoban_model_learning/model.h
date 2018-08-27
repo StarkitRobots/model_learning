@@ -59,8 +59,8 @@ public:
   double averageLogLikelihood(const SampleVector & data_set,
                               std::default_random_engine * engine) const;
 
-  Json::Value toJson() const;
-  void fromJson(const Json::Value & v, const std::string & dir_name);
+  Json::Value toJson() const override;
+  void fromJson(const Json::Value & v, const std::string & dir_name) override;
 
   /// Default method for cloning is to serialize the object to Json and deserialize
   /// it which might be too time consuming for some classes
