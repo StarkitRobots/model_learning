@@ -3,6 +3,7 @@
 #include "rhoban_model_learning/model.h"
 #include "rhoban_model_learning/model_prior.h"
 #include "rhoban_model_learning/model_space.h"
+#include "rhoban_model_learning/predictor.h"
 
 #include "rhoban_bbo/optimizer.h"
 
@@ -24,6 +25,7 @@ public:
   ModelLearner(std::unique_ptr<Model> model,
                std::unique_ptr<ModelPrior> prior,
                std::unique_ptr<ModelSpace> space,
+               std::unique_ptr<Predictor> predictor,
                std::unique_ptr<rhoban_bbo::Optimizer> optimizer,
                const std::vector<int> trainable_indices);
 
@@ -58,6 +60,9 @@ protected:
   
   /// The allowed space
   std::unique_ptr<ModelSpace> space;
+
+  /// The predictor used to compare model prediction and observations
+  std::unique_ptr<Predictor> predictor;
 
   /// The blackbox optimizer used for parameters calibration
   std::unique_ptr<rhoban_bbo::Optimizer> optimizer;

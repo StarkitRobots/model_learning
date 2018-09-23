@@ -3,6 +3,7 @@
 #include "rhoban_model_learning/model_factory.h"
 #include "rhoban_model_learning/model_prior_factory.h"
 #include "rhoban_model_learning/model_space_factory.h"
+#include "rhoban_model_learning/predictor_factory.h"
 
 #include "rhoban_bbo/optimizer_factory.h"
 
@@ -16,11 +17,13 @@ ModelLearner::ModelLearner() {}
 ModelLearner::ModelLearner(std::unique_ptr<Model> model_,
                            std::unique_ptr<ModelPrior> prior_,
                            std::unique_ptr<ModelSpace> space_,
+                           std::unique_ptr<Predictor> predictor_,
                            std::unique_ptr<rhoban_bbo::Optimizer> optimizer_,
                            const std::vector<int> trainable_indices_) :
   model(std::move(model_)),
   prior(std::move(prior_)),
   space(std::move(space_)),
+  predictor(std::move(predictor_)),
   optimizer(std::move(optimizer_)),
   trainable_indices(trainable_indices_)
 {
@@ -76,7 +79,7 @@ double ModelLearner::getLogLikelihood(const Model & model,
                                       const SampleVector & data_set,
                                       std::default_random_engine * engine) const
 {
-  double data_all = model.averageLogLikelihood(data_set, engine);
+  double data_all = predictor->averageLogLikelihood(data_set, model, engine);
   double parameters_ll = prior->getLogLikelihood(model, trainable_indices);
   // Since we use average loglikelihood for data, parameters_ll has to be
   // normalized by number of elements in data set
@@ -99,6 +102,9 @@ Json::Value ModelLearner::toJson() const
   if (space) {
     v["space"] = space->toFactoryJson();
   }
+  if (predictor) {
+    v["predictor"] = predictor->toFactoryJson();
+  }
   if (optimizer) {
     v["optimizer"] = optimizer->toFactoryJson();
   }
@@ -111,6 +117,7 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
   model = ModelFactory().read(v, "model", dir_name);
   prior = ModelPriorFactory().read(v, "prior", dir_name);
   space = ModelSpaceFactory().read(v, "space", dir_name);
+  predictor = PredictorFactory().read(v, "predictor", dir_name);
   optimizer = OptimizerFactory().read(v, "optimizer", dir_name);
   trainable_indices = rhoban_utils::readVector<int>(v, "trainable_indices");
 }

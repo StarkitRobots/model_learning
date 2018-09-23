@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "rhoban_model_learning/basic_models/linear_model.h"
+#include "rhoban_model_learning/basic_models/linear_predictor.h"
 
 #include "rhoban_model_learning/default_input.h"
 
@@ -43,6 +44,7 @@ TEST(LinearModel, setInvalidStdDev) {
 
 TEST(LinearModel, predictObservationDeterminist) {
   LinearModel model(2);
+  LinearPredictor predictor;
   Eigen::VectorXd params(4);
   params << 3,-2,2,1;
   model.setParameters(params);
@@ -50,7 +52,7 @@ TEST(LinearModel, predictObservationDeterminist) {
     {Eigen::Vector2d(0,0), Eigen::Vector2d(2,0), Eigen::Vector2d(0,2)};
   std::vector<double> outputs = {2,8,-2};
   for (size_t i = 0; i < inputs.size(); i++){
-    Eigen::VectorXd prediction = model.predictObservation(DefaultInput(inputs[i]), nullptr);
+    Eigen::VectorXd prediction = predictor.predictObservation(DefaultInput(inputs[i]), model, nullptr);
     EXPECT_DOUBLE_EQ(outputs[i],prediction(0));
   }
 }

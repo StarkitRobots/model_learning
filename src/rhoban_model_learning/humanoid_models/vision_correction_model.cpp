@@ -37,7 +37,7 @@ std::unique_ptr<Input> VCM::VisionInput::clone() const {
   return std::unique_ptr<Input>(new VisionInput(*this));
 }
 
-VCM::VisionInputReader::VisionInputReader()
+VCM::VisionDataSetReader::VisionDataSetReader()
   : x_coord_range(0, 10000), y_coord_range(0, 10000),
     nb_training_tags(-1), nb_validation_tags(-1),
     max_samples_per_tag(1), min_samples_per_tag(1),
@@ -46,7 +46,7 @@ VCM::VisionInputReader::VisionInputReader()
 {
 }
 
-DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
+DataSet VCM::VisionDataSetReader::extractSamples(const std::string & file_path,
                                                std::default_random_engine * engine) const
 {
   Leph::MatrixLabel logs;
@@ -153,11 +153,11 @@ DataSet VCM::VisionInputReader::extractSamples(const std::string & file_path,
   return data;
 }
 
-std::string VCM::VisionInputReader::getClassName() const {
-  return "VisionInputReader";
+std::string VCM::VisionDataSetReader::getClassName() const {
+  return "VisionDataSetReader";
 }
 
-Json::Value VCM::VisionInputReader::toJson() const {
+Json::Value VCM::VisionDataSetReader::toJson() const {
   Json::Value  v;
   v["x_coord_range"] = rhoban_utils::vector2Json(x_coord_range);
   v["y_coord_range"] = rhoban_utils::vector2Json(y_coord_range);
@@ -170,8 +170,8 @@ Json::Value VCM::VisionInputReader::toJson() const {
   v["verbose"            ] = verbose            ;
   return v;
 }
-void VCM::VisionInputReader::fromJson(const Json::Value & v, 
-                                      const std::string & dir_name) {
+void VCM::VisionDataSetReader::fromJson(const Json::Value & v, 
+                                        const std::string & dir_name) {
   (void) dir_name;
   rhoban_utils::tryReadEigen(v, "x_coord_range", &x_coord_range);
   rhoban_utils::tryReadEigen(v, "y_coord_range", &y_coord_range);

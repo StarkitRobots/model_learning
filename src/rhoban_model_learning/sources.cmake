@@ -12,6 +12,8 @@ set(SOURCES
   model_space_factory.cpp
   model_prior.cpp
   model_prior_factory.cpp
+  predictor.cpp
+  predictor_factory.cpp
   sample.cpp
   tools.cpp
 )

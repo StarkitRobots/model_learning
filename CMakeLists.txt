@@ -34,7 +34,7 @@ set(DIRECTORIES
   src/rhoban_model_learning/basic_models
 #  src/rhoban_model_learning/ball_models
 #  src/rhoban_model_learning/models
-#  src/rhoban_model_learning/humanoid_models
+  src/rhoban_model_learning/humanoid_models
   )
 
 # Build ALL_SOURCES

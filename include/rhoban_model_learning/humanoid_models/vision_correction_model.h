@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rhoban_model_learning/model.h"
-#include "rhoban_model_learning/input_reader.h"
+#include "rhoban_model_learning/data_set_reader.h"
 
 #include "Model/HumanoidModel.hpp"
 #include "Model/NamesModel.h"
@@ -32,9 +32,9 @@ public:
     Leph::VectorLabel data;
   };
 
-  class VisionInputReader : public InputReader {
+  class VisionDataSetReader : public DataSetReader {
   public:
-    VisionInputReader();
+    VisionDataSetReader();
 
     /// Throw an error if:
     /// - none of `nb_training_tags` and `nb_validation_tags` is provided

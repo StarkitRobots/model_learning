@@ -1,8 +1,5 @@
 #include "rhoban_model_learning/basic_models/linear_model.h"
 
-#include "rhoban_model_learning/default_input.h"
-
-#include "rhoban_random/gaussian_distribution.h"
 #include "rhoban_utils/util.h"
 
 namespace rhoban_model_learning {
@@ -40,37 +37,6 @@ void LinearModel::setParameters(const Eigen::VectorXd & new_params) {
   coeffs = new_params.segment(0, coeffs.rows()); idx += coeffs.rows();
   bias = new_params(idx++);
   std_dev = new_params(idx++);
-}
-  
-Eigen::VectorXd LinearModel::predictObservation(const Input & input,
-                                                std::default_random_engine * engine) const {
-  double value;
-  try {
-    Eigen::VectorXd input_vec = (dynamic_cast<const DefaultInput &>(input)).data;
-    value = coeffs.transpose() * input_vec + bias;
-  } catch(const std::bad_cast & exc) {
-    throw std::runtime_error(DEBUG_INFO + "Invalid type for input, expecting DefaultInput");
-  }
-  if (engine) {
-    std::normal_distribution<double> obs_noise_distrib(0, std_dev);
-    value += obs_noise_distrib(*engine);
-  }
-  Eigen::VectorXd result(1);
-  result(0) = value;
-  return result;
-}
-  
-double LinearModel::computeLogLikelihood(const Sample & sample,
-                                         std::default_random_engine * engine) const {
-  // Here it is easy to compute the logLikelihood, thus we do not need to use
-  // Monte-Carlo
-  (void) engine;
-  if (sample.getObservation().rows() != 1) {
-    throw std::runtime_error(DEBUG_INFO + "Invalid dimension for observation");
-  }
-  double expected_value = predictObservation(sample.getInput(), nullptr)(0);
-  rhoban_random::GaussianDistribution distrib(expected_value, std_dev * std_dev);
-  return distrib.getLogLikelihood(sample.getObservation()(0));
 }
 
 std::unique_ptr<Model> LinearModel::clone() const {
