@@ -2,6 +2,8 @@
 
 #include "rhoban_model_learning/basic_models/linear_model.h"
 
+#include "rhoban_model_learning/humanoid_models/camera_model.h"
+
 // TODO: integrate back 
 //#include "rhoban_model_learning/humanoid_models/vision_correction_model.h"
 //#include "rhoban_model_learning/ball_models/position_predictor_factory.h"
@@ -14,6 +16,7 @@ namespace rhoban_model_learning
 
 ModelFactory::ModelFactory() {
   registerBuilder("LinearModel", []() { return std::unique_ptr<Model>(new LinearModel); });
+  registerBuilder("CameraModel", []() { return std::unique_ptr<Model>(new CameraModel); });
 //  registerBuilder("VisionCorrectionModel",
 //                  []() { return std::unique_ptr<Model>(new VisionCorrectionModel); });
 //  registerBuilder("TrajectoryPredictor",
