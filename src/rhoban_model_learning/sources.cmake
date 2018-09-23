@@ -1,4 +1,5 @@
 set(SOURCES
+  composite_model.cpp
   data_set_reader_factory.cpp
   default_data_set_reader.cpp
   default_input.cpp

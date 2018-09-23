@@ -11,7 +11,8 @@ namespace rhoban_model_learning
 /// A few important points:
 /// - Constructors of the child class has to register the models in the map
 ///   - Except copy constructors (just call copy constructors of CompositeModel)
-/// - Only 'mandatory' function to implement for the child class is 'predictObservation'
+/// - Only 'mandatory' function to implement for the child class are:
+///   'predictObservation', 'getClassName' and 'clone'
 class CompositeModel : public Model
 {
 public:
@@ -26,10 +27,9 @@ public:
   
   Json::Value toJson() const override;
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
-  virtual std::unique_ptr<Model> clone() const override;
   
 protected:
-  // Each model is named to facilitate 
+  // Each model is named to facilitate use of prefixes
   std::map<std::string,std::unique_ptr<Model>> models;
 };
 
