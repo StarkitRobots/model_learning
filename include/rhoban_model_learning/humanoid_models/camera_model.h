@@ -23,7 +23,6 @@ public:
   
   std::unique_ptr<Model> clone() const override;
 
-private:
   Leph::CameraModel model;
 };
 

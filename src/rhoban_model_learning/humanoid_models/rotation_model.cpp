@@ -12,17 +12,16 @@ RotationModel::RotationModel(const RotationModel & other)
 {
 }
 
+Eigen::Vector3d RotationModel::getRPY() const {
+  return Eigen::Vector3d(roll, pitch, yaw);
+}
+
 int RotationModel::getParametersSize() const {
   return 3;
 }
 
 Eigen::VectorXd RotationModel::getParameters() const {
-  Eigen::VectorXd params(3);
-  int idx = 0;
-  params(idx++) = roll;
-  params(idx++) = pitch;
-  params(idx++) = yaw;
-  return params;
+  return getRPY();
 }
 
 void RotationModel::setParameters(const Eigen::VectorXd & new_params) {

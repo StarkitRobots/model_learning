@@ -21,7 +21,6 @@ public:
   
   std::unique_ptr<Model> clone() const override;
 
-private:
   double px_stddev;
 };
 

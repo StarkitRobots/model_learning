@@ -1,3 +1,5 @@
+#pragma once
+
 #include "rhoban_model_learning/model.h"
 
 #include "Model/CameraModel.hpp"
@@ -11,6 +13,8 @@ class RotationModel : public Model {
 public:
   RotationModel();
   RotationModel(const RotationModel & other);
+
+  Eigen::Vector3d getRPY() const;
   
   int getParametersSize() const override;
   Eigen::VectorXd getParameters() const override;
