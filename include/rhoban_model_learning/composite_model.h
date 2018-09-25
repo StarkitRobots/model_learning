@@ -12,7 +12,7 @@ namespace rhoban_model_learning
 /// - Constructors of the child class has to register the models in the map
 ///   - Except copy constructors (just call copy constructors of CompositeModel)
 /// - Only 'mandatory' function to implement for the child class are:
-///   'predictObservation', 'getClassName' and 'clone'
+///   'getClassName' and 'clone'
 class CompositeModel : public Model
 {
 public:

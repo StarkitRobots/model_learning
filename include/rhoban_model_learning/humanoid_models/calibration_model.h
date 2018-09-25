@@ -3,6 +3,8 @@
 #include "rhoban_model_learning/composite_model.h"
 #include "rhoban_model_learning/humanoid_models/rotation_model.h"
 
+#include <Model/CameraModel.hpp>
+
 namespace rhoban_model_learning
 {
 
