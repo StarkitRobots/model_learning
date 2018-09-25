@@ -2,6 +2,8 @@
 
 #include <Eigen/Core>
 
+#include <vector>
+
 namespace rhoban_model_learning
 {
 

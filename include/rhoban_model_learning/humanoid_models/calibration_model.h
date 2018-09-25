@@ -15,8 +15,7 @@ namespace rhoban_model_learning
 ///
 /// Observations are positions of the object in the image (x,y)
 class CalibrationModel : public CompositeModel {
-
-
+public:
   CalibrationModel();
   CalibrationModel(const CalibrationModel & other);
 
