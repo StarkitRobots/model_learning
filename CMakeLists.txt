@@ -88,6 +88,7 @@ enable_testing()
  
 set(TESTS
   basic_models/linear_model
+  humanoid_models/pose_model
 # TODO: reintegrate
 #  humanoid_models/vision_correction_model
 )

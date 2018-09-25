@@ -1,6 +1,13 @@
 Rhoban Model Learning
 =====================
 
+Immediate TODO
+--------------
+- Implement ArucoModels (and add them to specific locations)
+- Implement Priors class and CompositePriors
+- Implement shortcut names (at least "all" and for compositeModels)
+
+
 Taxonomy 
 --------
 - Sample: A couple composed of an Input and an Observation

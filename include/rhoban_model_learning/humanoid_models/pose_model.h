@@ -14,6 +14,8 @@ public:
   PoseModel();
   PoseModel(const PoseModel & other);
 
+  Eigen::Vector3d getPosInSelf(const Eigen::Vector3d & pos_in_world) const;
+
   int getParametersSize() const override;
 
   Eigen::VectorXd getParameters() const override;

@@ -5,12 +5,21 @@
 namespace rhoban_model_learning
 {
 
-PoseModel::PoseModel() : Model()
-{}
+PoseModel::PoseModel()
+  : Model(), pos(Eigen::Vector3d::Zero()),
+    orientation(Eigen::Quaterniond(Eigen::Vector4d(0,0,0,1)))
+{
+}
 
 PoseModel::PoseModel(const PoseModel & other)
   : Model(other), pos(other.pos), orientation(other.orientation)
 {
+}
+
+Eigen::Vector3d PoseModel::getPosInSelf(const Eigen::Vector3d & pos_in_world) const
+{
+  Eigen::Vector3d vec_in_world = pos_in_world - pos;
+  return orientation.toRotationMatrix().transpose() * vec_in_world;
 }
 
 int PoseModel::getParametersSize() const {
@@ -30,9 +39,8 @@ void PoseModel::setParameters(const Eigen::VectorXd & new_params) {
                              + std::to_string(new_params.rows()));
   }
   pos = new_params.segment(0,3);
-  // TODO: take care of normalization issues here (all values 0)
-  Eigen::Vector4d quat_coeffs = new_params.segment(3,4).normalized();
-  orientation = Eigen::Quaterniond(quat_coeffs);
+  orientation = Eigen::Quaterniond(Eigen::Vector4d(new_params.segment(3,4)));
+  orientation.normalize();
 }
 
 std::vector<std::string> PoseModel::getParametersNames() const {
