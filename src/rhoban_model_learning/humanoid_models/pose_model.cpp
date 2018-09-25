@@ -19,7 +19,22 @@ PoseModel::PoseModel(const PoseModel & other)
 Eigen::Vector3d PoseModel::getPosInSelf(const Eigen::Vector3d & pos_in_world) const
 {
   Eigen::Vector3d vec_in_world = pos_in_world - pos;
-  return orientation.toRotationMatrix().transpose() * vec_in_world;
+  return getRotationToSelf() * vec_in_world;
+}
+
+Eigen::Vector3d PoseModel::getPosFromSelf(const Eigen::Vector3d & pos_in_self) const
+{
+  return pos + getRotationFromSelf() * pos_in_self;
+}
+
+Eigen::Matrix<double,3,3> PoseModel::getRotationFromSelf() const
+{
+  return orientation.toRotationMatrix();
+}
+
+Eigen::Matrix<double,3,3> PoseModel::getRotationToSelf() const
+{
+  return orientation.toRotationMatrix().transpose();
 }
 
 int PoseModel::getParametersSize() const {

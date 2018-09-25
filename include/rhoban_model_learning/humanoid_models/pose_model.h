@@ -14,7 +14,14 @@ public:
   PoseModel();
   PoseModel(const PoseModel & other);
 
+  /// Return the position inside pose of a point in World referential
   Eigen::Vector3d getPosInSelf(const Eigen::Vector3d & pos_in_world) const;
+  /// Return the world position from a position inside pose referential
+  Eigen::Vector3d getPosFromSelf(const Eigen::Vector3d & pos_in_self) const;
+  /// Return the world to self rotation matrix
+  Eigen::Matrix<double,3,3> getRotationToSelf() const;
+  /// Return the self to world rotation matrix
+  Eigen::Matrix<double,3,3> getRotationFromSelf() const;
 
   int getParametersSize() const override;
 
@@ -29,7 +36,6 @@ public:
 
   virtual std::unique_ptr<Model> clone() const override;
 
-private:
   /// Position of the object inside the world referential
   Eigen::Vector3d pos;
 
