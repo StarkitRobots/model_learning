@@ -76,6 +76,7 @@ void PoseModel::fromJson(const Json::Value & v, const std::string & dir_name) {
   if (v.isObject() && v.isMember("orientation")) {
     Eigen::Vector4d orientation_tmp = rhoban_utils::readEigen<4,1>(v, "orientation");
     orientation = Eigen::Quaterniond(orientation_tmp);
+    orientation.normalize();
   }
 }
 

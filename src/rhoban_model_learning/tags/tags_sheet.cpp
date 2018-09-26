@@ -45,11 +45,11 @@ std::map<int, ArucoTag> TagsSheet::getMarkers() const
     double coeff_x(0), coeff_y(0);
     if (cols > 1) {
       int col = idx % cols;
-      coeff_x = col - (cols-1) / 2;
+      coeff_x = col - (cols-1) / 2.0;
     }
     if (rows > 1) {
       int row = std::floor(idx / cols);
-      coeff_y = row - (rows-1) / 2;
+      coeff_y = row - (rows-1) / 2.0;
     }
     Eigen::Vector3d marker_center_self(dx * coeff_x, dy * coeff_y, 0);
     Eigen::Vector3d marker_center = sheet_pose.getPosFromSelf(marker_center_self);
@@ -82,6 +82,8 @@ Json::Value TagsSheet::toJson() const {
   v["markers_ids" ] = rhoban_utils::vector2Json(markers_ids);
   v["dx"          ] = dx;
   v["dy"          ] = dy;
+  v["cols"        ] = cols;
+  v["rows"        ] = rows;
   v["sheet_pose"] = sheet_pose.toJson();
   return v;
 }
@@ -91,6 +93,8 @@ void TagsSheet::fromJson(const Json::Value & v, const std::string & dir_path) {
   rhoban_utils::tryRead(v,"marker_size" , &marker_size );
   rhoban_utils::tryRead(v,"dx"          , &dx          );
   rhoban_utils::tryRead(v,"dy"          , &dy          );
+  rhoban_utils::tryRead(v,"cols"        , &cols        );
+  rhoban_utils::tryRead(v,"rows"        , &rows        );
   rhoban_utils::tryReadVector(v,"markers_ids" , &markers_ids );
   if (v.isObject() && v.isMember("sheet_pose")) {
     sheet_pose.fromJson(v["sheet_pose"], dir_path);
