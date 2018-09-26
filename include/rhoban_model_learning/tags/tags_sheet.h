@@ -8,7 +8,9 @@
 namespace rhoban_model_learning
 {
 
-/// Represent a 3*2 sheet of aruco markers with a rectangular pattern
+/// Represent a rows*cols sheet of aruco markers with a rectangular pattern
+///
+/// e.g. a 3*2 sheet of aruco Tags
 ///           ----dx--->
 ///    |    id[0]     id[1]
 ///    |
@@ -26,11 +28,17 @@ public:
   TagsSheet(double marker_size,
             double dx,
             double dy,
+            int cols,
+            int rows,
             const PoseModel & sheet_pose,
             const std::vector<int> & markers_ids);
   TagsSheet(const TagsSheet & other);
 
+  /// Update the pose of the tags sheet
+  void setPose(const Eigen::Vector3d & pos,
+               const Eigen::Quaterniond & orientation);
 
+  /// Return the position of the markers in world referential
   std::map<int, ArucoTag> getMarkers() const;
 
   int getParametersSize() const override;
@@ -42,7 +50,7 @@ public:
   virtual Json::Value toJson() const override;
   virtual void fromJson(const Json::Value & v, const std::string & dir_path) override;
   virtual std::string getClassName() const override;
-
+  
 private:
   /// center and orientation of the sheet
   /// - center: sheet_center
@@ -53,12 +61,18 @@ private:
   /// Size of an aruco marker (all markers of a sheet have the same size) [m]
   double marker_size;
 
-  /// Spacing between two columns of tags [m]
+  /// Spacing between two columns of tags (center to center) [m]
   double dx;
 
-  /// Delta between two lines of tags (from [m]
+  /// Delta between two lines of tags (center to center) [m]
   double dy;
 
+  /// Number of columns in the sheet
+  int cols;
+
+  /// Number of rows in the sheet
+  int rows;
+  
   /// The list of the marker ids
   std::vector<int> markers_ids;
 };
