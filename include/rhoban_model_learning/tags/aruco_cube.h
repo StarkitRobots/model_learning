@@ -2,6 +2,7 @@
 
 #include "rhoban_model_learning/model.h"
 #include "rhoban_model_learning/tags/tags_sheet.h"
+#include "rhoban_model_learning/tags/tags_collection.h"
 
 namespace rhoban_model_learning
 {
@@ -14,14 +15,13 @@ namespace rhoban_model_learning
 /// - 1: cubeCenter + (        0, halfSide, 0)
 /// - 2: cubeCenter + (-halfSide,        0, 0)
 /// - 3: cubeCenter + (        0,-halfSide, 0)
-class ArucoCube : public Model
+class ArucoCube : public Model, public TagsCollection
 {
 public:
   ArucoCube();
   ArucoCube(const ArucoCube & other);
 
-  /// Return the position of the markers in world referential
-  std::map<int, ArucoTag> getMarkers() const;
+  std::map<int, ArucoTag> getMarkers() const override;
 
   int getParametersSize() const override;
 

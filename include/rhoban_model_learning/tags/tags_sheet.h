@@ -4,6 +4,7 @@
 
 #include "rhoban_model_learning/humanoid_models/pose_model.h"
 #include "rhoban_model_learning/tags/aruco_tag.h"
+#include "rhoban_model_learning/tags/tags_collection.h"
 
 namespace rhoban_model_learning
 {
@@ -21,7 +22,7 @@ namespace rhoban_model_learning
 ///     
 ///
 ///         id[4]     id[5]
-class TagsSheet : public Model {
+class TagsSheet : public Model, public TagsCollection {
 
 public:
   TagsSheet();
@@ -38,8 +39,7 @@ public:
   void setPose(const Eigen::Vector3d & pos,
                const Eigen::Quaterniond & orientation);
 
-  /// Return the position of the markers in world referential
-  std::map<int, ArucoTag> getMarkers() const;
+  std::map<int, ArucoTag> getMarkers() const override;
 
   int getParametersSize() const override;
 
