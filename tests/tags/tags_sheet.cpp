@@ -16,8 +16,8 @@ TEST(jsonLoader, singleElement)
   TagsSheet s;
   s.loadFile(getAbsoluteTestFilePrefix()+"sheet_1x1.json");
   std::map<int, ArucoTag> markers = s.getMarkers();
-  EXPECT_EQ(1,markers.size());
-  EXPECT_EQ(1,markers.count(32));
+  EXPECT_EQ((size_t)1,markers.size());
+  EXPECT_EQ((size_t)1,markers.count(32));
   ArucoTag tag = markers.at(32);
   EXPECT_EQ(0, tag.marker_center(0));
   EXPECT_EQ(0, tag.marker_center(1));
@@ -47,7 +47,7 @@ TEST(jsonLoader, twoByThree)
   EXPECT_EQ(markers_ids.size(),markers.size());
   for (size_t idx = 0; idx < markers_ids.size(); idx++) {
     int marker_id = markers_ids[idx];
-    EXPECT_EQ(1,markers.count(marker_id));
+    EXPECT_EQ((size_t)1,markers.count(marker_id));
     const ArucoTag & tag = markers.at(marker_id);
     for (int d = 0; d < 3; d++) {
       EXPECT_NEAR(expected_pos[idx](d), tag.marker_center(d),std::pow(10,-6));

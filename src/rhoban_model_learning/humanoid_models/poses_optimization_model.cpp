@@ -3,20 +3,19 @@
 #include "rhoban_model_learning/humanoid_models/camera_model.h"
 #include "rhoban_model_learning/humanoid_models/multi_poses_model.h"
 #include "rhoban_model_learning/humanoid_models/vision_noise_model.h"
-
-#include <rhoban_utils/util.h>
+#include "rhoban_model_learning/tags/aruco_collection.h"
 
 namespace rhoban_model_learning
 {
 
 typedef PosesOptimizationModel POM;
 
-POM::PosesOptimizationModel() :
-  CompositeModel()
+POM::PosesOptimizationModel() : CompositeModel()
 {
-  models["noise" ] = std::unique_ptr<Model>(new VisionNoiseModel);
+  models["noise"] = std::unique_ptr<Model>(new VisionNoiseModel);
   models["camera"] = std::unique_ptr<Model>(new CameraModel);
-  models["poses" ] = std::unique_ptr<Model>(new MultiPosesModel);
+  models["poses"] = std::unique_ptr<Model>(new MultiPosesModel);
+  models["tags"] = std::unique_ptr<Model>(new ArucoCollection);
 }
 
 POM::PosesOptimizationModel(const PosesOptimizationModel & other)
@@ -39,27 +38,20 @@ const PoseModel & POM::getPose(int idx) const {
 std::unique_ptr<Model> POM::clone() const {
   return std::unique_ptr<Model>(new POM(*this));
 }
-void POM::fromJson(const Json::Value & v, const std::string & dir_name) {
-  CompositeModel::fromJson(v, dir_name);
-  // Checking that content has been appropriately set
-  try{
-    dynamic_cast<const CameraModel &>(*models.at("camera"));
-  } catch (const std::bad_cast & e) {
-    throw std::runtime_error(DEBUG_INFO + " invalid type for 'camera'");
-  }
-  try{
-    dynamic_cast<const VisionNoiseModel &>(*models.at("noise"));
-  } catch (const std::bad_cast & e) {
-    throw std::runtime_error(DEBUG_INFO + " invalid type for 'noise'");
-  }
-  try{
-    dynamic_cast<const MultiPosesModel &>(*models.at("poses"));
-  } catch (const std::bad_cast & e) {
-    throw std::runtime_error(DEBUG_INFO + " invalid type for 'poses'");
-  }
+
+void POM::fromJson(const Json::Value & json_value,
+                   const std::string & dir_name)
+{
+  CompositeModel::fromJson(json_value, dir_name);
+  // Checking content
+  checkType<VisionNoiseModel>("noise");
+  checkType<CameraModel>("camera");
+  checkType<MultiPosesModel>("poses");
+  checkType<TagsCollection>("tags");
 }
 
-std::string POM::getClassName() const {
+std::string POM::getClassName() const
+{
   return "PosesOptimizationModel";
 }
 

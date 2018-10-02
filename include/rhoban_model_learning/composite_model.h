@@ -2,6 +2,8 @@
 
 #include "rhoban_model_learning/model.h"
 
+#include <rhoban_utils/util.h>
+
 namespace rhoban_model_learning
 {
 
@@ -27,6 +29,15 @@ public:
   
   Json::Value toJson() const override;
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
+
+  // Throws explicit runtime error if models at given key is not of class T
+  template <class T> void checkType(const std::string & key) const {
+    try{
+      dynamic_cast<const T &>(*models.at(key));
+    } catch (const std::bad_cast & e) {
+      throw std::runtime_error(DEBUG_INFO + " invalid type for '" + key + "'");
+    }
+  }
   
 protected:
   // Each model is named to facilitate use of prefixes
