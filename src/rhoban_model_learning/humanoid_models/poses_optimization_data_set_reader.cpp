@@ -1,4 +1,4 @@
-#include "rhoban_model_learning/humanoid_models/calibration_data_set_reader.h"
+#include "rhoban_model_learning/humanoid_models/poses_optimization_data_set_reader.h"
 
 #include "rhoban_model_learning/humanoid_models/poses_optimization_input.h"
 
@@ -6,15 +6,18 @@
 #include <rhoban_utils/tables/string_table.h>
 #include <rhoban_utils/util.h>
 
+#include <iostream>
+
 namespace rhoban_model_learning
 {
+
+using rhoban_utils::StringTable;
 
 typedef PosesOptimizationDataSetReader PODSR;
 typedef PosesOptimizationInput POI;
 
 PODSR::PosesOptimizationDataSetReader()
-  : nb_training_tags(-1), nb_validation_tags(-1),
-    max_samples_per_tag(1), min_samples_per_tag(1),
+  : nb_images(-1), training_tags_per_image(-1), validation_tags_per_image(-1),
     verbose(false)
 {
 }
@@ -24,91 +27,55 @@ DataSet PODSR::extractSamples(const std::string & file_path,
 {
   StringTable data = StringTable::buildFromFile(file_path);
 
-  std::map<int, >> inputs_by_image;
+  std::map<int, std::vector<Sample>> samples_by_image;
   for (size_t row = 0; row < data.nbRows(); row++) {
     std::map<std::string, std::string> row_content = data.getRow(row);
-    int image_id = std::stoi(row_content["image_id"]);
-    int marker_id = std::stoi(row_content["marker_id"]);
-    double pixel_x = std::stod(row_content["pixel_x"]);
-    double pixel_y = std::stod(row_content["pixel_y"]);
-    inputs_by_image[image_id]
+    int image_id = std::stoi(row_content.at("image_id"));
+    int marker_id = std::stoi(row_content.at("marker_id"));
+    double pixel_x = std::stod(row_content.at("pixel_x"));
+    double pixel_y = std::stod(row_content.at("pixel_y"));
+    samples_by_image[image_id].push_back(Sample(std::unique_ptr<Input>(new POI(image_id,marker_id)),
+                                                Eigen::Vector2d(pixel_x, pixel_y)));
   }
   
-  // Get valid indices
+  // Get valid images indices
   if (verbose) {
-    std::cout << "Filtering tag indices" << std::endl;
+    std::cout << "Filtering images" << std::endl;
   }
-  std::vector<int> tags_indices;
-  for (const auto & pair : samples_by_id) {
-    int tag_id = pair.first;
+  std::vector<int> images_indices;
+  for (const auto & pair : samples_by_image) {
+    int image_id = pair.first;
     int nb_samples = pair.second.size();
-    if (nb_samples >= min_samples_per_tag) {
-      tags_indices.push_back(pair.first);
+    if (nb_samples >= training_tags_per_image + validation_tags_per_image) {
+      images_indices.push_back(pair.first);
     } else if (verbose) {
-      std::cout << "\tIgnoring tag " << tag_id << " because it has only "
+      std::cout << "\tIgnoring image " << image_id << " because it has only "
                 << nb_samples << " valid samples" << std::endl;
     }
   }
-  // Choose which tags will be used for training and validation
-  int training_size = nb_training_tags;
-  int validation_size = nb_validation_tags;
-  if (training_size == -1 && validation_size == -1) { 
-    throw std::runtime_error(DEBUG_INFO + "No size specified for either training or validation");
-  } else if (training_size + validation_size > (int) tags_indices.size()) {
-    throw std::runtime_error(DEBUG_INFO + "Not enough tags available: ("
-                             + std::to_string(validation_size) + "+"
-                             + std::to_string(training_size) + ">"
-                             + std::to_string(tags_indices.size()) + ")");
+  if (images_indices.size() < (size_t) nb_images) {
+    throw std::runtime_error(DEBUG_INFO + " not enough images with enough tags ("
+                             + std::to_string(images_indices.size()) +" images available, "
+                             + std::to_string(nb_images) + " required)");
   }
-  if (validation_size == -1) {
-    validation_size = tags_indices.size() - training_size;
-  }
-  if (training_size == -1) {
-    training_size = tags_indices.size() - validation_size;
-  }
-
-  int nb_unused_tags = tags_indices.size() - (training_size+validation_size);
-
-  std::vector<size_t> set_sizes =
-    {(size_t)training_size, (size_t)validation_size, (size_t)nb_unused_tags};
-  std::vector<std::vector<size_t>> separated_indices;
-  separated_indices = rhoban_random::splitIndices(tags_indices.size() - 1, set_sizes, engine);
-  // Fill data set
-  DataSet data;
-  if (verbose) std::cout << "Training indices" << std::endl;
-  for (size_t idx : separated_indices[0]) {
-    // Limited number of samples for training_set
-    int tag_id = tags_indices[idx];
-    const SampleVector & tag_samples = samples_by_id[tag_id];
-    int nb_samples = tag_samples.size();
-    std::vector<size_t> samples_indices =
-      rhoban_random::getUpToKDistinctFromN(max_samples_per_tag, nb_samples, engine);
-    for (size_t sample_idx : samples_indices) {
-      data.training_set.push_back(tag_samples[sample_idx]->clone());
+  // Separating samples
+  DataSet data_set;
+  for (size_t idx : rhoban_random::getKDistinctFromN(nb_images, images_indices.size(), engine)) {
+    int image_idx = images_indices[idx];
+    const std::vector<Sample> & image_samples = samples_by_image[image_idx];
+    std::vector<size_t> set_sizes = { (size_t)training_tags_per_image,
+                                      (size_t)validation_tags_per_image };
+    std::vector<std::vector<size_t>> samples_indices;
+    rhoban_random::splitIndices(image_samples.size(), set_sizes, engine);
+    for (size_t training_idx : samples_indices[0]) {
+      data_set.training_set.push_back(image_samples[training_idx].clone());
     }
-    if (verbose) {
-      std::cout << "\t" << tag_id << ": " << samples_indices.size() << " samples" << std::endl;
-    }
-  }
-  if (verbose) std::cout << "Validation indices" << std::endl;
-  for (size_t idx : separated_indices[1]) {
-    // Limited number of samples for training_set
-    int tag_id = tags_indices[idx];
-    const SampleVector & tag_samples = samples_by_id[tag_id];
-    for (const auto & sample : tag_samples) {
-      data.validation_set.push_back(sample->clone());
-    }
-    if (verbose) {
-      std::cout << "\t" << tag_id << ": " << tag_samples.size() << " samples" << std::endl;
+    for (size_t validation_idx : samples_indices[1]) {
+      data_set.validation_set.push_back(image_samples[validation_idx].clone());
     }
   }
 
-  if (verbose) {
-    std::cout << "Training Set size: " << data.training_set.size() << std::endl;
-    std::cout << "Validation Set size: " << data.validation_set.size() << std::endl;
-  }
-  
-  return data;
+  return data_set;
 }
 
 std::string PODSR::getClassName() const {
@@ -117,29 +84,19 @@ std::string PODSR::getClassName() const {
 
 Json::Value PODSR::toJson() const {
   Json::Value  v;
-  v["x_coord_range"] = rhoban_utils::vector2Json(x_coord_range);
-  v["y_coord_range"] = rhoban_utils::vector2Json(y_coord_range);
-  v["nb_training_tags"   ] = nb_training_tags   ;
-  v["nb_validation_tags" ] = nb_validation_tags ;
-  v["max_samples_per_tag"] = max_samples_per_tag;
-  v["min_samples_per_tag"] = min_samples_per_tag;
-  v["rescale_width"      ] = rescale_width      ;
-  v["rescale_height"     ] = rescale_height     ;
-  v["verbose"            ] = verbose            ;
+  v["nb_images"                ] = nb_images                ;
+  v["training_tags_per_image"  ] = training_tags_per_image  ;
+  v["validation_tags_per_image"] = validation_tags_per_image;
+  v["verbose"                  ] = verbose                  ;
   return v;
 }
 void PODSR::fromJson(const Json::Value & v, 
-                                        const std::string & dir_name) {
+                     const std::string & dir_name) {
   (void) dir_name;
-  rhoban_utils::tryReadEigen(v, "x_coord_range", &x_coord_range);
-  rhoban_utils::tryReadEigen(v, "y_coord_range", &y_coord_range);
-  rhoban_utils::tryRead(v, "nb_training_tags"   , &nb_training_tags   );
-  rhoban_utils::tryRead(v, "nb_validation_tags" , &nb_validation_tags );
-  rhoban_utils::tryRead(v, "max_samples_per_tag", &max_samples_per_tag);
-  rhoban_utils::tryRead(v, "min_samples_per_tag", &min_samples_per_tag);
-  rhoban_utils::tryRead(v, "rescale_width"      , &rescale_width      );
-  rhoban_utils::tryRead(v, "rescale_height"     , &rescale_height     );
-  rhoban_utils::tryRead(v, "verbose"            , &verbose            );
+  rhoban_utils::tryRead(v, "nb_images"                , &nb_images                 );
+  rhoban_utils::tryRead(v, "training_tags_per_image"  , &training_tags_per_image   );
+  rhoban_utils::tryRead(v, "validation_tags_per_image", &validation_tags_per_image );
+  rhoban_utils::tryRead(v, "verbose"                  , &verbose                   );
 }
 
 }

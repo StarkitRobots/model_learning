@@ -8,6 +8,7 @@ set (SOURCES
   pose_model.cpp
   poses_optimization_input.cpp
   poses_optimization_model.cpp
+  poses_optimization_data_set_reader.cpp
   rotation_model.cpp
   vision_noise_model.cpp
 #  vision_correction_model.cpp

@@ -7,6 +7,11 @@ PosesOptimizationInput::PosesOptimizationInput() : image_id(-1), aruco_id(-1)
 {
 }
 
+PosesOptimizationInput::PosesOptimizationInput(int image_id, int aruco_id)
+  : image_id(image_id), aruco_id(aruco_id)
+{
+}
+
 PosesOptimizationInput::PosesOptimizationInput(const PosesOptimizationInput & other)
   : image_id(other.image_id), aruco_id(other.aruco_id)
 {
