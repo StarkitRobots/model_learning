@@ -11,11 +11,11 @@ string getAbsoluteTestFilePrefix() {
     return currentDirPath + "/../ressources/tags/";
 }
 
-TEST(jsonLoader, singleElement)
+TEST(ArucoCube, singleElement)
 {
-  TagsSheet s;
-  s.loadFile(getAbsoluteTestFilePrefix()+"aruco_cube_1.json");
-  std::map<int, ArucoTag> markers = s.getMarkers();
+  ArucoCube cube;
+  cube.loadFile(getAbsoluteTestFilePrefix()+"aruco_cube_1.json");
+  std::map<int, ArucoTag> markers = cube.getMarkers();
   EXPECT_EQ((size_t)7,markers.size());
   std::vector<int> expected_markers = {1,2,3,4,5,6,8};
   std::vector<Eigen::Vector3d> expected_positions = {
@@ -32,9 +32,9 @@ TEST(jsonLoader, singleElement)
     const Eigen::Vector3d & expected_pos = expected_positions[idx];
     EXPECT_EQ((size_t)1,markers.count(marker_id));
     ArucoTag tag = markers.at(marker_id);
-    EXPECT_EQ(expected_pos(0), tag.marker_center(0));
-    EXPECT_EQ(expected_pos(1), tag.marker_center(1));
-    EXPECT_EQ(expected_pos(2), tag.marker_center(2));
+    EXPECT_NEAR(expected_pos(0), tag.marker_center(0), 0.001);
+    EXPECT_NEAR(expected_pos(1), tag.marker_center(1), 0.001);
+    EXPECT_NEAR(expected_pos(2), tag.marker_center(2), 0.001);
   }
 }
 int main(int argc, char **argv) {

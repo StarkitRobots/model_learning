@@ -77,6 +77,7 @@ void ArucoCube::fromJson(const Json::Value & v, const std::string & dir_path) {
       sheets[key_idx].fromJson(sheets_v[key], dir_path);
     }
   }
+  updateSheets();
 }
 
 std::string ArucoCube::getClassName() const {
@@ -91,8 +92,8 @@ void ArucoCube::updateSheets() {
     }
     // Computing transformations
     Eigen::Quaterniond sheet_orientation =
+      Eigen::AngleAxisd(- M_PI /2, Eigen::Vector3d::UnitX()) *
       Eigen::AngleAxisd((3- face_id)* M_PI /2, Eigen::Vector3d::UnitY())
-      * Eigen::AngleAxisd(- M_PI /2, Eigen::Vector3d::UnitX())
       * pose.orientation;
     Eigen::Vector3d center_in_cube =
       Eigen::Matrix3d(Eigen::AngleAxisd(face_id * M_PI / 2, Eigen::Vector3d::UnitZ()))

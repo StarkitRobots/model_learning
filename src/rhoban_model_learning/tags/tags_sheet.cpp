@@ -49,7 +49,7 @@ std::map<int, ArucoTag> TagsSheet::getMarkers() const
     }
     if (rows > 1) {
       int row = std::floor(idx / cols);
-      coeff_y = row - (rows-1) / 2.0;
+      coeff_y = -(row - (rows-1) / 2.0);
     }
     Eigen::Vector3d marker_center_self(dx * coeff_x, dy * coeff_y, 0);
     Eigen::Vector3d marker_center = sheet_pose.getPosFromSelf(marker_center_self);

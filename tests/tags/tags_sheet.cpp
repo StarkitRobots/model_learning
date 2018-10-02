@@ -11,7 +11,7 @@ string getAbsoluteTestFilePrefix() {
     return currentDirPath + "/../ressources/tags/";
 }
 
-TEST(jsonLoader, singleElement)
+TEST(TagsSheet, singleElement)
 {
   TagsSheet s;
   s.loadFile(getAbsoluteTestFilePrefix()+"sheet_1x1.json");
@@ -27,18 +27,18 @@ TEST(jsonLoader, singleElement)
   EXPECT_NEAR(0.0  , tag.orientation.coeffs()(2),0.01);
   EXPECT_NEAR(0.707, tag.orientation.coeffs()(3),0.01);
 }
-TEST(jsonLoader, twoByThree)
+TEST(TagsSheet, twoByThree)
 {
   // Expected content
   std::vector<int> markers_ids = {2,4,5,8,1,6};
   std::vector<Eigen::Vector3d> expected_pos =
     {
-      Eigen::Vector3d(-0.1, 0.0, -0.1),
-      Eigen::Vector3d( 0.0, 0.0, -0.1),
-      Eigen::Vector3d( 0.1, 0.0, -0.1),
       Eigen::Vector3d(-0.1, 0.0,  0.1),
       Eigen::Vector3d( 0.0, 0.0,  0.1),
-      Eigen::Vector3d( 0.1, 0.0,  0.1)
+      Eigen::Vector3d( 0.1, 0.0,  0.1),
+      Eigen::Vector3d(-0.1, 0.0, -0.1),
+      Eigen::Vector3d( 0.0, 0.0, -0.1),
+      Eigen::Vector3d( 0.1, 0.0, -0.1)
     };
   // Loading + checking
   TagsSheet s;
