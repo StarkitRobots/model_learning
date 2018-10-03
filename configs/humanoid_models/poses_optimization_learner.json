@@ -1,0 +1,50 @@
+{
+    "model" : {
+        "class name" : "PosesOptimizationModel",
+        "content" : {
+            "models" : {
+                "noise" : {
+                    "class name" : "VisionNoiseModel",
+                    "content" : {}
+                },
+                "camera" : {
+                    "class name" : "CameraModel",
+                    "content" : {}
+                },
+                "poses" : {
+                    "class name" : "MultiPosesModel",
+                    "content" : {
+                        "nb_poses" : 4
+                    }
+                },
+                "tags" : {
+                    "class name" : "ArucoCollection",
+                    "content" : {
+                        "models" : {
+                            "sheet_1" : {
+                                "class name" : "TagsSheet",
+                                "content" : {
+                                    "cols" : 2,
+                                    "rows" : 3
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "prior" : {
+    },
+    "predictor" : {
+        "class name" : "PosesOptimizationPredictor"
+    },
+    "optimizer" : {
+        "class name" : "CrossEntropy",
+        "content" : {
+            "nb_generations" : 10,
+            "population_size" : 50,
+            "best_set_size" : 5
+        }
+    }
+}
