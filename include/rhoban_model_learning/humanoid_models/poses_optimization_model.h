@@ -19,6 +19,8 @@ public:
 
   const PoseModel & getPose(int idx) const;
 
+  const Eigen::Vector3d & getTagPosition(int tag_idx) const;
+
   virtual std::unique_ptr<Model> clone() const;
 
   void fromJson(const Json::Value & json_value,

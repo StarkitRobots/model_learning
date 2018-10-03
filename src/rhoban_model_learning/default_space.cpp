@@ -4,8 +4,8 @@ namespace rhoban_model_learning {
 
 DefaultSpace::DefaultSpace() {}
 
-Eigen::MatrixXd DefaultSpace::getParametersSpace(const Model & m) const {
-  (void) m;
+Eigen::MatrixXd DefaultSpace::getParametersSpace(const Model & m, const ModelPrior & p) const {
+  (void) m; (void) p;
   return space;
 }
 

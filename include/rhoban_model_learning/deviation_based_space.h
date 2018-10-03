@@ -6,10 +6,11 @@
 
 namespace rhoban_model_learning {
 
-/// Default space is simply an hyperrectangle
-class DefaultSpace : public ModelSpace {
+/// DeviationBasedSpace is an hyperrectangle centered on the prior and with a
+/// size depending on the prior
+class DeviationBasedSpace : public ModelSpace {
 public:
-  DefaultSpace();
+  DeviationBasedSpace();
   
   Eigen::MatrixXd getParametersSpace(const Model & m,
                                      const ModelPrior & prior) const override;
@@ -20,7 +21,8 @@ public:
   Json::Value toJson() const override;
   
 private:
-  Eigen::MatrixXd space;
+  /// space is : mean - ratio * dev to mean + ratio * dev
+  double ratio;
 };
 
 }

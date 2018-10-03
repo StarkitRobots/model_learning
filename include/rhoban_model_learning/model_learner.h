@@ -46,6 +46,8 @@ public:
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
 
   const Model & getModel() const;
+  
+  const ModelPrior & getPrior() const;
 
   const ModelSpace & getSpace() const;
 

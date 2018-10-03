@@ -6,9 +6,10 @@ set (SOURCES
   camera_model.cpp
   multi_poses_model.cpp
   pose_model.cpp
+  poses_optimization_data_set_reader.cpp
   poses_optimization_input.cpp
   poses_optimization_model.cpp
-  poses_optimization_data_set_reader.cpp
+  poses_optimization_predictor.cpp
   rotation_model.cpp
   vision_noise_model.cpp
 #  vision_correction_model.cpp

@@ -35,9 +35,73 @@
         }
     },
     "prior" : {
+        "class name" : "CompositePrior",
+        "content" : {
+            "priors" : {
+                "noise" : {
+                    "class name" : "DefaultPrior",
+                    "content" : {
+                        "means" : {
+                            "rows" : 1,
+                            "values" : [10]
+                        },
+                        "deviations" : {
+                            "rows" : 1,
+                            "values" : [5]
+                        }
+                    }
+                },
+                "camera" : {
+                    "class name" : "DefaultPrior",
+                    "content" : {
+                        "means" : {
+                            "rows" : 4,
+                            "values" : [400,400,300,200]
+                        },
+                        "deviations" : {
+                            "rows" : 4,
+                            "values" : [20,20,10,10]
+                        }
+                    }
+                },
+                "poses" : {
+                    "class name" : "DefaultPrior",
+                    "content" : {
+                        "means" : {
+                            "rows" : 28,
+                            "values" : [0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0]
+                        },
+                        "deviations" : {
+                            "rows" : 28,
+                            "values" : [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                        }
+                    }
+                },
+                "tags" : {
+                    "class name" : "DefaultPrior",
+                    "content" : {
+                        "means" : {
+                            "rows" : 42,
+                            "values" : [0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0]
+                        },
+                        "deviations" : {
+                            "rows" : 42,
+                            "values" : [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "space" : {
+        "class name" : "DeviationBasedSpace",
+        "content" : {
+            "ratio" : 2
+        }
     },
     "predictor" : {
-        "class name" : "PosesOptimizationPredictor"
+        "class name" : "PosesOptimizationPredictor",
+        "content" : {}
     },
     "optimizer" : {
         "class name" : "CrossEntropy",
@@ -46,5 +110,6 @@
             "population_size" : 50,
             "best_set_size" : 5
         }
-    }
+    },
+    "trainable_indices" : [0,1,2,3,4,5,6,7,8]//incomplete
 }

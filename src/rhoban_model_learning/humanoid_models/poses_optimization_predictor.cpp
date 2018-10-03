@@ -28,11 +28,11 @@ Eigen::VectorXd POP::predictObservation(const Input & raw_input,
   Eigen::Vector3d marker_pos_world = model.getTagPosition(input.aruco_id);
 
   Eigen::Vector3d marker_pos_camera = camera_pose.getPosInSelf(marker_pos_world);
-  Eigen::Vector2d model.getCameraModel().getImgFromObject();
+  Eigen::Vector2d pixel = cv2Eigen(model.getCameraModel().getImgFromObject(eigen2CV(marker_pos_camera)));
   
   // Add noise if required
   if (engine != nullptr) {
-    std::normal_distribution<double> observation_noise(0, calibration_model.getPxStddev());
+    std::normal_distribution<double> observation_noise(0, model.getPxStddev());
     pixel(0) += observation_noise(*engine);
     pixel(1) += observation_noise(*engine);
   }
@@ -42,7 +42,7 @@ Eigen::VectorXd POP::predictObservation(const Input & raw_input,
 double POP::computeLogLikelihood(const Sample & sample,
                                  const Model & raw_model,
                                  std::default_random_engine * engine) const {
-  const POP & model = dynamic_cast<const POP &>(raw_model);
+  const PosesOptimizationModel & model = dynamic_cast<const PosesOptimizationModel &>(raw_model);
 
   (void) engine;
   Eigen::Vector2d prediction = predictObservation(sample.getInput(), model, nullptr);

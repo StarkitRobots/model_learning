@@ -21,6 +21,9 @@ public:
   CompositeModel();
   CompositeModel(const CompositeModel & other);
 
+  /// Throws std::out_of_range on invalid name
+  const Model & getModel(const std::string & name) const;
+
   int getParametersSize() const override;
 
   Eigen::VectorXd getParameters() const override;

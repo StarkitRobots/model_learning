@@ -20,7 +20,7 @@ int main(int argc, char ** argv) {
   // Reading input reader from Json
   std::unique_ptr<DataSetReader> input_reader = DataSetReaderFactory().buildFromJsonFile(argv[2]);
 
-  learner.getSpace().append(learner.getModel(), learner.getTrainableIndices(), std::cout);
+  learner.getSpace().append(learner.getModel(), learner.getPrior(), learner.getTrainableIndices(), std::cout);
 
   // Analyze data
   std::default_random_engine engine = rhoban_random::getRandomEngine();

@@ -58,7 +58,7 @@ ModelLearner::learnParameters(const SampleVector & training_set,
       model_copy->setParameters(parameters);
       return this->getLogLikelihood(*model_copy, training_set, engine);
     };
-  Eigen::MatrixXd matrix_space = space->getParametersSpace(*model, trainable_indices);
+  Eigen::MatrixXd matrix_space = space->getParametersSpace(*model, *prior, trainable_indices);
   if (matrix_space.rows() == 0) {
     throw std::logic_error("ModelLearner::learnParameters: model has no parameters");
   }
@@ -125,6 +125,11 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
 const Model & ModelLearner::getModel() const
 {
   return *model;
+}
+
+const ModelPrior & ModelLearner::getPrior() const
+{
+  return *prior;
 }
 
 const ModelSpace & ModelLearner::getSpace() const
