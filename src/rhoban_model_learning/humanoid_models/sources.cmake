@@ -4,6 +4,9 @@ set (SOURCES
   calibration_model.cpp
   calibration_predictor.cpp
   camera_model.cpp
+  infered_poses_model.cpp
+  infered_poses_predictor.cpp
+  infered_poses_input.cpp
   multi_poses_model.cpp
   pose_model.cpp
   poses_optimization_input.cpp
