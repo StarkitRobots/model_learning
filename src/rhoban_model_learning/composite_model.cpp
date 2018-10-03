@@ -16,6 +16,10 @@ CompositeModel::CompositeModel(const CompositeModel & other)
   }
 }
 
+const Model & CompositeModel::getModel(const std::string & name) const {
+  return *models.at(name);
+}
+
 int CompositeModel::getParametersSize() const {
   int count = 0;
   for (const auto & entry : models) {

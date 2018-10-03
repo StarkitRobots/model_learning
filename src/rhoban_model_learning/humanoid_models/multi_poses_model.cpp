@@ -78,9 +78,10 @@ void MultiPosesModel::fromJson(const Json::Value & v, const std::string & dir_na
     int nb_poses = rhoban_utils::read<int>(v, "nb_poses");
     poses.clear();
     poses.resize(nb_poses);
+  } else {
+    throw rhoban_utils::JsonParsingError(DEBUG_INFO +
+                                         " v is not an array and has no attribut nb_poses");
   }
-  throw rhoban_utils::JsonParsingError(DEBUG_INFO +
-                                       " v is not an array and has no attribut nb_poses");
 }
 
 std::string MultiPosesModel::getClassName() const {

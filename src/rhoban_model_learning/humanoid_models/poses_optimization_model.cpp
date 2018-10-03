@@ -35,6 +35,10 @@ const PoseModel & POM::getPose(int idx) const {
   return static_cast<const MultiPosesModel &>(*models.at("poses")).getPose(idx);
 }
 
+const Eigen::Vector3d & POM::getTagPosition(int tag_idx) const {
+  return dynamic_cast<const TagsCollection &>(*models.at("tags")).getMarkers().at(tag_idx).marker_center;
+}
+
 std::unique_ptr<Model> POM::clone() const {
   return std::unique_ptr<Model>(new POM(*this));
 }

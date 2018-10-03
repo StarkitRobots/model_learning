@@ -10,7 +10,7 @@ namespace rhoban_model_learning
 /// - Aruco Id
 ///
 /// Observations are positions of the marker in the image (x,y)
-class PosesOptimizationPredictor : Predictor {
+class PosesOptimizationPredictor : public Predictor {
 public:
   PosesOptimizationPredictor();
 
