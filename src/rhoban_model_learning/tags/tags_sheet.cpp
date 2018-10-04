@@ -69,6 +69,7 @@ Eigen::VectorXd TagsSheet::getParameters() const {
 }
 
 void TagsSheet::setParameters(const Eigen::VectorXd & new_params) {
+  std::cout << "Setting parameters for sheet_pose: " << new_params.transpose() << std::endl;
   sheet_pose.setParameters(new_params);
 }
 

@@ -9,7 +9,10 @@
                 },
                 "camera" : {
                     "class name" : "CameraModel",
-                    "content" : {}
+                    "content" : {
+                        "img_width" : 600,
+                        "img_height" : 480
+                    }
                 },
                 "poses" : {
                     "class name" : "MultiPosesModel",
@@ -25,7 +28,8 @@
                                 "class name" : "TagsSheet",
                                 "content" : {
                                     "cols" : 2,
-                                    "rows" : 3
+                                    "rows" : 3,
+                                    "markers_ids" : [1,2,3,4,5,6]
                                 }
                             }
                         }
@@ -55,12 +59,12 @@
                     "class name" : "DefaultPrior",
                     "content" : {
                         "means" : {
-                            "rows" : 4,
-                            "values" : [400,400,300,200]
+                            "rows" : 9,
+                            "values" : [400,400,300,200,0,0,0,0,0]
                         },
                         "deviations" : {
-                            "rows" : 4,
-                            "values" : [20,20,10,10]
+                            "rows" : 9,
+                            "values" : [20,20,10,10,0,0,0,0,0]
                         }
                     }
                 },
@@ -80,13 +84,14 @@
                 "tags" : {
                     "class name" : "DefaultPrior",
                     "content" : {
+                        // Problems might occur if points are not in front of the camera
                         "means" : {
-                            "rows" : 42,
-                            "values" : [0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0]
+                            "rows" : 7,
+                            "values" : [2,0,0,1,0,0,0]
                         },
                         "deviations" : {
-                            "rows" : 42,
-                            "values" : [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                            "rows" : 7,
+                            "values" : [0.1,0.1,0.1,0.01,0.01,0.01,0.01]
                         }
                     }
                 }
@@ -111,5 +116,5 @@
             "best_set_size" : 5
         }
     },
-    "trainable_indices" : [0,1,2,3,4,5,6,7,8]//incomplete
+    "trainable_indices" : [0,1,2,3,4,5,6,7,8,38,39,40,41,42,43,44]//incomplete
 }

@@ -36,7 +36,18 @@ const PoseModel & POM::getPose(int idx) const {
 }
 
 const Eigen::Vector3d & POM::getTagPosition(int tag_idx) const {
-  return dynamic_cast<const TagsCollection &>(*models.at("tags")).getMarkers().at(tag_idx).marker_center;
+  const std::map<int, ArucoTag> markers =
+    dynamic_cast<const TagsCollection &>(*models.at("tags")).getMarkers();
+  try{
+    return markers.at(tag_idx).marker_center;
+  } catch (const std::out_of_range & exc) {
+    std::ostringstream tags_oss;
+    for (const auto & entry : markers) {
+      tags_oss << entry.first << ", ";
+    }
+    throw std::out_of_range(DEBUG_INFO + " cannot find '" +  std::to_string(tag_idx)
+                            + "', available indices: " + tags_oss.str());
+  }
 }
 
 std::unique_ptr<Model> POM::clone() const {

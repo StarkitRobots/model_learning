@@ -9,6 +9,7 @@
 #include <rhoban_utils/angle.h>
 #include <rhoban_utils/util.h>
 
+#include <iostream>
 
 namespace rhoban_model_learning
 {
@@ -28,6 +29,8 @@ Eigen::VectorXd POP::predictObservation(const Input & raw_input,
   Eigen::Vector3d marker_pos_world = model.getTagPosition(input.aruco_id);
 
   Eigen::Vector3d marker_pos_camera = camera_pose.getPosInSelf(marker_pos_world);
+  std::cout << "Marker pos in world: " << marker_pos_world.transpose() << std::endl;
+  std::cout << "Marker pos in camera: " << marker_pos_camera.transpose() << std::endl;
   Eigen::Vector2d pixel = cv2Eigen(model.getCameraModel().getImgFromObject(eigen2CV(marker_pos_camera)));
   
   // Add noise if required

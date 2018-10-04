@@ -41,10 +41,20 @@ Eigen::VectorXd CompositeModel::getParameters() const {
 }
 
 void CompositeModel::setParameters(const Eigen::VectorXd & new_params) {
+  int nb_parameters_received = new_params.rows();
+  int nb_parameters_expected = getParametersSize();
+  if (nb_parameters_received != nb_parameters_expected) {
+    throw std::runtime_error(DEBUG_INFO + " invalid number of parameters: "
+                             + std::to_string(nb_parameters_received) + " received,"
+                             + std::to_string(nb_parameters_expected) + " expected");
+  }
   int idx = 0;
   for (const auto & entry : models) {
     int model_count = entry.second->getParametersSize();
-    entry.second->setParameters(new_params.segment(idx, model_count));
+    const Eigen::VectorXd & sub_model_params = new_params.segment(idx, model_count);
+    std::cout << "params for model '" << entry.first << "' "
+              << sub_model_params.transpose() << std::endl;
+    entry.second->setParameters(sub_model_params);
     idx += model_count;
   }
 }

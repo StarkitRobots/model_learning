@@ -60,13 +60,15 @@ DataSet PODSR::extractSamples(const std::string & file_path,
   }
   // Separating samples
   DataSet data_set;
-  for (size_t idx : rhoban_random::getKDistinctFromN(nb_images, images_indices.size(), engine)) {
+  std::vector<size_t> chosen_indices =
+    rhoban_random::getKDistinctFromN(nb_images, images_indices.size(), engine);
+  for (size_t idx : chosen_indices) {
     int image_idx = images_indices[idx];
     const std::vector<Sample> & image_samples = samples_by_image[image_idx];
     std::vector<size_t> set_sizes = { (size_t)training_tags_per_image,
                                       (size_t)validation_tags_per_image };
-    std::vector<std::vector<size_t>> samples_indices;
-    rhoban_random::splitIndices(image_samples.size(), set_sizes, engine);
+    std::vector<std::vector<size_t>> samples_indices =
+      rhoban_random::splitIndices(image_samples.size() - 1, set_sizes, engine);
     for (size_t training_idx : samples_indices[0]) {
       data_set.training_set.push_back(image_samples[training_idx].clone());
     }

@@ -55,7 +55,7 @@ ModelLearner::learnParameters(const SampleVector & training_set,
     {
       // Copy the original model, update the parameters and compute logLikelihood
       std::unique_ptr<Model> model_copy = this->model->clone();
-      model_copy->setParameters(parameters);
+      model_copy->setParameters(parameters, this->getTrainableIndices());
       return this->getLogLikelihood(*model_copy, training_set, engine);
     };
   Eigen::MatrixXd matrix_space = space->getParametersSpace(*model, *prior, trainable_indices);
@@ -120,6 +120,20 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
   predictor = PredictorFactory().read(v, "predictor", dir_name);
   optimizer = OptimizerFactory().read(v, "optimizer", dir_name);
   trainable_indices = rhoban_utils::readVector<int>(v, "trainable_indices");
+
+  int model_size = model->getParametersSize();
+  int prior_size = prior->getParametersMeans(*model).rows();
+  int space_size = space->getParametersSpace(*model, *prior).rows();
+  if (model_size != prior_size) {
+    throw std::runtime_error(DEBUG_INFO + "size of prior ("
+                             + std::to_string(prior_size) + ") size of model ("
+                             + std::to_string(model_size) + ")");
+  }
+  if (model_size != space_size) {
+    throw std::runtime_error(DEBUG_INFO + "size of space ("
+                             + std::to_string(space_size) + ") size of model ("
+                             + std::to_string(model_size) + ")");
+  }
 }
 
 const Model & ModelLearner::getModel() const
