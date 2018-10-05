@@ -45,21 +45,9 @@ Eigen::Vector3d IPM::getTagPosition(int i) const{
 void IPM::fromJson(const Json::Value & v, const std::string & dir_name) {
   CompositeModel::fromJson(v, dir_name);
   // Checking that content has been appropriately set
-  try{
-    dynamic_cast<const CameraModel &>(*models.at("camera"));
-  } catch (const std::bad_cast & e) {
-    throw std::runtime_error(DEBUG_INFO + " invalid type for 'camera'");
-  }
-  try{
-    dynamic_cast<const VisionNoiseModel &>(*models.at("noise"));
-  } catch (const std::bad_cast & e) {
-    throw std::runtime_error(DEBUG_INFO + " invalid type for 'noise'");
-  }
-  //try{
-  //  dynamic_cast<const MultiPosesModel &>(*models.at("aruco_collection"));
-  //} catch (const std::bad_cast & e) {
-  //  throw std::runtime_error(DEBUG_INFO + " invalid type for 'aruco_collection'");
-  //}
+  checkType<VisionNoiseModel>("noise");
+  checkType<CameraModel>("camera");
+  checkType<TagsCollection>("tags");
 }
 
 std::string IPM::getClassName() const {
