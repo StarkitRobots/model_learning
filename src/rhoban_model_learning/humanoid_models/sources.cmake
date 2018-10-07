@@ -7,6 +7,7 @@ set (SOURCES
   infered_poses_model.cpp
   infered_poses_predictor.cpp
   infered_poses_input.cpp
+  infered_poses_data_set_reader.cpp
   multi_poses_model.cpp
   pose_model.cpp
   poses_optimization_data_set_reader.cpp
