@@ -32,7 +32,8 @@ double ModelPrior::getLogLikelihood(const Model & m) const {
   for (int i = 0; i < deviations.rows(); i++) {
     double stddev = deviations(i);
     if (stddev <= 0.0) {
-      throw std::logic_error(DEBUG_INFO + "Negative or null stddev found");
+      throw std::logic_error(DEBUG_INFO + "Negative or null stddev found for parameter '"
+                             + m.getParametersNames()[i] + "'");
     }
     rhoban_random::GaussianDistribution distrib(means(i), stddev * stddev);
     log_likelihood += distrib.getLogLikelihood(parameters(i));
@@ -49,7 +50,8 @@ double ModelPrior::getLogLikelihood(const Model & m,
   for (int i : used_indices) {
     double stddev = deviations(i);
     if (stddev <= 0.0) {
-      throw std::logic_error(DEBUG_INFO + "Negative or null stddev found");
+      throw std::logic_error(DEBUG_INFO + "Negative or null stddev found for parameter '"
+                             + m.getParametersNames()[i] + "'");
     }
     rhoban_random::GaussianDistribution distrib(means(i), stddev * stddev);
     log_likelihood += distrib.getLogLikelihood(parameters(i));
