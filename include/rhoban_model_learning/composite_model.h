@@ -29,6 +29,8 @@ public:
   Eigen::VectorXd getParameters() const override;
   void setParameters(const Eigen::VectorXd & new_params) override;
   std::vector<std::string> getParametersNames() const override;
+
+  std::set<int> getIndicesFromName(const std::string & name) const override;
   
   Json::Value toJson() const override;
   void fromJson(const Json::Value & v, const std::string & dir_name) override;

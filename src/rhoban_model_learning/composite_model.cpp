@@ -70,6 +70,20 @@ std::vector<std::string> CompositeModel::getParametersNames() const {
   }
   return names;
 }
+
+std::set<int> CompositeModel::getIndicesFromName(const std::string & name) const {
+  size_t separator_index = name.find(':');
+  if (separator_index == std::string::npos) {
+    // No separator found -> delegate to default implementation
+    return Model::getIndicesFromName(name);
+  }
+  std::string prefix = name.substr(0, separator_index);
+  std::string suffix = name.substr(separator_index + 1, name.size() - separator_index - 1);
+  if (models.count(prefix) == 0) {
+    throw std::out_of_range(DEBUG_INFO + " no model named '" + prefix + "'");
+  }
+  return models.at(prefix)->getIndicesFromName(suffix);
+}
   
 Json::Value CompositeModel::toJson() const {
   Json::Value v;

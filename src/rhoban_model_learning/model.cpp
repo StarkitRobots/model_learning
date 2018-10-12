@@ -58,6 +58,38 @@ std::vector<std::string> Model::getParametersNames(const std::vector<int> & used
   return used_names;
 }
 
+std::set<int> Model::getIndicesFromName(const std::string & name) const {
+  std::vector<std::string> parameters_names = getParametersNames();
+  for (size_t idx = 0; idx < parameters_names.size(); idx++) {
+    if (name == parameters_names[idx]) {
+      return {(int)idx};
+    }
+  }
+  if (name == "all") {
+    std::set<int> parameters;
+    for (int i = 0; i < getParametersSize(); i++) {
+      parameters.insert(i);
+    }
+    return parameters;
+  }
+  throw std::out_of_range(DEBUG_INFO + " unknown name '" + name + "'");
+}
+
+std::set<int> Model::getIndicesFromNames(const std::vector<std::string> & names) const {
+  std::set<int> result;
+  for (const std::string & name : names) {
+    std::set<int> name_indices = getIndicesFromName(name);
+    for (int index : name_indices) {
+      if (result.count(index) == 0) {
+        result.insert(index);
+      } else {
+        throw std::out_of_range(DEBUG_INFO + " duplicated entry for index " + std::to_string(index));
+      }
+    }
+  }
+  return result;
+}
+
 std::unique_ptr<Model> Model::clone() const {
   Json::Value v = toJson();
   std::unique_ptr<Model> other = ModelFactory().build(getClassName());
