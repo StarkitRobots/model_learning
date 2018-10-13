@@ -20,7 +20,7 @@ TEST(PosesOptimizationDataSetReader, artificialFile)
   reader.loadFile(getAbsoluteTestFilePrefix()+"poses_optimization_data_set_reader.json");
   DataSet data = reader.extractSamples(getAbsoluteTestFilePrefix() + "poses_optimization_data.csv",
                                        &engine);
-  EXPECT_EQ((size_t)24, data.training_set.size());
+  EXPECT_EQ((size_t)16, data.training_set.size());
   EXPECT_EQ((size_t)8, data.validation_set.size());
 }
 int main(int argc, char **argv) {
