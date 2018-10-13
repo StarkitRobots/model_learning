@@ -21,6 +21,9 @@ public:
   CompositeModel();
   CompositeModel(const CompositeModel & other);
 
+  /// Return the first index for parameters at given name
+  int getOffset(const std::string & name) const;
+
   /// Throws std::out_of_range on invalid name
   const Model & getModel(const std::string & name) const;
 

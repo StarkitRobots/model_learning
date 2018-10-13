@@ -16,6 +16,18 @@ CompositeModel::CompositeModel(const CompositeModel & other)
   }
 }
 
+int CompositeModel::getOffset(const std::string & name) const
+{
+  int offset = 0;
+  for (const auto & entry : models) {
+    if (entry.first == name) {
+      return offset;
+    }
+    offset += entry.second->getParametersSize();
+  }
+  throw std::out_of_range(DEBUG_INFO + " no models named '" + name + "'");
+}
+
 const Model & CompositeModel::getModel(const std::string & name) const {
   return *models.at(name);
 }
@@ -73,16 +85,29 @@ std::vector<std::string> CompositeModel::getParametersNames() const {
 
 std::set<int> CompositeModel::getIndicesFromName(const std::string & name) const {
   size_t separator_index = name.find(':');
+  std::string prefix, suffix;
   if (separator_index == std::string::npos) {
-    // No separator found -> delegate to default implementation
-    return Model::getIndicesFromName(name);
+    if (models.count(name) == 1) {
+      prefix = name;
+      suffix = "all";
+    } else {
+      // No separator found -> delegate to default implementation
+      return Model::getIndicesFromName(name);
+    }
+  } else {
+    prefix = name.substr(0, separator_index);
+    suffix = name.substr(separator_index + 1, name.size() - separator_index - 1);
   }
-  std::string prefix = name.substr(0, separator_index);
-  std::string suffix = name.substr(separator_index + 1, name.size() - separator_index - 1);
   if (models.count(prefix) == 0) {
     throw std::out_of_range(DEBUG_INFO + " no model named '" + prefix + "'");
   }
-  return models.at(prefix)->getIndicesFromName(suffix);
+  std::set<int> inner_indices = models.at(prefix)->getIndicesFromName(suffix);
+  int offset = getOffset(prefix);
+  std::set<int> corrected_indices;
+  for (int index : inner_indices) {
+    corrected_indices.insert(index + offset);
+  }
+  return corrected_indices;
 }
   
 Json::Value CompositeModel::toJson() const {

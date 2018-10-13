@@ -89,6 +89,7 @@ enable_testing()
  
 set(TESTS
   basic_models/linear_model
+  humanoid_models/calibration_model
   humanoid_models/pose_model
   humanoid_models/poses_optimization_data_set_reader
   tags/aruco_cube
