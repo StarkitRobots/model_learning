@@ -20,12 +20,12 @@ public:
   /// max
   Eigen::MatrixXd getParametersSpace(const Model & m,
                                      const ModelPrior & prior,
-                                     const std::vector<int> & used_indices) const;
+                                     const std::set<int> & used_indices) const;
 
   /// Display one line of parameter space with names on each line
   void append(const Model & m,
               const ModelPrior & prior,
-              const std::vector<int> & used_indices,
+              const std::set<int> & used_indices,
               std::ostream & out) const;
 };
 

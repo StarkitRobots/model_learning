@@ -61,7 +61,7 @@ TEST(LinearModel, getParametersNames) {
   LinearModel model(2);
   std::vector<std::string> expected_names = {"param1","param2","param3","param4"};
   std::vector<std::string> received_names = model.getParametersNames();
-  EXPECT_EQ(received_names.size(), expected_names.size());
+  ASSERT_EQ(received_names.size(), expected_names.size());
   for (size_t idx = 0; idx < received_names.size(); idx++) {
     EXPECT_EQ(received_names[idx], expected_names[idx]);
   }
@@ -71,9 +71,9 @@ TEST(LinearModel, getIndicesFromName) {
   LinearModel model(2);
   std::vector<int> expected_indices = {0,1,2,3};
   std::set<int> received_indices = model.getIndicesFromName("all");
-  EXPECT_EQ(expected_indices.size(), received_indices.size());
+  ASSERT_EQ(expected_indices.size(), received_indices.size());
   for (int index : expected_indices) {
-    EXPECT_EQ(1,received_indices.count(index));
+    EXPECT_EQ(1,(int)received_indices.count(index));
   }
 }
 

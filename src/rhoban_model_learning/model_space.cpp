@@ -7,7 +7,7 @@ namespace rhoban_model_learning
 
 Eigen::MatrixXd ModelSpace::getParametersSpace(const Model & m,
                                                const ModelPrior & prior,
-                                               const std::vector<int> & used_indices) const {
+                                               const std::set<int> & used_indices) const {
   Eigen::MatrixXd global_space = getParametersSpace(m, prior);
   Eigen::MatrixXd used_space(used_indices.size(), 2);
   int used_idx = 0;
@@ -20,7 +20,7 @@ Eigen::MatrixXd ModelSpace::getParametersSpace(const Model & m,
 
 void ModelSpace::append(const Model & m,
                         const ModelPrior & prior,
-                        const std::vector<int> & used_indices,
+                        const std::set<int> & used_indices,
                         std::ostream & out) const {
   std::vector<std::string> parameters_names = m.getParametersNames(used_indices);
   Eigen::MatrixXd parameters_spaces = getParametersSpace(m, prior, used_indices);

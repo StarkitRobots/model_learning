@@ -27,7 +27,7 @@ public:
                std::unique_ptr<ModelSpace> space,
                std::unique_ptr<Predictor> predictor,
                std::unique_ptr<rhoban_bbo::Optimizer> optimizer,
-               const std::vector<int> trainable_indices);
+               const std::set<int> trainable_indices);
 
   Result learnParameters(const DataSet & data_set,
                          std::default_random_engine * engine);
@@ -51,7 +51,7 @@ public:
 
   const ModelSpace & getSpace() const;
 
-  const std::vector<int> & getTrainableIndices() const;
+  const std::set<int> & getTrainableIndices() const;
 
 protected:
   /// The model which will be learnt
@@ -70,7 +70,7 @@ protected:
   std::unique_ptr<rhoban_bbo::Optimizer> optimizer;
 
   /// The subset of indices allowed for modification
-  std::vector<int> trainable_indices;
+  std::set<int> trainable_indices;
 };
 
 }

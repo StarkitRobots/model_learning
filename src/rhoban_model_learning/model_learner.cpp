@@ -19,7 +19,7 @@ ModelLearner::ModelLearner(std::unique_ptr<Model> model_,
                            std::unique_ptr<ModelSpace> space_,
                            std::unique_ptr<Predictor> predictor_,
                            std::unique_ptr<rhoban_bbo::Optimizer> optimizer_,
-                           const std::vector<int> trainable_indices_) :
+                           const std::set<int> trainable_indices_) :
   model(std::move(model_)),
   prior(std::move(prior_)),
   space(std::move(space_)),
@@ -108,7 +108,7 @@ Json::Value ModelLearner::toJson() const
   if (optimizer) {
     v["optimizer"] = optimizer->toFactoryJson();
   }
-  v["trainable_indices"] = rhoban_utils::vector2Json(trainable_indices);
+  v["trainable_indices"] = rhoban_utils::set2Json(trainable_indices);
   return v;
 }
 
@@ -119,7 +119,7 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
   space = ModelSpaceFactory().read(v, "space", dir_name);
   predictor = PredictorFactory().read(v, "predictor", dir_name);
   optimizer = OptimizerFactory().read(v, "optimizer", dir_name);
-  trainable_indices = rhoban_utils::readVector<int>(v, "trainable_indices");
+  trainable_indices = rhoban_utils::readSet<int>(v, "trainable_indices");
 
   int model_size = model->getParametersSize();
   int prior_size = prior->getParametersMeans(*model).rows();
@@ -151,7 +151,7 @@ const ModelSpace & ModelLearner::getSpace() const
   return *space;
 }
 
-const std::vector<int> & ModelLearner::getTrainableIndices() const
+const std::set<int> & ModelLearner::getTrainableIndices() const
 {
   return trainable_indices;
 }

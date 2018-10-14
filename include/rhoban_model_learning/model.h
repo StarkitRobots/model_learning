@@ -19,19 +19,19 @@ public:
 
   /// Return the values of the current parameters
   virtual Eigen::VectorXd getParameters() const = 0;
-  virtual Eigen::VectorXd getParameters(const std::vector<int> & used_indices) const;
+  virtual Eigen::VectorXd getParameters(const std::set<int> & used_indices) const;
 
   /// Update the internal structure of the model with the provided parameters
   virtual void setParameters(const Eigen::VectorXd & new_params) = 0;
   /// Set parameters at provided indices
   virtual void setParameters(const Eigen::VectorXd & new_params,
-                             const std::vector<int> & used_indices);
+                             const std::set<int> & used_indices);
 
   /// Return a list of names for the parameters
   /// Default implementation return a vector with {param1,param2,...}
   virtual std::vector<std::string> getParametersNames() const;
   /// List of names for parameters at the given indices
-  std::vector<std::string> getParametersNames(const std::vector<int> & used_indices) const;
+  std::vector<std::string> getParametersNames(const std::set<int> & used_indices) const;
 
   /// Return the list of indices of the parameters from the provided name.
   /// Names can be 'keywords' representing multiple indices. e.g. "all"

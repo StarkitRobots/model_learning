@@ -16,7 +16,7 @@ int Model::getParametersSize() const {
   return getParameters().rows();
 }
 
-Eigen::VectorXd Model::getParameters(const std::vector<int> & used_indices) const {
+Eigen::VectorXd Model::getParameters(const std::set<int> & used_indices) const {
   Eigen::VectorXd all_parameters = getParameters();
   Eigen::VectorXd used_parameters(used_indices.size());
   int used_idx = 0;
@@ -28,7 +28,7 @@ Eigen::VectorXd Model::getParameters(const std::vector<int> & used_indices) cons
 }
 
 void Model::setParameters(const Eigen::VectorXd & new_params,
-                          const std::vector<int> & used_indices) {
+                          const std::set<int> & used_indices) {
   Eigen::VectorXd all_parameters = getParameters();
   int used_idx = 0;
   for (int idx : used_indices) {
@@ -47,7 +47,7 @@ std::vector<std::string> Model::getParametersNames() const {
   return result;
 }
 
-std::vector<std::string> Model::getParametersNames(const std::vector<int> & used_indices) const {
+std::vector<std::string> Model::getParametersNames(const std::set<int> & used_indices) const {
   std::vector<std::string> all_names = getParametersNames();
   std::vector<std::string> used_names(used_indices.size());
   int used_idx = 0;
