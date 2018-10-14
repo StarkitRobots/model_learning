@@ -119,7 +119,16 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
   space = ModelSpaceFactory().read(v, "space", dir_name);
   predictor = PredictorFactory().read(v, "predictor", dir_name);
   optimizer = OptimizerFactory().read(v, "optimizer", dir_name);
-  trainable_indices = rhoban_utils::readSet<int>(v, "trainable_indices");
+  trainable_indices.clear();
+  rhoban_utils::tryReadSet<int>(v, "trainable_indices", &trainable_indices);
+  std::vector<std::string> indices_names;
+  rhoban_utils::tryReadVector<std::string>(v, "indices_names", &indices_names);
+  if (indices_names.size() > 0) {
+    if (trainable_indices.size() > 0) {
+      throw std::runtime_error(DEBUG_INFO + " both trainable_indices and indices_names specified");
+    }
+    trainable_indices = model->getIndicesFromNames(indices_names);
+  }
 
   int model_size = model->getParametersSize();
   int prior_size = prior->getParametersMeans(*model).rows();

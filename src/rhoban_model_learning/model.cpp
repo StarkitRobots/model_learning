@@ -83,7 +83,7 @@ std::set<int> Model::getIndicesFromNames(const std::vector<std::string> & names)
       if (result.count(index) == 0) {
         result.insert(index);
       } else {
-        throw std::out_of_range(DEBUG_INFO + " duplicated entry for index " + std::to_string(index));
+        throw std::runtime_error(DEBUG_INFO + " duplicated entry for index " + std::to_string(index));
       }
     }
   }

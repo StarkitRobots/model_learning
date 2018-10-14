@@ -88,6 +88,7 @@ target_link_libraries(model_learner ${catkin_LIBRARIES} rhoban_model_learning)
 enable_testing()
  
 set(TESTS
+  composite_model
   basic_models/linear_model
   humanoid_models/calibration_model
   humanoid_models/pose_model

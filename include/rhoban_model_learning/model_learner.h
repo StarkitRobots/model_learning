@@ -43,6 +43,9 @@ public:
 
   virtual std::string getClassName() const override;
   Json::Value toJson() const override;
+
+  /// Training indices can be provided either using parameters indices (trainable_indices)
+  /// or using parameter names (indices_names)
   void fromJson(const Json::Value & v, const std::string & dir_name) override;
 
   const Model & getModel() const;
