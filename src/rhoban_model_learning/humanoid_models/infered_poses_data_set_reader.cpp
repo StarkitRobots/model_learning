@@ -69,17 +69,19 @@ DataSet IPDSR::extractSamples(const std::string & file_path,
   std::map<int, std::vector<Sample>> samples_by_image;
 
   for (size_t idx : chosen_image_indices) {
-    const std::vector<Eigen::Vector3d> & raw_datas_of_image = raw_datas_by_image[idx];
-    std::vector<size_t> set_sizes = { (size_t)nb_tags_to_infer_pose,
-                                      (size_t)nb_tags_per_image };
-    std::vector<std::vector<size_t>> tags_indices =
-      rhoban_random::splitIndices(raw_datas_of_image.size(), set_sizes, engine);
+    const std::vector<Eigen::Vector3d> & raw_datas_of_image = raw_datas_by_image[images_indices[idx]];
+    std::vector<size_t> set_sizes = {
+      (size_t)nb_tags_to_infer_pose,
+      (size_t)nb_tags_per_image
+    };
+    std::vector<std::vector<size_t>> tags_indices_separated =
+      rhoban_random::splitIndices(raw_datas_of_image.size()-1, set_sizes, engine);
     std::vector<Eigen::Vector3d> tags_to_infer;
-    for (size_t tag_to_infer_id : tags_indices[0]) {
+    for (size_t tag_to_infer_id : tags_indices_separated[0]) {
       tags_to_infer.push_back(raw_datas_of_image[tag_to_infer_id]);
     }
-    for (size_t validation_idx : tags_indices[1]) {
-      Eigen::Vector3d tag = raw_datas_of_image[validation_idx];
+    for (size_t id_tag : tags_indices_separated[1]) {
+      Eigen::Vector3d tag = raw_datas_of_image[id_tag];
       samples_by_image[idx].push_back(
         Sample(
           std::unique_ptr<Input>( new IPI(tags_to_infer, tag[0])),
@@ -90,10 +92,12 @@ DataSet IPDSR::extractSamples(const std::string & file_path,
   }
 
   // Choosing the data set by separating the images for training and validation
+
   DataSet data_set;
   std::vector<size_t> set_sizes = {(size_t)nb_training_images, (size_t)nb_validation_images};
   std::vector<std::vector<size_t>> training_and_validation_image_indices_separation =
-    rhoban_random::splitIndices(nb_images, set_sizes, engine);
+    rhoban_random::splitIndices(samples_by_image.size()-1, set_sizes, engine);
+
   for (size_t idx : training_and_validation_image_indices_separation[0]){
     for (const Sample & sample : samples_by_image[idx]){
       data_set.training_set.push_back(sample.clone());
@@ -116,7 +120,7 @@ Json::Value IPDSR::toJson() const {
   Json::Value  v;
   v["nb_training_images"   ] = nb_training_images;
   v["nb_validation_images" ] = nb_validation_images;
-  v["nb_tags_per_image"       ] = nb_tags_per_image;
+  v["nb_tags_per_image"    ] = nb_tags_per_image;
   v["nb_tags_to_infer_pose"] = nb_tags_to_infer_pose;
   v["verbose"              ] = verbose;
   return v;
@@ -130,10 +134,10 @@ void IPDSR::fromJson(const Json::Value & v,
   rhoban_utils::tryRead(v,"nb_tags_to_infer_pose", &nb_tags_to_infer_pose);
   rhoban_utils::tryRead(v,"verbose"              , &verbose);
 
-  if (2 < nb_tags_to_infer_pose) {
+  if (3 > nb_tags_to_infer_pose) {
     throw std::runtime_error(DEBUG_INFO + " the number of tags ("
                              + std::to_string(nb_tags_to_infer_pose) +
-                             " should be bigger than 3.");
+                             " should be bigger than 2.");
   }
 }
 

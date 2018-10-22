@@ -93,6 +93,7 @@ set(TESTS
   humanoid_models/calibration_model
   humanoid_models/pose_model
   humanoid_models/poses_optimization_data_set_reader
+  humanoid_models/infered_poses_data_set_reader
   tags/aruco_cube
   tags/tags_sheet
 # TODO: reintegrate

@@ -1,0 +1,10 @@
+{
+    "noise" : {
+        "class_name" : "VisionNoiseModel",
+        "content" : {}
+    },
+    "camera" : {
+    },
+    "tags" : {
+    }
+}
