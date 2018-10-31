@@ -17,17 +17,17 @@ SimpleAngularModel::SimpleAngularModel(double observation_stddev_,
 {
 }
 
-Eigen::VectorXd SimpleAngularModel::getParameters() const
+Eigen::VectorXd SimpleAngularModel::getGlobalParameters() const
 {
   return Eigen::Vector2d(observation_stddev, step_stddev);
 }
 
-Eigen::MatrixXd SimpleAngularModel::getParametersSpace() const
+Eigen::MatrixXd SimpleAngularModel::getGlobalParametersSpace() const
 {
   throw std::logic_error("SimpleAngularModel::getParametersSpace is not implemented yet");
 }
 
-void SimpleAngularModel::setParameters(const Eigen::VectorXd & new_params)
+void SimpleAngularModel::setGlobalParameters(const Eigen::VectorXd & new_params)
 {
   if (new_params.rows() != 2) {
     std::ostringstream oss;
@@ -39,7 +39,7 @@ void SimpleAngularModel::setParameters(const Eigen::VectorXd & new_params)
   step_stddev = new_params(1);
 }
 
-std::vector<std::string> SimpleAngularModel::getParametersNames() const
+std::vector<std::string> SimpleAngularModel::getGlobalParametersNames() const
 {
   return {"observation_stddev","step_stddev"};
 }

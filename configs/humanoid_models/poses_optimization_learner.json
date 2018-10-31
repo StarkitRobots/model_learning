@@ -1,0 +1,120 @@
+{
+    "model" : {
+        "class name" : "PosesOptimizationModel",
+        "content" : {
+            "models" : {
+                "noise" : {
+                    "class name" : "VisionNoiseModel",
+                    "content" : {}
+                },
+                "camera" : {
+                    "class name" : "CameraModel",
+                    "content" : {
+                        "img_width" : 600,
+                        "img_height" : 480
+                    }
+                },
+                "poses" : {
+                    "class name" : "MultiPosesModel",
+                    "content" : {
+                        "nb_poses" : 4
+                    }
+                },
+                "tags" : {
+                    "class name" : "ArucoCollection",
+                    "content" : {
+                        "models" : {
+                            "sheet_1" : {
+                                "class name" : "TagsSheet",
+                                "content" : {
+                                    "cols" : 2,
+                                    "rows" : 3,
+                                    "markers_ids" : [1,2,3,4,5,6]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "prior" : {
+        "class name" : "CompositePrior",
+        "content" : {
+            "priors" : {
+                "noise" : {
+                    "class name" : "DefaultPrior",
+                    "content" : {
+                        "means" : {
+                            "rows" : 1,
+                            "values" : [10]
+                        },
+                        "deviations" : {
+                            "rows" : 1,
+                            "values" : [5]
+                        }
+                    }
+                },
+                "camera" : {
+                    "class name" : "DefaultPrior",
+                    "content" : {
+                        "means" : {
+                            "rows" : 9,
+                            "values" : [400,400,300,200,0,0,0,0,0]
+                        },
+                        "deviations" : {
+                            "rows" : 9,
+                            "values" : [20,20,10,10,0.1,0.1,0.1,0.1,0.1]
+                        }
+                    }
+                },
+                "poses" : {
+                    "class name" : "DefaultPrior",
+                    "content" : {
+                        "means" : {
+                            "rows" : 28,
+                            "values" : [0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0]
+                        },
+                        "deviations" : {
+                            "rows" : 28,
+                            "values" : [1,1,1,0.1,0.1,0.1,0.1,1,1,1,0.1,0.1,0.1,0.1,1,1,1,0.1,0.1,0.1,0.1,1,1,1,0.1,0.1,0.1,0.1]
+                        }
+                    }
+                },
+                "tags" : {
+                    "class name" : "DefaultPrior",
+                    "content" : {
+                        // Problems might occur if points are not in front of the camera
+                        "means" : {
+                            "rows" : 7,
+                            "values" : [4,2,2,1,0,0,0]
+                        },
+                        "deviations" : {
+                            "rows" : 7,
+                            "values" : [0.1,0.1,0.1,0.01,0.01,0.01,0.01]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "space" : {
+        "class name" : "DeviationBasedSpace",
+        "content" : {
+            "ratio" : 2
+        }
+    },
+    "predictor" : {
+        "class name" : "PosesOptimizationPredictor",
+        "content" : {}
+    },
+    "optimizer" : {
+        "class name" : "CrossEntropy",
+        "content" : {
+            "nb_generations" : 10,
+            "population_size" : 50,
+            "best_set_size" : 5
+        }
+    },
+    "trainable_indices" : [0,1,2,3,4,5,6,7,8,38,39,40,41,42,43,44]//incomplete
+}

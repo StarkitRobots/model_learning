@@ -114,12 +114,12 @@ std::string TrajectoryPredictor::Reader::getClassName() const {
 
 
 TrajectoryPredictor::TrajectoryPredictor()
-  : ModularModel(0), speed_estimator(), position_predictor()
+  : Model(), speed_estimator(), position_predictor()
 {
 }
 
 TrajectoryPredictor::TrajectoryPredictor(const TrajectoryPredictor & other)
-  : ModularModel(other)
+  : Model(other)
 {
   speed_estimator = std::unique_ptr<SpeedEstimator>((SpeedEstimator*)other.speed_estimator->clone().release());
   position_predictor = std::unique_ptr<PositionPredictor>((PositionPredictor*)other.position_predictor->clone().release());
@@ -197,19 +197,16 @@ std::vector<std::string> TrajectoryPredictor::getGlobalParametersNames() const {
 }
 
 Json::Value TrajectoryPredictor::toJson() const {
-  Json::Value v = ModularModel::toJson();
+  Json::Value v = Model::toJson();
   v["speed_estimator"] = speed_estimator->toFactoryJson();
   v["position_predictor"] = position_predictor->toFactoryJson();
   return v;
 }
 
 void TrajectoryPredictor::fromJson(const Json::Value & v, const std::string & dir_name) {
-  ModularModel::fromJson(v, dir_name);
+  Model::fromJson(v, dir_name);
   speed_estimator = SpeedEstimatorFactory().read(v, "speed_estimator", dir_name);
   position_predictor = PositionPredictorFactory().read(v, "position_predictor", dir_name);
-  if (used_indices.size() == 0) {
-    setDefaultIndices();
-  }
 }
 
 std::string TrajectoryPredictor::getClassName() const {

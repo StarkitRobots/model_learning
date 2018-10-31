@@ -1,7 +1,6 @@
 #include "rhoban_model_learning/model.h"
+#include "rhoban_model_learning/model_factory.h"
 
-#include "rhoban_random/multivariate_gaussian.h"
-#include "rhoban_utils/threading/multi_core.h"
 #include "rhoban_utils/util.h"
 
 using namespace rhoban_utils;
@@ -9,80 +8,93 @@ using namespace rhoban_utils;
 namespace rhoban_model_learning
 {
 
-Model::Model() : nb_samples(500), nb_threads(1)
+Model::Model()
 {
 }
 
-Model::Model(int nb_samples_) : nb_samples(nb_samples_), nb_threads(1)
-{
+int Model::getParametersSize() const {
+  return getParameters().rows();
 }
 
-Model::Model(const Model & other)
-  : nb_samples(other.nb_samples), nb_threads(other.nb_threads)
-{
-}
-
-double Model::computeLogLikelihood(const Sample & sample,
-                                   std::default_random_engine * engine) const
-{
-  std::vector<Eigen::VectorXd> observations;
-  for (int i = 0; i < nb_samples; i++) {
-    observations.push_back(predictObservation(sample.getInput(), engine));
+Eigen::VectorXd Model::getParameters(const std::set<int> & used_indices) const {
+  Eigen::VectorXd all_parameters = getParameters();
+  Eigen::VectorXd used_parameters(used_indices.size());
+  int used_idx = 0;
+  for (int idx : used_indices) {
+    used_parameters(used_idx) = all_parameters[idx];
+    used_idx++;
   }
-  rhoban_random::MultivariateGaussian distrib;
-  distrib.fit(observations, getObservationsCircularity()); 
-  // TODO: fit the distribution and add it
-  return distrib.getLogLikelihood(sample.getObservation());
+  return used_parameters;
 }
 
-double Model::averageLogLikelihood(const SampleVector & data_set,
-                                   std::default_random_engine * engine) const
-{
-  // Preparing task
-  std::vector<double> log_likelihoods(data_set.size());
-  MultiCore::StochasticTask log_likelihood_computer =
-    [&](int start_idx, int end_idx, std::default_random_engine * engine)
-    {
-      for (int idx = start_idx; idx < end_idx; idx++) {
-        log_likelihoods[idx] = this->computeLogLikelihood(*(data_set[idx]), engine);
-      }
-    };
-  // Computing evaluation
-  MultiCore::runParallelStochasticTask(log_likelihood_computer, data_set.size(),
-                                       nb_threads, engine);
-  // Gathering Results
-  double log_likelihood = 0.0;
-  for (size_t idx = 0; idx < data_set.size(); idx++) {
-    log_likelihood += log_likelihoods[idx];
+void Model::setParameters(const Eigen::VectorXd & new_params,
+                          const std::set<int> & used_indices) {
+  Eigen::VectorXd all_parameters = getParameters();
+  int used_idx = 0;
+  for (int idx : used_indices) {
+    all_parameters(idx) = new_params(used_idx);
+    used_idx++;
   }
-  return log_likelihood / data_set.size();
+  setParameters(all_parameters);
 }
 
-Json::Value Model::toJson() const {
-  Json::Value v;
-  v["nb_samples"] = nb_samples;
-  v["nb_threads"] = nb_threads;
-  return v;
+std::vector<std::string> Model::getParametersNames() const {
+  int nb_parameters = getParametersSize();
+  std::vector<std::string> result;
+  for (int idx = 0; idx < nb_parameters; idx++) {
+    result.push_back("param" + std::to_string(idx+1));
+  }
+  return result;
 }
 
-void Model::fromJson(const Json::Value & v, const std::string & dir_name) {
-  (void) dir_name;
-  rhoban_utils::tryRead(v, "nb_samples", &nb_samples);
-  rhoban_utils::tryRead(v, "nb_threads", &nb_threads);
+std::vector<std::string> Model::getParametersNames(const std::set<int> & used_indices) const {
+  std::vector<std::string> all_names = getParametersNames();
+  std::vector<std::string> used_names(used_indices.size());
+  int used_idx = 0;
+  for (int idx : used_indices) {
+    used_names[used_idx] = all_names[idx];
+    used_idx++;
+  }
+  return used_names;
 }
 
-void Model::appendParametersSpace(std::ostream & out) const {
+std::set<int> Model::getIndicesFromName(const std::string & name) const {
   std::vector<std::string> parameters_names = getParametersNames();
-  Eigen::MatrixXd parameters_spaces = getParametersSpace();
-  if (parameters_names.size() != (size_t)parameters_spaces.rows()) {
-    throw std::logic_error(DEBUG_INFO +
-                           " inconsistent number of parameters between spaces and names");
+  for (size_t idx = 0; idx < parameters_names.size(); idx++) {
+    if (name == parameters_names[idx]) {
+      return {(int)idx};
+    }
   }
-  for (int i = 0; i < parameters_spaces.rows(); i++) {
-    out << parameters_names[i] << ": ["
-        << parameters_spaces(i,0) << "," << parameters_spaces(i,1) << "]"
-        << std::endl;
+  if (name == "all") {
+    std::set<int> parameters;
+    for (int i = 0; i < getParametersSize(); i++) {
+      parameters.insert(i);
+    }
+    return parameters;
   }
+  throw std::out_of_range(DEBUG_INFO + " unknown name '" + name + "'");
+}
+
+std::set<int> Model::getIndicesFromNames(const std::vector<std::string> & names) const {
+  std::set<int> result;
+  for (const std::string & name : names) {
+    std::set<int> name_indices = getIndicesFromName(name);
+    for (int index : name_indices) {
+      if (result.count(index) == 0) {
+        result.insert(index);
+      } else {
+        throw std::runtime_error(DEBUG_INFO + " duplicated entry for index " + std::to_string(index));
+      }
+    }
+  }
+  return result;
+}
+
+std::unique_ptr<Model> Model::clone() const {
+  Json::Value v = toJson();
+  std::unique_ptr<Model> other = ModelFactory().build(getClassName());
+  other->fromJson(v,"./");
+  return other;
 }
 
 

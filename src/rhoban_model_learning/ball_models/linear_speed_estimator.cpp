@@ -10,7 +10,7 @@ namespace rhoban_model_learning
 {
 
 LinearSpeedEstimator::LinearSpeedEstimator()
-  : SpeedEstimator(1), window_duration(0.5), max_ball_speed(4)
+  : SpeedEstimator(), window_duration(0.5), max_ball_speed(4)
 {
 }
 
@@ -97,7 +97,7 @@ std::vector<std::string> LinearSpeedEstimator::getGlobalParametersNames() const 
 }
 
 Json::Value LinearSpeedEstimator::toJson() const {
-  Json::Value v = ModularModel::toJson();
+  Json::Value v = Model::toJson();
   v["noise"] = noise;
   v["window_duration"] = window_duration;
   v["max_ball_speed"] = max_ball_speed;
@@ -105,7 +105,7 @@ Json::Value LinearSpeedEstimator::toJson() const {
 }
 
 void LinearSpeedEstimator::fromJson(const Json::Value & v, const std::string & dir_name) {
-  ModularModel::fromJson(v, dir_name);
+  Model::fromJson(v, dir_name);
   rhoban_utils::tryRead(v, "noise",  &noise);
   rhoban_utils::tryRead(v, "window_duration",  &window_duration);
 }

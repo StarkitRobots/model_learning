@@ -1,8 +1,21 @@
 set(SOURCES
-  input_reader_factory.cpp
+  composite_model.cpp
+  composite_prior.cpp
+  data_set_reader_factory.cpp
+  default_data_set_reader.cpp
+  default_input.cpp
+  default_prior.cpp
+  default_space.cpp
+  deviation_based_space.cpp
   model.cpp
   model_factory.cpp
   model_learner.cpp
-  modular_model.cpp
+  model_space.cpp
+  model_space_factory.cpp
+  model_prior.cpp
+  model_prior_factory.cpp
+  predictor.cpp
+  predictor_factory.cpp
   sample.cpp
+  tools.cpp
 )

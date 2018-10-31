@@ -1,5 +1,5 @@
 #include "rhoban_model_learning/model_learner.h"
-#include "rhoban_model_learning/input_reader_factory.h"
+#include "rhoban_model_learning/data_set_reader_factory.h"
 
 #include "rhoban_random/tools.h"
 
@@ -18,9 +18,9 @@ int main(int argc, char ** argv) {
   ModelLearner learner;
   learner.loadFile(argv[1]);
   // Reading input reader from Json
-  std::unique_ptr<InputReader> input_reader = InputReaderFactory().buildFromJsonFile(argv[2]);
+  std::unique_ptr<DataSetReader> input_reader = DataSetReaderFactory().buildFromJsonFile(argv[2]);
 
-  learner.getModel().appendParametersSpace(std::cout);
+  learner.getSpace().append(learner.getModel(), learner.getPrior(), learner.getTrainableIndices(), std::cout);
 
   // Analyze data
   std::default_random_engine engine = rhoban_random::getRandomEngine();
@@ -32,10 +32,6 @@ int main(int argc, char ** argv) {
   // Output csv file with results
   std::cout << "training score   : " << r.training_log_likelihood   << std::endl;
   std::cout << "validation score : " << r.validation_log_likelihood << std::endl;
-
-  Eigen::MatrixXd limits = r.model->getParametersSpace();
-  std::cout << "limits for learning" << std::endl
-            << limits.transpose() << std::endl;
 
   // Write parameters
   Eigen::VectorXd params = r.model->getParameters();

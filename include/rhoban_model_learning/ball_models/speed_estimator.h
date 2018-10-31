@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rhoban_model_learning/modular_model.h"
+#include "rhoban_model_learning/model.h"
 
 #include "rhoban_model_learning/ball_models/position_sequence.h"
 
@@ -13,7 +13,7 @@ namespace rhoban_model_learning
 /// and the time for the prediction
 ///
 /// It produces an output with the estimated speed of the ball (vx, vy) [m/s]
-class SpeedEstimator : public ModularModel {
+class SpeedEstimator : public Model {
 public:
 
   class Input : public rhoban_model_learning::Input {
@@ -28,7 +28,7 @@ public:
     double prediction_time;
   };
 
-  SpeedEstimator(int nb_dims);
+  SpeedEstimator();
 
   /// Input: a PositionSequence is required
   /// @return:  (vx [m/s], vy [m/s], t_pred [s])

@@ -1,6 +1,9 @@
 #include "rhoban_model_learning/model_learner.h"
 
 #include "rhoban_model_learning/model_factory.h"
+#include "rhoban_model_learning/model_prior_factory.h"
+#include "rhoban_model_learning/model_space_factory.h"
+#include "rhoban_model_learning/predictor_factory.h"
 
 #include "rhoban_bbo/optimizer_factory.h"
 
@@ -12,10 +15,17 @@ namespace rhoban_model_learning
 ModelLearner::ModelLearner() {}
 
 ModelLearner::ModelLearner(std::unique_ptr<Model> model_,
+                           std::unique_ptr<ModelPrior> prior_,
+                           std::unique_ptr<ModelSpace> space_,
+                           std::unique_ptr<Predictor> predictor_,
                            std::unique_ptr<rhoban_bbo::Optimizer> optimizer_,
-                           const Eigen::VectorXd & initial_guess_) :
-  model(std::move(model_)), optimizer(std::move(optimizer_)),
-  initial_guess(initial_guess_)
+                           const std::set<int> trainable_indices_) :
+  model(std::move(model_)),
+  prior(std::move(prior_)),
+  space(std::move(space_)),
+  predictor(std::move(predictor_)),
+  optimizer(std::move(optimizer_)),
+  trainable_indices(trainable_indices_)
 {
 }
 
@@ -45,25 +55,35 @@ ModelLearner::learnParameters(const SampleVector & training_set,
     {
       // Copy the original model, update the parameters and compute logLikelihood
       std::unique_ptr<Model> model_copy = this->model->clone();
-      model_copy->setParameters(parameters);
-      return model_copy->averageLogLikelihood(training_set, engine);
+      model_copy->setParameters(parameters, this->getTrainableIndices());
+      return this->getLogLikelihood(*model_copy, training_set, engine);
     };
-  Eigen::MatrixXd space = model->getParametersSpace();
-  if (space.rows() == 0) {
+  Eigen::MatrixXd matrix_space = space->getParametersSpace(*model, *prior, trainable_indices);
+  if (matrix_space.rows() == 0) {
     throw std::logic_error("ModelLearner::learnParameters: model has no parameters");
   }
-  optimizer->setLimits(space);
-  Eigen::VectorXd best_parameters; 
+  optimizer->setLimits(matrix_space);
+  Eigen::VectorXd initial_guess = prior->getParametersMeans(*model, trainable_indices);
+  Eigen::VectorXd best_parameters;
   best_parameters = optimizer->train(reward_function, initial_guess, engine);
   // Copy the model 
   result.model = model->clone();
   result.model->setParameters(best_parameters);
   // Estimate log likelihood on both, training set and validation set
-  result.training_log_likelihood =
-    result.model->averageLogLikelihood(training_set, engine);
-  result.validation_log_likelihood =
-    result.model->averageLogLikelihood(validation_set, engine);
+  result.training_log_likelihood = getLogLikelihood(*result.model, training_set, engine);
+  result.validation_log_likelihood = getLogLikelihood(*result.model, validation_set, engine);
   return result;
+}
+
+double ModelLearner::getLogLikelihood(const Model & model,
+                                      const SampleVector & data_set,
+                                      std::default_random_engine * engine) const
+{
+  double data_all = predictor->averageLogLikelihood(data_set, model, engine);
+  double parameters_ll = prior->getLogLikelihood(model, trainable_indices);
+  // Since we use average loglikelihood for data, parameters_ll has to be
+  // normalized by number of elements in data set
+  return data_all + parameters_ll  / data_set.size();
 }
 
 std::string ModelLearner::getClassName() const {
@@ -76,27 +96,73 @@ Json::Value ModelLearner::toJson() const
   if (model) {
     v["model"] = model->toFactoryJson();
   }
+  if (prior) {
+    v["prior"] = prior->toFactoryJson();
+  }
+  if (space) {
+    v["space"] = space->toFactoryJson();
+  }
+  if (predictor) {
+    v["predictor"] = predictor->toFactoryJson();
+  }
   if (optimizer) {
     v["optimizer"] = optimizer->toFactoryJson();
   }
-  v["initial_guess"] = rhoban_utils::vector2Json(initial_guess);
+  v["trainable_indices"] = rhoban_utils::set2Json(trainable_indices);
   return v;
 }
 
 void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
 {
   model = ModelFactory().read(v, "model", dir_name);
+  prior = ModelPriorFactory().read(v, "prior", dir_name);
+  space = ModelSpaceFactory().read(v, "space", dir_name);
+  predictor = PredictorFactory().read(v, "predictor", dir_name);
   optimizer = OptimizerFactory().read(v, "optimizer", dir_name);
-  rhoban_utils::tryReadEigen(v, "initial_guess", &initial_guess);
-  if (initial_guess.rows() == 0) {
-    Eigen::MatrixXd space = model->getParametersSpace();
-    initial_guess = (space.col(0) + space.col(1)) / 2;
+  trainable_indices.clear();
+  rhoban_utils::tryReadSet<int>(v, "trainable_indices", &trainable_indices);
+  std::vector<std::string> indices_names;
+  rhoban_utils::tryReadVector<std::string>(v, "indices_names", &indices_names);
+  if (indices_names.size() > 0) {
+    if (trainable_indices.size() > 0) {
+      throw std::runtime_error(DEBUG_INFO + " both trainable_indices and indices_names specified");
+    }
+    trainable_indices = model->getIndicesFromNames(indices_names);
+  }
+
+  int model_size = model->getParametersSize();
+  int prior_size = prior->getParametersMeans(*model).rows();
+  int space_size = space->getParametersSpace(*model, *prior).rows();
+  if (model_size != prior_size) {
+    throw std::runtime_error(DEBUG_INFO + "size of prior ("
+                             + std::to_string(prior_size) + ") size of model ("
+                             + std::to_string(model_size) + ")");
+  }
+  if (model_size != space_size) {
+    throw std::runtime_error(DEBUG_INFO + "size of space ("
+                             + std::to_string(space_size) + ") size of model ("
+                             + std::to_string(model_size) + ")");
   }
 }
 
-const Model & ModelLearner::getModel()
+const Model & ModelLearner::getModel() const
 {
   return *model;
+}
+
+const ModelPrior & ModelLearner::getPrior() const
+{
+  return *prior;
+}
+
+const ModelSpace & ModelLearner::getSpace() const
+{
+  return *space;
+}
+
+const std::set<int> & ModelLearner::getTrainableIndices() const
+{
+  return trainable_indices;
 }
 
 }

@@ -26,6 +26,7 @@ BallPhysicalModel::~BallPhysicalModel() {}
 Eigen::VectorXd
 BallPhysicalModel::predictObservation(const rhoban_model_learning::Input & raw_input,
                                       std::default_random_engine * engine) const {
+  (void)engine;
   if (max_integration_step <= 0) {
     throw std::logic_error(DEBUG_INFO + "Invalid value for max_integration_step: "
                            + std::to_string(max_integration_step));
@@ -126,7 +127,7 @@ std::vector<std::string> BallPhysicalModel::getGlobalParametersNames() const {
 }
 
 Json::Value BallPhysicalModel::toJson() const {
-  Json::Value v = ModularModel::toJson();
+  Json::Value v = Model::toJson();
   v["base_dry"  ] = base_dry ;
   v["base_visc" ] = base_visc;
   v["opp_dry"   ] = opp_dry  ;
@@ -140,7 +141,7 @@ Json::Value BallPhysicalModel::toJson() const {
 }
 
 void BallPhysicalModel::fromJson(const Json::Value & v, const std::string & dir_name) {
-  ModularModel::fromJson(v, dir_name);
+  Model::fromJson(v, dir_name);
   double bgd_deg = blade_grass_direction.getSignedValue();
   rhoban_utils::tryRead(v, "base_dry" , &base_dry );
   rhoban_utils::tryRead(v, "base_visc", &base_visc);

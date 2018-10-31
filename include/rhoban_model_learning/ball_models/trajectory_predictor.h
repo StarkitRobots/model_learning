@@ -5,13 +5,13 @@
 #include "rhoban_model_learning/ball_models/speed_estimator.h"
 
 #include "rhoban_model_learning/input_reader.h"
-#include "rhoban_model_learning/modular_model.h"
+#include "rhoban_model_learning/model.h"
 #include "rhoban_model_learning/ball_models/position_sequence_reader.h"
 
 namespace rhoban_model_learning
 {
 /// Predicts the position of the ball (x,y) at a given TimeStamp
-class TrajectoryPredictor : public ModularModel {
+class TrajectoryPredictor : public Model {
 public:
 
   class Input : public rhoban_model_learning::Input {
