@@ -4,18 +4,19 @@
 
 namespace rhoban_model_learning
 {
-
 /// A position predictor estimates the position of the ball after a specified
 /// amount of time
 ///
 /// It takes as input the position and the speed of the ball as well as the time
 /// requested for prediction (dt)
-class PositionPredictor : public Model {
+class PositionPredictor : public Model
+{
 public:
-  class Input : public rhoban_model_learning::Input {
+  class Input : public rhoban_model_learning::Input
+  {
   public:
     Input();
-    Input(const Input & other);
+    Input(const Input& other);
 
     std::unique_ptr<rhoban_model_learning::Input> clone() const override;
 
@@ -27,11 +28,9 @@ public:
     double prediction_duration;
   };
 
-  
   PositionPredictor(int dim);
 
   virtual Eigen::VectorXi getObservationsCircularity() const override;
-
 };
 
-}
+}  // namespace rhoban_model_learning

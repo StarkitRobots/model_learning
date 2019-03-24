@@ -5,10 +5,10 @@
 
 namespace rhoban_model_learning
 {
-
-ModelPriorFactory::ModelPriorFactory() {
-  registerBuilder("CompositePrior",[]() { return std::unique_ptr<ModelPrior>(new CompositePrior); });
-  registerBuilder("DefaultPrior",[]() { return std::unique_ptr<ModelPrior>(new DefaultPrior); });
+ModelPriorFactory::ModelPriorFactory()
+{
+  registerBuilder("CompositePrior", []() { return std::unique_ptr<ModelPrior>(new CompositePrior); });
+  registerBuilder("DefaultPrior", []() { return std::unique_ptr<ModelPrior>(new DefaultPrior); });
 }
 
-}
+}  // namespace rhoban_model_learning

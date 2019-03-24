@@ -6,26 +6,22 @@
 
 namespace rhoban_model_learning
 {
-
 class BallPhysicalModel : public PositionPredictor
 {
 public:
-
   BallPhysicalModel();
   virtual ~BallPhysicalModel();
 
-  virtual Eigen::VectorXd
-  predictObservation(const rhoban_model_learning::Input & input,
-                     std::default_random_engine * engine) const override;
-
+  virtual Eigen::VectorXd predictObservation(const rhoban_model_learning::Input& input,
+                                             std::default_random_engine* engine) const override;
 
   virtual Eigen::VectorXd getGlobalParameters() const;
   virtual Eigen::MatrixXd getGlobalParametersSpace() const;
-  virtual void setGlobalParameters(const Eigen::VectorXd & new_params);
+  virtual void setGlobalParameters(const Eigen::VectorXd& new_params);
   virtual std::vector<std::string> getGlobalParametersNames() const;
 
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
   std::string getClassName() const;
 
 private:
@@ -63,4 +59,4 @@ private:
   double min_speed;
 };
 
-}
+}  // namespace rhoban_model_learning

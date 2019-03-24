@@ -3,10 +3,9 @@
 
 namespace rhoban_model_learning
 {
-
-SpeedEstimatorFactory::SpeedEstimatorFactory() {
-  registerBuilder("LinearSpeedEstimator",
-                  [](){return std::unique_ptr<SpeedEstimator>(new LinearSpeedEstimator);});  
+SpeedEstimatorFactory::SpeedEstimatorFactory()
+{
+  registerBuilder("LinearSpeedEstimator", []() { return std::unique_ptr<SpeedEstimator>(new LinearSpeedEstimator); });
 }
 
-}
+}  // namespace rhoban_model_learning

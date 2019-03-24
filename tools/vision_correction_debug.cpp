@@ -10,19 +10,25 @@ using namespace rhoban_utils;
 
 typedef VisionCorrectionModel::VisionInput VisionInput;
 
-class Config : public rhoban_utils::JsonSerializable {
+class Config : public rhoban_utils::JsonSerializable
+{
 public:
-  Config(){}
+  Config()
+  {
+  }
 
-  std::string getClassName() const override {
+  std::string getClassName() const override
+  {
     return "VisionCorrectionDebugConfig";
   }
 
-  Json::Value toJson() const override {
+  Json::Value toJson() const override
+  {
     throw std::logic_error("Not implemented");
   }
 
-  void fromJson(const Json::Value & v, const std::string & dir_name) override {
+  void fromJson(const Json::Value& v, const std::string& dir_name) override
+  {
     models = ModelFactory().readMap(v, "models", dir_name);
   }
 
@@ -30,25 +36,26 @@ public:
   std::map<std::string, std::unique_ptr<Model>> models;
 };
 
-void compare(const std::string & model_name,
-             const VisionCorrectionModel & m,
-             const SampleVector & samples,
-             std::ostream & out) {
-  for (const auto & s : samples) {
-    const VisionInput & input = dynamic_cast<const VisionInput &>(s->getInput());
+void compare(const std::string& model_name, const VisionCorrectionModel& m, const SampleVector& samples,
+             std::ostream& out)
+{
+  for (const auto& s : samples)
+  {
+    const VisionInput& input = dynamic_cast<const VisionInput&>(s->getInput());
     int tag_id = input.data("tag_id");
     Eigen::Vector2d obs(input.data("pixel_x_uncorrected"), input.data("pixel_y_uncorrected"));
     Eigen::Vector2d pred = m.predictObservation(input, nullptr);
     Eigen::Vector2d error = obs - pred;
-    out << model_name << "," << tag_id << "," << error(0) << "," << error(1) << ","
-        << obs(0) << "," << obs(1) << "," << pred(0) << "," << pred(1)<< std::endl;
+    out << model_name << "," << tag_id << "," << error(0) << "," << error(1) << "," << obs(0) << "," << obs(1) << ","
+        << pred(0) << "," << pred(1) << std::endl;
   }
 }
 
-int main(int argc, char ** argv) {
-  if (argc != 4) {
-    std::cerr << "Usage: " << argv[0] << " <vision_correction_debug.json> <input_reader.json> <data_file>"
-              << std::endl;
+int main(int argc, char** argv)
+{
+  if (argc != 4)
+  {
+    std::cerr << "Usage: " << argv[0] << " <vision_correction_debug.json> <input_reader.json> <data_file>" << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -67,12 +74,12 @@ int main(int argc, char ** argv) {
   csv_file << "model,tagId,errX,errY,obsX,obsY,predX,predY" << std::endl;
 
   //
-  for (const auto & model_pair : conf.models) {
-      std::string model_name = model_pair.first;
-      const VisionCorrectionModel & model =
-          dynamic_cast<const VisionCorrectionModel &> (*(model_pair.second));
+  for (const auto& model_pair : conf.models)
+  {
+    std::string model_name = model_pair.first;
+    const VisionCorrectionModel& model = dynamic_cast<const VisionCorrectionModel&>(*(model_pair.second));
 
-      compare(model_name, model, data.training_set, csv_file);
-      compare(model_name, model, data.validation_set, csv_file);
+    compare(model_name, model, data.training_set, csv_file);
+    compare(model_name, model, data.validation_set, csv_file);
   }
 }

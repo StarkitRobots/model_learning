@@ -5,19 +5,18 @@
 
 namespace rhoban_model_learning
 {
-
-/// Represent multiple cubes, thus allowing to get all 
+/// Represent multiple cubes, thus allowing to get all
 class ArucoCollection : public CompositeModel, public TagsCollection
 {
 public:
   ArucoCollection();
-  ArucoCollection(const ArucoCollection & other);
+  ArucoCollection(const ArucoCollection& other);
 
   std::map<int, ArucoTag> getMarkers() const override;
-  virtual void fromJson(const Json::Value & v, const std::string & dir_path) override;
+  virtual void fromJson(const Json::Value& v, const std::string& dir_path) override;
 
   virtual std::string getClassName() const override;
   virtual std::unique_ptr<Model> clone() const override;
 };
 
-}
+}  // namespace rhoban_model_learning

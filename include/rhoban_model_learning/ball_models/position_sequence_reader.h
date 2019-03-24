@@ -5,24 +5,24 @@
 
 namespace rhoban_model_learning
 {
-
-/// Extracts a map of PositionSequences using the provided 
-class PositionSequenceReader : public rhoban_utils::JsonSerializable {
+/// Extracts a map of PositionSequences using the provided
+class PositionSequenceReader : public rhoban_utils::JsonSerializable
+{
 public:
   PositionSequenceReader();
 
   /// Read all the ball_position entries at the given path, then separates them
   /// based on the speed provided by the speed_estimator and return a vector
   /// containing the separated position sequences
-  std::vector<PositionSequence> readPositionSequences(const std::string & file_path) const;
+  std::vector<PositionSequence> readPositionSequences(const std::string& file_path) const;
 
   /// Separate a PositionSequence in multiple PositionSequences based on
   /// estimated ball speed
-  std::vector<PositionSequence> splitSequence(const PositionSequence & pos_seq) const;
+  std::vector<PositionSequence> splitSequence(const PositionSequence& pos_seq) const;
 
   virtual std::string getClassName() const override;
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
 
 private:
   /// Used to estimate the speed of the ball in order to separate different ball
@@ -50,4 +50,4 @@ private:
   double min_point_count;
 };
 
-}
+}  // namespace rhoban_model_learning

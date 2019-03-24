@@ -6,12 +6,12 @@
 
 namespace rhoban_model_learning
 {
-
-class CalibrationInput : public Input {
+class CalibrationInput : public Input
+{
 public:
   CalibrationInput();
-  CalibrationInput(const Leph::VectorLabel & data);
-  CalibrationInput(const CalibrationInput & other);
+  CalibrationInput(const Leph::VectorLabel& data);
+  CalibrationInput(const CalibrationInput& other);
 
   virtual std::unique_ptr<Input> clone() const override;
 
@@ -19,4 +19,4 @@ public:
   Leph::VectorLabel data;
 };
 
-}
+}  // namespace rhoban_model_learning

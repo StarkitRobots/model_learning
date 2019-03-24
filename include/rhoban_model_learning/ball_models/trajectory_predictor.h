@@ -11,33 +11,34 @@
 namespace rhoban_model_learning
 {
 /// Predicts the position of the ball (x,y) at a given TimeStamp
-class TrajectoryPredictor : public Model {
+class TrajectoryPredictor : public Model
+{
 public:
-
-  class Input : public rhoban_model_learning::Input {
+  class Input : public rhoban_model_learning::Input
+  {
   public:
     Input();
-    Input(const PositionSequence & seq, double prediction_time);
-    Input(const Input & other);
+    Input(const PositionSequence& seq, double prediction_time);
+    Input(const Input& other);
     virtual ~Input();
 
     std::unique_ptr<rhoban_model_learning::Input> clone() const override;
-    
+
     /// The entries available for prediction
     PositionSequence ball_positions;
-    
+
     /// Timestamp for the prediction
     double prediction_time;
   };
 
-  class Reader : public InputReader {
+  class Reader : public InputReader
+  {
   public:
-    /// Extracts training and validation set from 
-    DataSet extractSamples(const std::string & file_path,
-                           std::default_random_engine * engine) const;
+    /// Extracts training and validation set from
+    DataSet extractSamples(const std::string& file_path, std::default_random_engine* engine) const;
 
     Json::Value toJson() const override;
-    void fromJson(const Json::Value & v, const std::string & dir_name) override;
+    void fromJson(const Json::Value& v, const std::string& dir_name) override;
     std::string getClassName() const;
 
   private:
@@ -63,29 +64,26 @@ public:
     double max_dt;
   };
 
-
-
   TrajectoryPredictor();
-  TrajectoryPredictor(const TrajectoryPredictor & other);
+  TrajectoryPredictor(const TrajectoryPredictor& other);
   virtual ~TrajectoryPredictor();
 
-  Eigen::VectorXd
-  predictObservation(const rhoban_model_learning::Input & input,
-                     std::default_random_engine * engine) const override;
-  
-  
+  Eigen::VectorXd predictObservation(const rhoban_model_learning::Input& input,
+                                     std::default_random_engine* engine) const override;
+
   virtual Eigen::VectorXi getObservationsCircularity() const override;
 
   virtual Eigen::VectorXd getGlobalParameters() const override;
   virtual Eigen::MatrixXd getGlobalParametersSpace() const override;
-  virtual void setGlobalParameters(const Eigen::VectorXd & new_params) override;
+  virtual void setGlobalParameters(const Eigen::VectorXd& new_params) override;
   virtual std::vector<std::string> getGlobalParametersNames() const override;
 
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
   std::string getClassName() const;
 
   std::unique_ptr<Model> clone() const override;
+
 private:
   /// The model used to estimate the speed of the ball
   std::unique_ptr<SpeedEstimator> speed_estimator;
@@ -94,5 +92,4 @@ private:
   std::unique_ptr<PositionPredictor> position_predictor;
 };
 
-
-}
+}  // namespace rhoban_model_learning

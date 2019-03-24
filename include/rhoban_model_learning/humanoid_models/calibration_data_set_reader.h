@@ -4,8 +4,8 @@
 
 namespace rhoban_model_learning
 {
-
-class CalibrationDataSetReader : public DataSetReader {
+class CalibrationDataSetReader : public DataSetReader
+{
 public:
   CalibrationDataSetReader();
 
@@ -13,12 +13,12 @@ public:
   /// - none of `nb_training_tags` and `nb_validation_tags` is provided
   /// - The sum of `nb_training_tags` and `nb_validation_tags` is higher
   ///   than the number of valid tags
-  virtual DataSet extractSamples(const std::string & file_path,
-                                 std::default_random_engine * engine) const override;
+  virtual DataSet extractSamples(const std::string& file_path, std::default_random_engine* engine) const override;
 
   virtual std::string getClassName() const override;
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
+
 private:
   /// The acceptable range for x coordinates [px]
   Eigen::Vector2d x_coord_range;
@@ -44,4 +44,4 @@ private:
   bool verbose;
 };
 
-}
+}  // namespace rhoban_model_learning

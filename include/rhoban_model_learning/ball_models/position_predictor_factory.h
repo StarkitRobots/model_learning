@@ -4,11 +4,12 @@
 
 #include "rhoban_utils/serialization/factory.h"
 
-namespace rhoban_model_learning {
-
-class PositionPredictorFactory : public rhoban_utils::Factory<PositionPredictor> {
+namespace rhoban_model_learning
+{
+class PositionPredictorFactory : public rhoban_utils::Factory<PositionPredictor>
+{
 public:
   PositionPredictorFactory();
 };
 
-}
+}  // namespace rhoban_model_learning

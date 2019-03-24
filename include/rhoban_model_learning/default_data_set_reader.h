@@ -4,7 +4,6 @@
 
 namespace rhoban_model_learning
 {
-
 /// Read data from a csv file, simply consider the first 'input_dim' columns as input
 /// and the 'observation_dim' columns as observations
 ///
@@ -13,13 +12,12 @@ class DefaultDataSetReader : public DataSetReader
 {
 public:
   DefaultDataSetReader();
-  
-  DataSet extractSamples(const std::string & file_path,
-                         std::default_random_engine * engine) const override;
+
+  DataSet extractSamples(const std::string& file_path, std::default_random_engine* engine) const override;
 
   std::string getClassName() const override;
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
 
 private:
   /// Dimensionality of input
@@ -30,4 +28,4 @@ private:
   double validation_ratio;
 };
 
-}
+}  // namespace rhoban_model_learning

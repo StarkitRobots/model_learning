@@ -11,62 +11,57 @@ using namespace rhoban_bbo;
 
 namespace rhoban_model_learning
 {
-
-ModelLearner::ModelLearner() {}
-
-ModelLearner::ModelLearner(std::unique_ptr<Model> model_,
-                           std::unique_ptr<ModelPrior> prior_,
-                           std::unique_ptr<ModelSpace> space_,
-                           std::unique_ptr<Predictor> predictor_,
-                           std::unique_ptr<rhoban_bbo::Optimizer> optimizer_,
-                           const std::set<int> trainable_indices_) :
-  model(std::move(model_)),
-  prior(std::move(prior_)),
-  space(std::move(space_)),
-  predictor(std::move(predictor_)),
-  optimizer(std::move(optimizer_)),
-  trainable_indices(trainable_indices_)
+ModelLearner::ModelLearner()
 {
 }
 
-ModelLearner::Result
-ModelLearner::learnParameters(const DataSet & data,
-                              std::default_random_engine * engine)
+ModelLearner::ModelLearner(std::unique_ptr<Model> model_, std::unique_ptr<ModelPrior> prior_,
+                           std::unique_ptr<ModelSpace> space_, std::unique_ptr<Predictor> predictor_,
+                           std::unique_ptr<rhoban_bbo::Optimizer> optimizer_, const std::set<int> trainable_indices_)
+  : model(std::move(model_))
+  , prior(std::move(prior_))
+  , space(std::move(space_))
+  , predictor(std::move(predictor_))
+  , optimizer(std::move(optimizer_))
+  , trainable_indices(trainable_indices_)
+{
+}
+
+ModelLearner::Result ModelLearner::learnParameters(const DataSet& data, std::default_random_engine* engine)
 {
   return learnParameters(data.training_set, data.validation_set, engine);
 }
 
-ModelLearner::Result
-ModelLearner::learnParameters(const SampleVector & training_set,
-                              const SampleVector & validation_set,
-                              std::default_random_engine * engine)
+ModelLearner::Result ModelLearner::learnParameters(const SampleVector& training_set, const SampleVector& validation_set,
+                                                   std::default_random_engine* engine)
 {
-  if (training_set.size() == 0) {
+  if (training_set.size() == 0)
+  {
     throw std::logic_error(DEBUG_INFO + " empty training set");
   }
-  if (validation_set.size() == 0) {
+  if (validation_set.size() == 0)
+  {
     throw std::logic_error(DEBUG_INFO + " empty validation set");
   }
 
   Result result;
-  rhoban_bbo::Optimizer::RewardFunc reward_function =
-    [this, &training_set]
-    (const Eigen::VectorXd & parameters, std::default_random_engine * engine)
-    {
-      // Copy the original model, update the parameters and compute logLikelihood
-      std::unique_ptr<Model> model_copy = this->model->clone();
-      model_copy->setParameters(parameters, this->getTrainableIndices());
-      return this->getLogLikelihood(*model_copy, training_set, engine);
-    };
+  rhoban_bbo::Optimizer::RewardFunc reward_function = [this, &training_set](const Eigen::VectorXd& parameters,
+                                                                            std::default_random_engine* engine) {
+    // Copy the original model, update the parameters and compute logLikelihood
+    std::unique_ptr<Model> model_copy = this->model->clone();
+    model_copy->setParameters(parameters, this->getTrainableIndices());
+    return this->getLogLikelihood(*model_copy, training_set, engine);
+  };
   Eigen::MatrixXd matrix_space = space->getParametersSpace(*model, *prior, trainable_indices);
-  if (matrix_space.rows() == 0) {
+  if (matrix_space.rows() == 0)
+  {
     throw std::logic_error("ModelLearner::learnParameters: model has no parameters");
   }
   optimizer->setLimits(matrix_space);
   Eigen::VectorXd initial_guess = prior->getParametersMeans(*model, trainable_indices);
   Eigen::VectorXd best_parameters;
   best_parameters = optimizer->train(reward_function, initial_guess, engine);
-  // Copy the model 
+  // Copy the model
   result.model = model->clone();
   result.model->setParameters(best_parameters);
   // Estimate log likelihood on both, training set and validation set
@@ -75,44 +70,49 @@ ModelLearner::learnParameters(const SampleVector & training_set,
   return result;
 }
 
-double ModelLearner::getLogLikelihood(const Model & model,
-                                      const SampleVector & data_set,
-                                      std::default_random_engine * engine) const
+double ModelLearner::getLogLikelihood(const Model& model, const SampleVector& data_set,
+                                      std::default_random_engine* engine) const
 {
   double data_all = predictor->averageLogLikelihood(data_set, model, engine);
   double parameters_ll = prior->getLogLikelihood(model, trainable_indices);
   // Since we use average loglikelihood for data, parameters_ll has to be
   // normalized by number of elements in data set
-  return data_all + parameters_ll  / data_set.size();
+  return data_all + parameters_ll / data_set.size();
 }
 
-std::string ModelLearner::getClassName() const {
+std::string ModelLearner::getClassName() const
+{
   return "ModelLearner";
 }
 
 Json::Value ModelLearner::toJson() const
 {
   Json::Value v;
-  if (model) {
+  if (model)
+  {
     v["model"] = model->toFactoryJson();
   }
-  if (prior) {
+  if (prior)
+  {
     v["prior"] = prior->toFactoryJson();
   }
-  if (space) {
+  if (space)
+  {
     v["space"] = space->toFactoryJson();
   }
-  if (predictor) {
+  if (predictor)
+  {
     v["predictor"] = predictor->toFactoryJson();
   }
-  if (optimizer) {
+  if (optimizer)
+  {
     v["optimizer"] = optimizer->toFactoryJson();
   }
   v["trainable_indices"] = rhoban_utils::set2Json(trainable_indices);
   return v;
 }
 
-void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
+void ModelLearner::fromJson(const Json::Value& v, const std::string& dir_name)
 {
   model = ModelFactory().read(v, "model", dir_name);
   prior = ModelPriorFactory().read(v, "prior", dir_name);
@@ -123,8 +123,10 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
   rhoban_utils::tryReadSet<int>(v, "trainable_indices", &trainable_indices);
   std::vector<std::string> indices_names;
   rhoban_utils::tryReadVector<std::string>(v, "indices_names", &indices_names);
-  if (indices_names.size() > 0) {
-    if (trainable_indices.size() > 0) {
+  if (indices_names.size() > 0)
+  {
+    if (trainable_indices.size() > 0)
+    {
       throw std::runtime_error(DEBUG_INFO + " both trainable_indices and indices_names specified");
     }
     trainable_indices = model->getIndicesFromNames(indices_names);
@@ -133,36 +135,36 @@ void ModelLearner::fromJson(const Json::Value & v, const std::string & dir_name)
   int model_size = model->getParametersSize();
   int prior_size = prior->getParametersMeans(*model).rows();
   int space_size = space->getParametersSpace(*model, *prior).rows();
-  if (model_size != prior_size) {
-    throw std::runtime_error(DEBUG_INFO + "size of prior ("
-                             + std::to_string(prior_size) + ") size of model ("
-                             + std::to_string(model_size) + ")");
+  if (model_size != prior_size)
+  {
+    throw std::runtime_error(DEBUG_INFO + "size of prior (" + std::to_string(prior_size) + ") size of model (" +
+                             std::to_string(model_size) + ")");
   }
-  if (model_size != space_size) {
-    throw std::runtime_error(DEBUG_INFO + "size of space ("
-                             + std::to_string(space_size) + ") size of model ("
-                             + std::to_string(model_size) + ")");
+  if (model_size != space_size)
+  {
+    throw std::runtime_error(DEBUG_INFO + "size of space (" + std::to_string(space_size) + ") size of model (" +
+                             std::to_string(model_size) + ")");
   }
 }
 
-const Model & ModelLearner::getModel() const
+const Model& ModelLearner::getModel() const
 {
   return *model;
 }
 
-const ModelPrior & ModelLearner::getPrior() const
+const ModelPrior& ModelLearner::getPrior() const
 {
   return *prior;
 }
 
-const ModelSpace & ModelLearner::getSpace() const
+const ModelSpace& ModelLearner::getSpace() const
 {
   return *space;
 }
 
-const std::set<int> & ModelLearner::getTrainableIndices() const
+const std::set<int>& ModelLearner::getTrainableIndices() const
 {
   return trainable_indices;
 }
 
-}
+}  // namespace rhoban_model_learning

@@ -4,8 +4,8 @@
 
 namespace rhoban_model_learning
 {
-
-class InferedPosesDataSetReader : public DataSetReader {
+class InferedPosesDataSetReader : public DataSetReader
+{
 public:
   InferedPosesDataSetReader();
 
@@ -13,16 +13,16 @@ public:
   /// - none of `nb_training_images` and `nb_validation_images` is provided
   /// - The sum of `nb_training_images` and `nb_validation_tags` is higher
   ///   than the number of images with at least 'min_tags'
-  virtual DataSet extractSamples(const std::string & file_path,
-                                 std::default_random_engine * engine) const override;
+  virtual DataSet extractSamples(const std::string& file_path, std::default_random_engine* engine) const override;
 
   virtual std::string getClassName() const override;
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
+
 private:
   /// Number of images used for the training data set
   int nb_training_images;
-  
+
   /// Number of images used for the validation data set
   int nb_validation_images;
 
@@ -38,4 +38,4 @@ private:
   bool verbose;
 };
 
-}
+}  // namespace rhoban_model_learning

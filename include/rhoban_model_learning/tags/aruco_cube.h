@@ -6,7 +6,6 @@
 
 namespace rhoban_model_learning
 {
-
 /// Represent a cube which can contain an aruco tag on every side face (i.e. not
 /// top neither bottom)
 ///
@@ -19,24 +18,24 @@ class ArucoCube : public Model, public TagsCollection
 {
 public:
   ArucoCube();
-  ArucoCube(const ArucoCube & other);
+  ArucoCube(const ArucoCube& other);
 
   std::map<int, ArucoTag> getMarkers() const override;
 
   int getParametersSize() const override;
 
   Eigen::VectorXd getParameters() const override;
-  void setParameters(const Eigen::VectorXd & new_params) override;
+  void setParameters(const Eigen::VectorXd& new_params) override;
   std::vector<std::string> getParametersNames() const override;
 
   virtual Json::Value toJson() const override;
-  virtual void fromJson(const Json::Value & v, const std::string & dir_path) override;
+  virtual void fromJson(const Json::Value& v, const std::string& dir_path) override;
   virtual std::string getClassName() const override;
-  
+
 private:
   /// Update the pose of the sheets to match the pose of the cube
   void updateSheets();
-  
+
   /// The pose of the cube
   PoseModel pose;
 
@@ -47,4 +46,4 @@ private:
   std::map<int, TagsSheet> sheets;
 };
 
-}
+}  // namespace rhoban_model_learning

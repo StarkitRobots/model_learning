@@ -6,12 +6,12 @@
 
 namespace rhoban_model_learning
 {
-
-class TagsCollection {
+class TagsCollection
+{
 public:
   /// Return a dictionary containing all the aruco tags of the collection with
   /// their position in world referential
   virtual std::map<int, ArucoTag> getMarkers() const = 0;
 };
 
-}
+}  // namespace rhoban_model_learning

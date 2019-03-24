@@ -5,11 +5,10 @@
 
 namespace rhoban_model_learning
 {
-
-ModelSpaceFactory::ModelSpaceFactory() {
-  registerBuilder("DefaultSpace",[]() { return std::unique_ptr<ModelSpace>(new DefaultSpace); });
-  registerBuilder("DeviationBasedSpace",
-                  []() { return std::unique_ptr<ModelSpace>(new DeviationBasedSpace); });
+ModelSpaceFactory::ModelSpaceFactory()
+{
+  registerBuilder("DefaultSpace", []() { return std::unique_ptr<ModelSpace>(new DefaultSpace); });
+  registerBuilder("DeviationBasedSpace", []() { return std::unique_ptr<ModelSpace>(new DeviationBasedSpace); });
 }
 
-}
+}  // namespace rhoban_model_learning

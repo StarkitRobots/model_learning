@@ -7,10 +7,11 @@
 
 using namespace rhoban_model_learning;
 
-int main(int argc, char ** argv) {
-  if (argc < 4) {
-    std::cerr << "Usage: " << argv[0] << " <model_learner.json> <input_reader.json> <data_file>"
-              << std::endl;
+int main(int argc, char** argv)
+{
+  if (argc < 4)
+  {
+    std::cerr << "Usage: " << argv[0] << " <model_learner.json> <input_reader.json> <data_file>" << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -30,22 +31,26 @@ int main(int argc, char ** argv) {
   ModelLearner::Result r = learner.learnParameters(data, &engine);
 
   // Output csv file with results
-  std::cout << "training score   : " << r.training_log_likelihood   << std::endl;
+  std::cout << "training score   : " << r.training_log_likelihood << std::endl;
   std::cout << "validation score : " << r.validation_log_likelihood << std::endl;
 
   // Write parameters
   Eigen::VectorXd params = r.model->getParameters();
   std::vector<std::string> param_names = r.model->getParametersNames();
-  for (size_t i = 0; i < param_names.size(); i++) {
+  for (size_t i = 0; i < param_names.size(); i++)
+  {
     std::cout << param_names[i];
-    if ( i != param_names.size() - 1) {
+    if (i != param_names.size() - 1)
+    {
       std::cout << ",";
     }
   }
   std::cout << std::endl;
-  for (int i = 0; i < params.rows(); i++) {
+  for (int i = 0; i < params.rows(); i++)
+  {
     std::cout << params(i);
-    if ( i != params.rows() - 1) {
+    if (i != params.rows() - 1)
+    {
       std::cout << ",";
     }
   }
@@ -53,5 +58,4 @@ int main(int argc, char ** argv) {
 
   // Save model in Json format
   r.model->saveFile("trained_model.json");
-
 }

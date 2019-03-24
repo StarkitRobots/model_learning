@@ -8,19 +8,19 @@
 
 namespace rhoban_model_learning
 {
-
-class PositionSequence : public Input {
+class PositionSequence : public Input
+{
 public:
   /// Creates an empty position sequence
   PositionSequence();
-  PositionSequence(const PositionSequence & other);
+  PositionSequence(const PositionSequence& other);
   virtual ~PositionSequence();
 
   bool isEmpty() const;
 
   /// throws an exception if timing of the entry is lower than timing of the
   /// last entry
-  void addEntry(const Eigen::Vector3d & entry);
+  void addEntry(const Eigen::Vector3d& entry);
 
   /// Extract a position sequence with only the entries in the given interval
   PositionSequence extractSequence(double start, double end) const;
@@ -52,4 +52,4 @@ public:
   std::vector<Eigen::Vector3d> timed_positions;
 };
 
-}
+}  // namespace rhoban_model_learning

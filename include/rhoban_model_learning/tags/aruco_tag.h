@@ -5,14 +5,13 @@
 
 namespace rhoban_model_learning
 {
-
-class ArucoTag {
+class ArucoTag
+{
 public:
   ArucoTag();
 
-  ArucoTag(int marker_id, double marker_size,
-           const Eigen::Vector3d & marker_center,
-           const Eigen::Quaterniond & orientation);
+  ArucoTag(int marker_id, double marker_size, const Eigen::Vector3d& marker_center,
+           const Eigen::Quaterniond& orientation);
 
   /// The aruco identifier
   int marker_id;
@@ -30,4 +29,4 @@ public:
   Eigen::Quaterniond orientation;
 };
 
-}
+}  // namespace rhoban_model_learning

@@ -4,7 +4,6 @@
 
 namespace rhoban_model_learning
 {
-
 /// This class is used to integrate steps of the robot. It uses as input an
 /// estimation of displacement and output a corrected version of the orders
 ///
@@ -25,9 +24,9 @@ namespace rhoban_model_learning
 /// 2. Stochastic part:
 ///    noise_y = N(noise_prop * X + noise_constant)
 
-class HolonomicWalkModel : public Model {
+class HolonomicWalkModel : public Model
+{
 public:
-
   /// There are different variations of parametrization for the model
   /// (both deterministic and stochastic):
   /// None        : No parameters can be changed (mainly related to stochastic parameters)
@@ -38,19 +37,19 @@ public:
   /// Important note: The choice of the parameter subset only affect which
   ///                 parameters can be manipulated, it does not ensure that
   ///                 their values are not used
-  enum ParameterSubset {
+  enum ParameterSubset
+  {
     None,
     Constant,
     Linear,
     All,
   };
 
-  /// Dummy constructor with no correction on deterministic part and default values for noises (only 
+  /// Dummy constructor with no correction on deterministic part and default values for noises (only
   HolonomicWalkModel();
 
   /// Constructor with specific parameters set
-  HolonomicWalkModel(ParameterSubset deterministic_type,
-                     ParameterSubset noise_type);
+  HolonomicWalkModel(ParameterSubset deterministic_type, ParameterSubset noise_type);
 
   ParameterSubset getDeterministicType() const;
   ParameterSubset getNoiseType() const;
@@ -62,26 +61,22 @@ public:
   virtual Eigen::VectorXd getParameters() const override;
 
   /// Throw a logic_error if size of new_params does not match expected size
-  virtual void setParameters(const Eigen::VectorXd & new_params) override;
+  virtual void setParameters(const Eigen::VectorXd& new_params) override;
 
   virtual std::vector<std::string> getParametersNames() const override;
 
   /// Throws an exception if input is not of the type WalkOrderSequence
-  virtual Eigen::VectorXd
-  predictObservation(const Input & input,
-                     std::default_random_engine * engine) const override;
+  virtual Eigen::VectorXd predictObservation(const Input& input, std::default_random_engine* engine) const override;
 
   /// If engine is nullptr, then only the deterministic part is added
-  Eigen::VectorXd getStepDisplacement(const Eigen::Vector3d & expected_move,
-                                      std::default_random_engine * engine) const;
+  Eigen::VectorXd getStepDisplacement(const Eigen::Vector3d& expected_move, std::default_random_engine* engine) const;
 
   /// If engine is nullptr, then only the deterministic part is added
-  Eigen::VectorXd getNextPosition(const Eigen::Vector3d & initial,
-                                  const Eigen::Vector3d & expected_move,
-                                  std::default_random_engine * engine) const;
+  Eigen::VectorXd getNextPosition(const Eigen::Vector3d& initial, const Eigen::Vector3d& expected_move,
+                                  std::default_random_engine* engine) const;
 
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
   std::string getClassName() const;
 
 private:
@@ -98,4 +93,4 @@ private:
   ParameterSubset noise_type;
 };
 
-}
+}  // namespace rhoban_model_learning

@@ -7,42 +7,37 @@
 
 namespace rhoban_model_learning
 {
-
-class Predictor : public rhoban_utils::JsonSerializable {
+class Predictor : public rhoban_utils::JsonSerializable
+{
 public:
   Predictor();
-  Predictor(const Predictor & other);
+  Predictor(const Predictor& other);
 
   /// Return a vector indicating for each dimension of the observation if it is
   /// a circular dimension
   /// Default implementation is none of the dimension is circular
   virtual Eigen::VectorXi getObservationsCircularity() const;
-  
 
   /// Return the predicted observation according to the provided input and
   /// parameters and model. If 'engine' is null, noise is not considered
-  virtual Eigen::VectorXd
-  predictObservation(const Input & input,
-                     const Model & model,
-                     std::default_random_engine * engine) const = 0;
+  virtual Eigen::VectorXd predictObservation(const Input& input, const Model& model,
+                                             std::default_random_engine* engine) const = 0;
 
   /// Compute the logLikelihood of the observation of the sample given
   /// its input
   /// Default method is to predict nb_samples observations with noise and to fit
   /// a multivariate-gaussian on the resulting observations. Then the density is
   /// provided directly using the logLikelihood inside the given distribution
-  virtual double computeLogLikelihood(const Sample & sample,
-                                      const Model & model,
-                                      std::default_random_engine * engine) const;
+  virtual double computeLogLikelihood(const Sample& sample, const Model& model,
+                                      std::default_random_engine* engine) const;
 
   /// Compute the average logLikelihood of the data set given the current
   /// parameters (relies on computeLogLikelihood)
-  double averageLogLikelihood(const SampleVector & data_set,
-                              const Model & model,
-                              std::default_random_engine * engine) const;
+  double averageLogLikelihood(const SampleVector& data_set, const Model& model,
+                              std::default_random_engine* engine) const;
 
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
 
 protected:
   /// The number of samples used to fit a distribution if necessary
@@ -56,4 +51,4 @@ protected:
   int output_dim;
 };
 
-}
+}  // namespace rhoban_model_learning

@@ -8,7 +8,6 @@
 
 namespace rhoban_model_learning
 {
-
 /// Inputs are composed of:
 /// - Position of all the DOF and the IMU
 /// - Expected position of the data in the left_foot referential
@@ -20,14 +19,15 @@ namespace rhoban_model_learning
 /// Inputs are composed:
 /// - Trajectories of balls in the referential of Todo
 
-class BallPredictionModel : public ModularModel {
+class BallPredictionModel : public ModularModel
+{
 public:
-
-  class BallTrajectoriesInput : public Input {
+  class BallTrajectoriesInput : public Input
+  {
   public:
     BallTrajectoriesInput();
-    BallTrajectoriesInput(const Leph::VectorLabel & data);
-    BallTrajectoriesInput(const BallTrajectoriesInput & other);
+    BallTrajectoriesInput(const Leph::VectorLabel& data);
+    BallTrajectoriesInput(const BallTrajectoriesInput& other);
 
     virtual std::unique_ptr<Input> clone() const override;
 
@@ -35,18 +35,19 @@ public:
     Leph::VectorLabel data;
   };
 
-  class BallTrajectoriesInputReader: public InputReader {
+  class BallTrajectoriesInputReader : public InputReader
+  {
   public:
     BallTrajectoriesInputReader();
 
     /// If k=3
     /// .csv file : trajectory_id, xR, yR, thetaR, time, xB, yB
-    virtual DataSet extractSamples(const std::string & file_path,
-                                   std::default_random_engine * engine) const override;
+    virtual DataSet extractSamples(const std::string& file_path, std::default_random_engine* engine) const override;
 
     virtual std::string getClassName() const override;
     Json::Value toJson() const override;
-    void fromJson(const Json::Value & v, const std::string & dir_name) override;
+    void fromJson(const Json::Value& v, const std::string& dir_name) override;
+
   private:
     /// Number of points used to predict next point
     int nb_input_points;
@@ -70,37 +71,33 @@ public:
     bool verbose;
   };
 
-
   BallPredictionModel();
-  BallPredictionModel(const BallPredictionModel & other);
+  BallPredictionModel(const BallPredictionModel& other);
 
   virtual Eigen::VectorXd getGlobalParameters() const override;
   virtual Eigen::MatrixXd getGlobalParametersSpace() const override;
-  virtual void setGlobalParameters(const Eigen::VectorXd & new_params) override;
+  virtual void setGlobalParameters(const Eigen::VectorXd& new_params) override;
   virtual std::vector<std::string> getGlobalParametersNames() const override;
   virtual Eigen::VectorXi getObservationsCircularity() const override;
 
-  virtual Eigen::VectorXd
-  predictObservation(const Input & input,
-                     std::default_random_engine * engine) const;
+  virtual Eigen::VectorXd predictObservation(const Input& input, std::default_random_engine* engine) const;
 
   /// Density
-  virtual double computeLogLikelihood(const Sample & sample,
-                                      std::default_random_engine * engine) const override;
+  virtual double computeLogLikelihood(const Sample& sample, std::default_random_engine* engine) const override;
 
   virtual std::unique_ptr<Model> clone() const;
 
   Json::Value toJson() const override;
-  void fromJson(const Json::Value & v, const std::string & dir_name) override;
+  void fromJson(const Json::Value& v, const std::string& dir_name) override;
   std::string getClassName() const;
 
   /// Convert from leph coordinates ([-1,1]^2) to img coordinates ([0,width]*[0,height])
-  Eigen::Vector2d leph2Img(const Eigen::Vector2d & leph_coordinates) const;
+  Eigen::Vector2d leph2Img(const Eigen::Vector2d& leph_coordinates) const;
   /// Convert from img coordinates ([0,width]*[0,height]) to leph coordinates ([-1 1]^2)
-  Eigen::Vector2d img2Leph(const Eigen::Vector2d & img_coordinates) const;
+  Eigen::Vector2d img2Leph(const Eigen::Vector2d& img_coordinates) const;
 
 private:
   /// Hyper parameters
 };
 
-}
+}  // namespace rhoban_model_learning

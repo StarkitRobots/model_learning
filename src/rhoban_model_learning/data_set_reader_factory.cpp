@@ -8,18 +8,16 @@
 
 namespace rhoban_model_learning
 {
-
 typedef std::unique_ptr<DataSetReader> PTR;
 
-DataSetReaderFactory::DataSetReaderFactory() {
-  registerBuilder("DefaultDataSetReader",
-                  []() { return PTR(new DefaultDataSetReader); });
-  registerBuilder("PosesOptimizationDataSetReader",
-                  []() { return PTR(new PosesOptimizationDataSetReader); });
-//  registerBuilder("TrajectoryDataSetReader",
-//                  []() { return PTR(new TrajectoryPredictor::Reader); });
-//  registerBuilder("VisionDataSetReader",
-//                  []() { return PTR(new VisionCorrectionModel::VisionDataSetReader); });
+DataSetReaderFactory::DataSetReaderFactory()
+{
+  registerBuilder("DefaultDataSetReader", []() { return PTR(new DefaultDataSetReader); });
+  registerBuilder("PosesOptimizationDataSetReader", []() { return PTR(new PosesOptimizationDataSetReader); });
+  //  registerBuilder("TrajectoryDataSetReader",
+  //                  []() { return PTR(new TrajectoryPredictor::Reader); });
+  //  registerBuilder("VisionDataSetReader",
+  //                  []() { return PTR(new VisionCorrectionModel::VisionDataSetReader); });
 }
 
-}
+}  // namespace rhoban_model_learning

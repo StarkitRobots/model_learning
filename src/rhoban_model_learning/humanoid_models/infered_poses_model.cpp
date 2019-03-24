@@ -9,40 +9,41 @@
 
 namespace rhoban_model_learning
 {
-
 typedef InferedPosesModel IPM;
 
-IPM::InferedPosesModel() :
-  CompositeModel()
+IPM::InferedPosesModel() : CompositeModel()
 {
-  models["noise" ] = std::unique_ptr<Model>(new VisionNoiseModel);
+  models["noise"] = std::unique_ptr<Model>(new VisionNoiseModel);
   models["camera"] = std::unique_ptr<Model>(new CameraModel);
   models["tags"] = std::unique_ptr<Model>(new ArucoCollection);
 }
 
-IPM::InferedPosesModel(const InferedPosesModel & other)
-  : CompositeModel(other)
+IPM::InferedPosesModel(const InferedPosesModel& other) : CompositeModel(other)
 {
 }
 
-double IPM::getPxStddev() const {
-  return static_cast<const VisionNoiseModel &>(*models.at("noise")).px_stddev;
+double IPM::getPxStddev() const
+{
+  return static_cast<const VisionNoiseModel&>(*models.at("noise")).px_stddev;
 }
 
-const Leph::CameraModel & IPM::getCameraModel() const {
-  return static_cast<const CameraModel &>(*models.at("camera")).model;
+const Leph::CameraModel& IPM::getCameraModel() const
+{
+  return static_cast<const CameraModel&>(*models.at("camera")).model;
 }
 
-
-std::unique_ptr<Model> IPM::clone() const {
+std::unique_ptr<Model> IPM::clone() const
+{
   return std::unique_ptr<Model>(new IPM(*this));
 }
 
-Eigen::Vector3d IPM::getTagPosition(int i) const{
-  return static_cast<const ArucoCollection &>(*models.at("tags")).getMarkers()[i].marker_center;
+Eigen::Vector3d IPM::getTagPosition(int i) const
+{
+  return static_cast<const ArucoCollection&>(*models.at("tags")).getMarkers()[i].marker_center;
 }
 
-void IPM::fromJson(const Json::Value & v, const std::string & dir_name) {
+void IPM::fromJson(const Json::Value& v, const std::string& dir_name)
+{
   CompositeModel::fromJson(v, dir_name);
   // Checking that content has been appropriately set
   checkType<VisionNoiseModel>("noise");
@@ -50,8 +51,9 @@ void IPM::fromJson(const Json::Value & v, const std::string & dir_name) {
   checkType<TagsCollection>("tags");
 }
 
-std::string IPM::getClassName() const {
+std::string IPM::getClassName() const
+{
   return "InferedPosesModel";
 }
 
-}
+}  // namespace rhoban_model_learning

@@ -2,10 +2,8 @@
 
 namespace rhoban_model_learning
 {
-
 HolonomicWalkModel::HolonomicWalkModel()
 {
-
 }
 
-}
+}  // namespace rhoban_model_learning

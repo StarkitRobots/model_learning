@@ -5,11 +5,11 @@
 
 namespace rhoban_model_learning
 {
-
-PredictorFactory::PredictorFactory() {
+PredictorFactory::PredictorFactory()
+{
   registerBuilder("LinearPredictor", []() { return std::unique_ptr<Predictor>(new LinearPredictor); });
   registerBuilder("PosesOptimizationPredictor",
                   []() { return std::unique_ptr<Predictor>(new PosesOptimizationPredictor); });
 }
 
-}
+}  // namespace rhoban_model_learning
