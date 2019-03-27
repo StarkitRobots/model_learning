@@ -40,6 +40,8 @@ public:
 
   /// Orientation of the object
   Eigen::Quaterniond orientation;
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 }  // namespace rhoban_model_learning
