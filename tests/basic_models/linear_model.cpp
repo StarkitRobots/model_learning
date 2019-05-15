@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "rhoban_model_learning/basic_models/linear_model.h"
-#include "rhoban_model_learning/basic_models/linear_predictor.h"
+#include "starkit_model_learning/basic_models/linear_model.h"
+#include "starkit_model_learning/basic_models/linear_predictor.h"
 
-#include "rhoban_model_learning/default_input.h"
+#include "starkit_model_learning/default_input.h"
 
-using namespace rhoban_model_learning;
+using namespace starkit_model_learning;
 
 TEST(LinearModel, emptyBuilder)
 {

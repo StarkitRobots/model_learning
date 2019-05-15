@@ -1,16 +1,16 @@
-#include "rhoban_model_learning/humanoid_models/vision_correction_model.h"
-#include "rhoban_model_learning/input_reader_factory.h"
+#include "starkit_model_learning/humanoid_models/vision_correction_model.h"
+#include "starkit_model_learning/input_reader_factory.h"
 
-#include "rhoban_model_learning/model_factory.h"
+#include "starkit_model_learning/model_factory.h"
 
-#include "rhoban_random/tools.h"
+#include "starkit_random/tools.h"
 
-using namespace rhoban_model_learning;
-using namespace rhoban_utils;
+using namespace starkit_model_learning;
+using namespace starkit_utils;
 
 typedef VisionCorrectionModel::VisionInput VisionInput;
 
-class Config : public rhoban_utils::JsonSerializable
+class Config : public starkit_utils::JsonSerializable
 {
 public:
   Config()
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
   std::unique_ptr<InputReader> input_reader = InputReaderFactory().buildFromJsonFile(argv[2]);
 
   // Analyze data
-  std::default_random_engine engine = rhoban_random::getRandomEngine();
+  std::default_random_engine engine = starkit_random::getRandomEngine();
   DataSet data = input_reader->extractSamples(argv[3], &engine);
 
   std::ofstream csv_file("debug.csv");

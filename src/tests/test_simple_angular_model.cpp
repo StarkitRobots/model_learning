@@ -1,14 +1,14 @@
-#include "rhoban_model_learning/model_learner.h"
-#include "rhoban_model_learning/models/simple_angular_model.h"
-#include "rhoban_model_learning/models/simple_angular_model_input.h"
+#include "starkit_model_learning/model_learner.h"
+#include "starkit_model_learning/models/simple_angular_model.h"
+#include "starkit_model_learning/models/simple_angular_model_input.h"
 
-#include "rhoban_random/tools.h"
+#include "starkit_random/tools.h"
 
-#include "rhoban_bbo/cmaes_optimizer.h"
+#include "starkit_bbo/cmaes_optimizer.h"
 
 #include <iostream>
 
-using namespace rhoban_model_learning;
+using namespace starkit_model_learning;
 
 int main()
 {
@@ -20,7 +20,7 @@ int main()
   double validation_ratio = 0.2;
 
   SimpleAngularModel training_model(obs_stddev, step_stddev);
-  std::default_random_engine engine = rhoban_random::getRandomEngine();
+  std::default_random_engine engine = starkit_random::getRandomEngine();
   SampleVector samples;
 
   for (const auto& e : steps_map)
@@ -43,7 +43,7 @@ int main()
   {
     // Reset of all entities
     std::unique_ptr<Model> training_model(new SimpleAngularModel());
-    std::unique_ptr<rhoban_bbo::Optimizer> optimizer(new rhoban_bbo::CMAESOptimizer());
+    std::unique_ptr<starkit_bbo::Optimizer> optimizer(new starkit_bbo::CMAESOptimizer());
     optimizer->setMaxCalls(250);
     Eigen::Vector2d initial_guess(0.001, 0.001);
     ModelLearner learner(std::move(training_model), std::move(optimizer), initial_guess);

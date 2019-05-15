@@ -1,9 +1,9 @@
-#include "rhoban_model_learning/ball_models/position_sequence_reader.h"
-#include "rhoban_model_learning/ball_models/speed_estimator_factory.h"
+#include "starkit_model_learning/ball_models/position_sequence_reader.h"
+#include "starkit_model_learning/ball_models/speed_estimator_factory.h"
 
 #include <iostream>
 
-using namespace rhoban_model_learning;
+using namespace starkit_model_learning;
 
 int main(int argc, char** argv)
 {

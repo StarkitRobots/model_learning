@@ -1,15 +1,15 @@
-#include "rhoban_model_learning/model_factory.h"
-#include "rhoban_model_learning/ball_models/position_sequence_reader.h"
-#include "rhoban_model_learning/ball_models/trajectory_predictor.h"
+#include "starkit_model_learning/model_factory.h"
+#include "starkit_model_learning/ball_models/position_sequence_reader.h"
+#include "starkit_model_learning/ball_models/trajectory_predictor.h"
 
-#include "rhoban_random/tools.h"
+#include "starkit_random/tools.h"
 
 // Debug program:
 // Read and simulate trajectories
 
-using namespace rhoban_model_learning;
+using namespace starkit_model_learning;
 
-class Config : public rhoban_utils::JsonSerializable
+class Config : public starkit_utils::JsonSerializable
 {
 public:
   Config() : min_time_to_start(0), max_time_to_start(0.5), memory_duration(0.5)
@@ -30,9 +30,9 @@ public:
   {
     reader.read(v, "reader", dir_name);
     model = ModelFactory().read(v, "model", dir_name);
-    rhoban_utils::tryRead(v, "min_time_to_start", &min_time_to_start);
-    rhoban_utils::tryRead(v, "max_time_to_start", &max_time_to_start);
-    rhoban_utils::tryRead(v, "memory_duration", &memory_duration);
+    starkit_utils::tryRead(v, "min_time_to_start", &min_time_to_start);
+    starkit_utils::tryRead(v, "max_time_to_start", &max_time_to_start);
+    starkit_utils::tryRead(v, "memory_duration", &memory_duration);
   }
 
   PositionSequenceReader reader;
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
   std::vector<PositionSequence> sequences = config.reader.readPositionSequences(argv[2]);
 
   // Analyze data
-  std::default_random_engine engine = rhoban_random::getRandomEngine();
+  std::default_random_engine engine = starkit_random::getRandomEngine();
 
   std::ofstream csv_file("debug.csv");
   csv_file << "seq,data_type,time,ball_x,ball_y" << std::endl;

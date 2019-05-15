@@ -1,10 +1,10 @@
-#include "rhoban_model_learning/humanoid_models/vision_correction_model.h"
+#include "starkit_model_learning/humanoid_models/vision_correction_model.h"
 
 #include <gtest/gtest.h>
 
 using namespace std;
 using namespace Leph;
-using namespace rhoban_model_learning;
+using namespace starkit_model_learning;
 
 string getAbsoluteTestFilePath()
 {

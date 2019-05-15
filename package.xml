@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>rhoban_model_learning</name>
+  <name>starkit_model_learning</name>
   <version>0.0.0</version>
   <description>This package provide tools to optimize the parameters of models</description>
 
@@ -15,10 +15,10 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>rhoban_bbo</build_depend> <!-- rhoban/bbo.git -->
-  <build_depend>model</build_depend> <!-- rhoban/model.git -->
+  <build_depend>starkit_bbo</build_depend> <!-- starkit/bbo.git -->
+  <build_depend>model</build_depend> <!-- starkit/model.git -->
 
-  <run_depend>rhoban_bbo</run_depend>
+  <run_depend>starkit_bbo</run_depend>
   <run_depend>model</run_depend>
 
 </package>

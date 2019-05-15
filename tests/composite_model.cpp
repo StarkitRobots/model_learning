@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "rhoban_model_learning/composite_model.h"
+#include "starkit_model_learning/composite_model.h"
 
-using namespace rhoban_model_learning;
+using namespace starkit_model_learning;
 
 class ModelA : public Model
 {
@@ -29,8 +29,8 @@ public:
   void fromJson(const Json::Value& json_value, const std::string& dir_name) override
   {
     (void)dir_name;
-    rhoban_utils::tryRead(json_value, "a", &a);
-    rhoban_utils::tryRead(json_value, "b", &b);
+    starkit_utils::tryRead(json_value, "a", &a);
+    starkit_utils::tryRead(json_value, "b", &b);
   }
 
   Json::Value toJson() const override
@@ -77,9 +77,9 @@ public:
   void fromJson(const Json::Value& json_value, const std::string& dir_name) override
   {
     (void)dir_name;
-    rhoban_utils::tryRead(json_value, "a", &a);
-    rhoban_utils::tryRead(json_value, "b", &b);
-    rhoban_utils::tryRead(json_value, "c", &c);
+    starkit_utils::tryRead(json_value, "a", &a);
+    starkit_utils::tryRead(json_value, "b", &b);
+    starkit_utils::tryRead(json_value, "c", &c);
   }
 
   Json::Value toJson() const override

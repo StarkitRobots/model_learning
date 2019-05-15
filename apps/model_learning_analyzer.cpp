@@ -1,18 +1,18 @@
-#include "rhoban_model_learning/model_learner.h"
-#include "rhoban_model_learning/model_factory.h"
-#include "rhoban_model_learning/input_reader_factory.h"
+#include "starkit_model_learning/model_learner.h"
+#include "starkit_model_learning/model_factory.h"
+#include "starkit_model_learning/input_reader_factory.h"
 
-#include "rhoban_bbo/optimizer_factory.h"
+#include "starkit_bbo/optimizer_factory.h"
 
-#include "rhoban_utils/timing/time_stamp.h"
+#include "starkit_utils/timing/time_stamp.h"
 
-#include "rhoban_random/tools.h"
+#include "starkit_random/tools.h"
 
-using namespace rhoban_bbo;
-using namespace rhoban_model_learning;
-using namespace rhoban_utils;
+using namespace starkit_bbo;
+using namespace starkit_model_learning;
+using namespace starkit_utils;
 
-class Config : public rhoban_utils::JsonSerializable
+class Config : public starkit_utils::JsonSerializable
 {
 public:
   Config() : nb_runs(1)
@@ -31,7 +31,7 @@ public:
 
   void fromJson(const Json::Value& v, const std::string& dir_name) override
   {
-    rhoban_utils::tryRead(v, "nb_runs", &nb_runs);
+    starkit_utils::tryRead(v, "nb_runs", &nb_runs);
     readers = InputReaderFactory().readMap(v, "readers", dir_name);
     models = ModelFactory().readMap(v, "models", dir_name);
     optimizers = OptimizerFactory().readMap(v, "optimizers", dir_name);
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
   std::string data_path(argv[2]);
 
-  std::default_random_engine engine = rhoban_random::getRandomEngine();
+  std::default_random_engine engine = starkit_random::getRandomEngine();
 
   std::ofstream results_file("results.csv");
 

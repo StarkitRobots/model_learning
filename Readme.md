@@ -1,4 +1,4 @@
-Rhoban Model Learning
+Starkit Model Learning
 =====================
 
 Immediate TODO

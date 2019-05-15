@@ -1,9 +1,9 @@
-#include "rhoban_model_learning/humanoid_models/calibration_model.h"
+#include "starkit_model_learning/humanoid_models/calibration_model.h"
 
 #include <gtest/gtest.h>
 
 using namespace std;
-using namespace rhoban_model_learning;
+using namespace starkit_model_learning;
 
 TEST(calibrationModel, getIndicesFromNames)
 {

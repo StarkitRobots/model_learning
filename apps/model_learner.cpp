@@ -1,11 +1,11 @@
-#include "rhoban_model_learning/model_learner.h"
-#include "rhoban_model_learning/data_set_reader_factory.h"
+#include "starkit_model_learning/model_learner.h"
+#include "starkit_model_learning/data_set_reader_factory.h"
 
-#include "rhoban_random/tools.h"
+#include "starkit_random/tools.h"
 
 #include <iostream>
 
-using namespace rhoban_model_learning;
+using namespace starkit_model_learning;
 
 int main(int argc, char** argv)
 {
@@ -24,7 +24,7 @@ int main(int argc, char** argv)
   learner.getSpace().append(learner.getModel(), learner.getPrior(), learner.getTrainableIndices(), std::cout);
 
   // Analyze data
-  std::default_random_engine engine = rhoban_random::getRandomEngine();
+  std::default_random_engine engine = starkit_random::getRandomEngine();
   DataSet data = input_reader->extractSamples(argv[3], &engine);
 
   // Learn model
